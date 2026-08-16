@@ -46,6 +46,7 @@ function unlockSite() {
   site.classList.add("is-unlocked");
   initReveals();
   initDreamyMotion();
+  initReasonsCarousel();
 }
 
 function showGateError() {
@@ -109,6 +110,125 @@ if (sessionStorage.getItem(STORAGE_KEY) === "1") {
   unlockSite();
 } else if (gateInput) {
   gateInput.focus();
+}
+
+function initReasonsCarousel() {
+  const carousel = document.getElementById("reasons-carousel");
+  if (!carousel || initReasonsCarousel.ready) return;
+  initReasonsCarousel.ready = true;
+
+  const track = carousel.querySelector(".carousel-track");
+  const slides = Array.from(carousel.querySelectorAll(".carousel-slide"));
+  const dots = Array.from(carousel.querySelectorAll(".carousel-dot"));
+  const prevBtn = carousel.querySelector(".carousel-prev");
+  const nextBtn = carousel.querySelector(".carousel-next");
+
+  if (!track || slides.length === 0) return;
+
+  let index = 0;
+  let timer = null;
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  function setActive(nextIndex) {
+    index = (nextIndex + slides.length) % slides.length;
+
+    slides.forEach((slide, i) => {
+      slide.classList.toggle("is-active", i === index);
+    });
+
+    dots.forEach((dot, i) => {
+      dot.classList.toggle("is-active", i === index);
+    });
+
+    const target = slides[index];
+    const offset =
+      target.offsetLeft - (track.clientWidth - target.clientWidth) / 2;
+
+    track.scrollTo({ left: offset, behavior: prefersReducedMotion ? "auto" : "smooth" });
+  }
+
+  function nextSlide() {
+    setActive(index + 1);
+  }
+
+  function prevSlide() {
+    setActive(index - 1);
+  }
+
+  function startAutoplay() {
+    if (prefersReducedMotion) return;
+    stopAutoplay();
+    timer = window.setInterval(nextSlide, 4200);
+  }
+
+  function stopAutoplay() {
+    if (timer) {
+      window.clearInterval(timer);
+      timer = null;
+    }
+  }
+
+  prevBtn?.addEventListener("click", () => {
+    prevSlide();
+    startAutoplay();
+  });
+
+  nextBtn?.addEventListener("click", () => {
+    nextSlide();
+    startAutoplay();
+  });
+
+  dots.forEach((dot) => {
+    dot.addEventListener("click", () => {
+      const slideIndex = Number(dot.dataset.slide);
+      if (!Number.isNaN(slideIndex)) {
+        setActive(slideIndex);
+        startAutoplay();
+      }
+    });
+  });
+
+  track.addEventListener(
+    "scroll",
+    () => {
+      window.clearTimeout(initReasonsCarousel.scrollTimer);
+      initReasonsCarousel.scrollTimer = window.setTimeout(() => {
+        const center = track.scrollLeft + track.clientWidth / 2;
+        let closest = 0;
+        let closestDistance = Infinity;
+
+        slides.forEach((slide, i) => {
+          const slideCenter = slide.offsetLeft + slide.clientWidth / 2;
+          const distance = Math.abs(center - slideCenter);
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closest = i;
+          }
+        });
+
+        if (closest !== index) {
+          index = closest;
+          slides.forEach((slide, i) => {
+            slide.classList.toggle("is-active", i === index);
+          });
+          dots.forEach((dot, i) => {
+            dot.classList.toggle("is-active", i === index);
+          });
+        }
+      }, 80);
+    },
+    { passive: true }
+  );
+
+  carousel.addEventListener("mouseenter", stopAutoplay);
+  carousel.addEventListener("mouseleave", startAutoplay);
+  carousel.addEventListener("focusin", stopAutoplay);
+  carousel.addEventListener("focusout", startAutoplay);
+
+  setActive(0);
+  startAutoplay();
 }
 
 function initDreamyMotion() {
