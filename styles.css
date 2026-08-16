@@ -504,10 +504,11 @@ body.is-locked {
   margin: 0 auto 0.85rem;
 }
 
-  .sticker-everyday {
-  width: min(212px, 52vw);
-  height: min(212px, 52vw);
-  margin: 0 auto 1.5rem;
+.circle-wrap-everyday {
+  width: min(132px, 34vw);
+  height: min(132px, 34vw);
+  margin: 0 auto 1rem;
+  flex-shrink: 0;
 }
 
 .circle-wrap-proposal {
@@ -894,26 +895,27 @@ body.is-locked {
 }
 
 .everyday {
-  padding: 2rem clamp(1.25rem, 5vw, 4rem) 4rem;
+  padding: 1.5rem clamp(1rem, 4vw, 2rem) 3rem;
 }
 
 .everyday-inner {
-  max-width: 42rem;
+  max-width: 32rem;
   margin: 0 auto;
-  padding: 2.5rem clamp(1.5rem, 4vw, 2.5rem);
+  padding: 1.35rem clamp(1.1rem, 3vw, 1.5rem);
   background: linear-gradient(135deg, rgba(255, 214, 232, 0.75), rgba(255, 236, 245, 0.95));
-  border-radius: 1.5rem;
+  border-radius: 1.25rem;
   border: 2px solid rgba(255, 159, 199, 0.65);
   text-align: center;
-  box-shadow: 0 14px 36px rgba(255, 107, 157, 0.12);
+  box-shadow: 0 10px 28px rgba(255, 107, 157, 0.1);
 }
 
 @media (min-width: 640px) {
   .everyday-inner {
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1.15rem;
     text-align: left;
+    max-width: 36rem;
   }
 
   .circle-wrap-everyday {
@@ -923,18 +925,20 @@ body.is-locked {
 
 .everyday-copy {
   flex: 1;
+  min-width: 0;
 }
 
 .everyday-inner .section-title {
   text-align: inherit;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
+  font-size: clamp(1.35rem, 3.5vw, 1.65rem);
 }
 
 .everyday-inner p {
-  margin: 0 0 1rem;
-  line-height: 1.75;
+  margin: 0 0 0.75rem;
+  line-height: 1.62;
   color: var(--text-soft);
-  font-size: 1.05rem;
+  font-size: 0.95rem;
 }
 
 .everyday-inner p:last-child {
