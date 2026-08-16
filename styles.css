@@ -504,7 +504,7 @@ body.is-locked {
   margin: 0 auto 0.85rem;
 }
 
-  .sticker-everyday {
+.circle-wrap-everyday {
   width: min(212px, 52vw);
   height: min(212px, 52vw);
   margin: 0 auto 1.5rem;
