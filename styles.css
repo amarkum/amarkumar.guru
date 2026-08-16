@@ -163,6 +163,13 @@ body.is-locked {
   border-radius: 0.45rem;
 }
 
+.hint-note {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--text-light);
+}
+
 .gate-error {
   margin: 0.75rem 0 0;
   font-size: 0.88rem;

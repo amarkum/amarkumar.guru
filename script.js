@@ -1,7 +1,14 @@
-document.getElementById("year").textContent = String(new Date().getFullYear());
+const yearEl = document.getElementById("year");
+if (yearEl) {
+  yearEl.textContent = String(new Date().getFullYear());
+}
 
 const PASSWORD = "iloveamar";
 const STORAGE_KEY = "gobi-unlocked";
+
+function normalizeSecret(value) {
+  return value.trim().toLowerCase().replace(/\s+/g, "");
+}
 
 const body = document.body;
 const gate = document.getElementById("gate");
@@ -64,7 +71,7 @@ function initReveals() {
 
 gateForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const value = gateInput.value.trim().toLowerCase();
+  const value = normalizeSecret(gateInput.value);
 
   if (value === PASSWORD) {
     gateError.hidden = true;
