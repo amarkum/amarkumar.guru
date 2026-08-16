@@ -6,8 +6,24 @@ if (yearEl) {
 const PASSWORD = "iloveamar";
 const STORAGE_KEY = "gobi-unlocked";
 
+function buildPasswordHint(password) {
+  return password
+    .split("")
+    .map((char, index) => {
+      if (index === 0) return char;
+      if (index >= password.length - 4) return char;
+      return "*";
+    })
+    .join("");
+}
+
 function normalizeSecret(value) {
   return value.trim().toLowerCase().replace(/\s+/g, "");
+}
+
+const hintEl = document.getElementById("hint-code");
+if (hintEl) {
+  hintEl.textContent = buildPasswordHint(PASSWORD);
 }
 
 const body = document.body;
@@ -17,12 +33,19 @@ const gateForm = document.getElementById("gate-form");
 const gateInput = document.getElementById("gate-password");
 const gateError = document.getElementById("gate-error");
 
+if (gateInput) {
+  gateInput.maxLength = PASSWORD.length;
+  gateInput.placeholder = buildPasswordHint(PASSWORD);
+}
+
 function unlockSite() {
   sessionStorage.setItem(STORAGE_KEY, "1");
   body.classList.remove("is-locked");
   gate.classList.add("is-hidden");
   site.hidden = false;
+  site.classList.add("is-unlocked");
   initReveals();
+  initDreamyMotion();
 }
 
 function showGateError() {
@@ -51,7 +74,7 @@ function initReveals() {
   });
 
   const scrollReveals = document.querySelectorAll(
-    ".letter .reveal, .reasons .reveal, .everyday .reveal, .proposal .reveal, .closing .reveal"
+    ".letter .reveal, .real-letter .reveal, .reasons .reveal, .everyday .reveal, .proposal .reveal, .closing .reveal"
   );
 
   const observer = new IntersectionObserver(
@@ -84,6 +107,26 @@ gateForm.addEventListener("submit", (event) => {
 
 if (sessionStorage.getItem(STORAGE_KEY) === "1") {
   unlockSite();
-} else {
+} else if (gateInput) {
   gateInput.focus();
+}
+
+function initDreamyMotion() {
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  ).matches;
+
+  if (prefersReducedMotion || initDreamyMotion.ready) return;
+  initDreamyMotion.ready = true;
+
+  document.addEventListener(
+    "mousemove",
+    (event) => {
+      const x = (event.clientX / window.innerWidth - 0.5) * 16;
+      const y = (event.clientY / window.innerHeight - 0.5) * 16;
+      document.documentElement.style.setProperty("--dream-x", `${x}px`);
+      document.documentElement.style.setProperty("--dream-y", `${y}px`);
+    },
+    { passive: true }
+  );
 }

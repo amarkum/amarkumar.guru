@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ffd1e6" />
     <meta name="color-scheme" content="light" />
-    <title>For Gobi — from Amar</title>
+    <title>For Gucchu — from Amar</title>
     <meta
       name="description"
-      content="Ek chhoti si love letter — sirf Gobi ke liye, sirf Amar se."
+      content="Sirf meri Gobi ke liye — thoda pyaar, thoda drama, aur bahut saara sukoon."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -23,6 +23,16 @@
       <div class="glow glow-a"></div>
       <div class="glow glow-b"></div>
       <div class="glow glow-c"></div>
+      <div class="sparkles">
+        <span class="sparkle sparkle-1"></span>
+        <span class="sparkle sparkle-2"></span>
+        <span class="sparkle sparkle-3"></span>
+        <span class="sparkle sparkle-4"></span>
+        <span class="sparkle sparkle-5"></span>
+        <span class="sparkle sparkle-6"></span>
+        <span class="sparkle sparkle-7"></span>
+        <span class="sparkle sparkle-8"></span>
+      </div>
     </div>
 
     <div id="gate" class="gate">
@@ -35,11 +45,11 @@
           height="160"
           aria-hidden="true"
         />
-        <p class="gate-eyebrow">Arre Gobi!</p>
+        <p class="gate-eyebrow">Arre meri Gucchu!</p>
         <h1 class="gate-title">Yeh sirf tumhare liye hai</h1>
         <p class="gate-lede">
-          Pehle batao tum mujhse kitna pyaar karti ho... phir main letter khol
-          dunga.
+          Pehle prove karo tum mujhse kitna pyaar karti ho... tabhi andar
+          jaane dunga, my princess.
         </p>
 
         <form id="gate-form" class="gate-form">
@@ -53,16 +63,16 @@
             autocapitalize="none"
             autocorrect="off"
             spellcheck="false"
-            placeholder="iloveamar"
+            placeholder=""
             required
           />
           <p class="gate-hint">
             Hint:
-            <span class="hint-code" aria-label="Password hint">i*****a**</span>
-            <span class="hint-note">(bina space — i + love + amar)</span>
+            <span id="hint-code" class="hint-code" aria-label="Password hint"></span>
+            <span class="hint-note">(9 letters — bina space)</span>
           </p>
           <p id="gate-error" class="gate-error" hidden>
-            Arre meri jaan, galat hai! Hint dekho aur phir try karo.
+            Arre draamebaaz, galat hai! Hint dekho na, phir try karo.
           </p>
           <button class="btn btn-gate" type="submit">Dil khol do</button>
         </form>
@@ -71,7 +81,7 @@
 
     <div id="site" class="site" hidden>
       <header class="top">
-        <p class="mark">for gobi · from amar</p>
+        <p class="mark">for my gucchu · from your amar</p>
       </header>
 
       <main>
@@ -86,13 +96,13 @@
             />
           </div>
 
-          <p class="eyebrow reveal">Ek pyaari si love letter</p>
-          <h1 class="title reveal">Meri jaan, Gobi</h1>
+          <p class="eyebrow reveal">Tumhare liye, sirf tumhare liye</p>
+          <h1 class="title reveal">Meri jaan, Gucchu</h1>
           <p class="subline reveal">
-            Har din tumhare saath lagta hai jaise duniya thodi aur pyaari ho
-            gayi ho — warm, silly, aur bilkul sirf humari.
+            I love you so much... tum ho meri sukoon, meri hasi, meri duniya —
+            aur haan, thodi si draamebaazi bhi allowed hai.
           </p>
-          <a class="btn reveal" href="#letter">Letter padho</a>
+          <a class="btn reveal" href="#letter">Letter padho na</a>
         </section>
 
         <section id="letter" class="letter">
@@ -107,25 +117,52 @@
             />
             <div class="letter-inner">
               <div class="stamp" aria-hidden="true"></div>
-              <p class="letter-greeting">Pyari Gobi,</p>
+              <p class="letter-greeting">My Gulgul, my Gobi, my Guggu...</p>
               <p>
-                Maine yeh chhota sa internet-wala surprise sirf tumhare liye
-                banaya hai. Kyunki duniya ko ek aur webpage ki zaroorat nahi
-                thi — <em>tumhe</em> zaroorat thi kisi cheez ki jo pyaar se
-                bani ho, time liya ho, aur dil se likhi ho.
+                Dil se likh raha hoon — bottom of my heart se. I so much love
+                you. Tum meri <em>sukoon</em> ho. Jab bhi tumhe lipat ke baithta
+                hoon, lagta hai sab theek hai duniya mein. You are my reason for
+                smiles and tears both — aur honestly, dono mein bhi tum hi
+                sabse pyaari lagti ho.
               </p>
               <p>
-                Tum meri favourite person ho — shaant subah ke liye, zor se
-                hasne ke liye, aur beech ke har pal ke liye. Kabhi kabhi main
-                bol nahi paata, lekin aaj bol raha hoon: shukriya ki tumne
-                mujhe choose kiya. Baar baar.
+                Maine yeh chhota sa page sirf tumhare liye banaya hai, meri
+                princess. Kyunki kabhi kabhi main bol nahi paata kitna pyaar
+                karta hoon — lekin dil mein toh hamesha wahi baat rehti hai:
+                <em>I love you to infinity.</em>
+              </p>
+              <p>
+                Sorry agar kabhi kuch galat ho gaya ho — paap ka prayschit samajh
+                ke yeh sab likh raha hoon. Ab sirf tumhare liye jeena chahta hoon.
+                Protective hoon tumhare liye, bilkul papa jaisa — aur jab tum
+                door hoti ho toh thoda darr bhi lagta hai. Bas tum safe raho,
+                mera doll.
               </p>
             </div>
           </div>
         </section>
 
+        <section class="real-letter">
+          <div class="real-letter-inner reveal">
+            <h2 class="section-title">Mera asli letter</h2>
+            <p class="real-letter-note">
+              Wohi baatein, wahi pyaar — bas thoda zyada likh diya tha us din.
+            </p>
+            <figure class="real-letter-frame">
+              <img
+                src="assets/birthday-letter.png"
+                alt="Amar's handwritten birthday love letter to Gobi"
+                class="real-letter-img"
+                width="420"
+                height="800"
+              />
+              <figcaption>You are my sukoon.</figcaption>
+            </figure>
+          </div>
+        </section>
+
         <section class="reasons">
-          <h2 class="section-title reveal">Tum kyun special ho</h2>
+          <h2 class="section-title reveal">Tum kyun meri ho</h2>
           <div class="cards">
             <article class="card reveal">
               <img
@@ -137,7 +174,7 @@
                 aria-hidden="true"
               />
               <p>
-                Tumhare saath normal Tuesday bhi kisi celebration jaisa lagta
+                Tumhe lipat ke mujhe sukoon aata hai — bas yahi reason kaafi
                 hai.
               </p>
             </article>
@@ -150,7 +187,10 @@
                 height="100"
                 aria-hidden="true"
               />
-              <p>Tumhari hasi meri favourite notification hai.</p>
+              <p>
+                Tumhari hasi meri favourite cheez hai — notification se zyada
+                important.
+              </p>
             </article>
             <article class="card reveal">
               <img
@@ -161,7 +201,10 @@
                 height="100"
                 aria-hidden="true"
               />
-              <p>Ghar koi jagah nahi — ghar ho tum, Gobi.</p>
+              <p>
+                2 roti hi bachi kabhi toh dono roti bhi tumhe hi khilaunga — my
+                mela doll.
+              </p>
             </article>
             <article class="card reveal">
               <img
@@ -173,8 +216,8 @@
                 aria-hidden="true"
               />
               <p>
-                Chhoti chhoti baatein bhi meri sabse pyaari yaadein ban jaati
-                hain.
+                Tum meri princess ho — thodi draamebaaz bhi, lekin meri favourite
+                draamebaaz.
               </p>
             </article>
           </div>
@@ -190,17 +233,17 @@
               height="220"
             />
             <div class="everyday-copy">
-              <h2 class="section-title">Roz ka pyaar</h2>
+              <h2 class="section-title">Humari chhoti si duniya</h2>
               <p>
-                Jab hum saath khana banate hain aur dinner se pehle chupke se
-                taste kar lete hain. Jab tum mere paas aake comfortable ho
-                jaati ho aur main tumhare paas aake apna sa lagta hoon. Woh
-                inside jokes, raat ki baatein, neend bhari subah — sab kuch
-                milke humari zindagi bana raha hai.
+                Saath khana banana, chupke se taste karna, raat ko baatein
+                karna, aur subah tumhe dekh ke smile aa jana — yeh sab normal
+                lagta hai, lekin mere liye yeh sab kuch hai. Tum nahi hoti toh
+                din adhura lagta hai, Gobi.
               </p>
               <p>
-                Mujhe bade jazbaaton ki zaroorat nahi — main roz ke chhote
-                chhote palon mein apni kismet dekhta hoon. Aur woh pal tum ho.
+                Main tumhara hubby hoon — proud wala, protective wala, aur
+                thoda pagal wala bhi. Har din bas yahi chahta hoon ki tum khush
+                raho, safe raho, aur thodi thodi meri ho jao baar baar.
               </p>
             </div>
           </div>
@@ -216,14 +259,16 @@
               height="200"
               aria-hidden="true"
             />
-            <h2 class="section-title">Ek sawaal...</h2>
+            <h2 class="section-title">Ek sawaal phir se...</h2>
             <p class="proposal-question">
-              Kya tum phir se meri duniya banogi?
+              Kya tum phir se meri duniya banogi, meri Gucchu?
             </p>
-            <p class="proposal-spoiler">(Spoiler: tum already meri ho.)</p>
+            <p class="proposal-spoiler">
+              (Spoiler alert: tum already meri ho, meri wife, meri jaan.)
+            </p>
             <p class="proposal-note">
-              Lekin har din dil yahi kehta hai — Gobi, will you stay mine,
-              forever and always?
+              Lekin har din, har raat, har subah — dil yahi kehta hai: stay
+              mine, forever. I love you to infinity and beyond, my princess.
             </p>
           </div>
         </section>
@@ -240,19 +285,21 @@
           </div>
 
           <blockquote class="signoff reveal">
-            <p>Thank you for being my person.</p>
-            <p class="signoff-hindi">Shukriya ki tum meri ho.</p>
-            <p class="signoff-love">I love you, Gobi.</p>
-            <p class="signoff-hindi signoff-love-hindi">
-              Main tumse bahut pyaar karta hoon.
+            <p>Thank you for being my person, my sukoon, my everything.</p>
+            <p class="signoff-hindi">
+              Shukriya ki tum meri ho — meri Gobi, meri Gulgul, meri Gucchu.
             </p>
-            <cite>Hamesha tumhara, Amar</cite>
+            <p class="signoff-love">I love you so much, Gobi.</p>
+            <p class="signoff-hindi signoff-love-hindi">
+              Main tumse bahut bahut pyaar karta hoon — infinity tak.
+            </p>
+            <cite>Hamesha tumhara hubby, Amar</cite>
           </blockquote>
         </section>
       </main>
 
       <footer class="foot">
-        <p>© <span id="year"></span> Amar &amp; Gobi</p>
+        <p>© <span id="year"></span> Amar &amp; Gucchu</p>
       </footer>
     </div>
 
