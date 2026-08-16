@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ffd1e6" />
+    <meta name="color-scheme" content="light" />
     <title>For Gobi — from Amar</title>
     <meta
       name="description"
-      content="A little love letter from Amar to his wife Gobi — warm, silly, and entirely ours."
+      content="Ek chhoti si love letter — sirf Gobi ke liye, sirf Amar se."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,132 +18,239 @@
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
-    <div class="sky" aria-hidden="true"></div>
+  <body class="is-locked">
+    <div class="sky" aria-hidden="true">
+      <div class="glow glow-a"></div>
+      <div class="glow glow-b"></div>
+      <div class="glow glow-c"></div>
+    </div>
 
-    <header class="top">
-      <p class="mark">for gobi · from amar</p>
-    </header>
-
-    <main>
-      <section class="hero">
-        <div class="hero-sticker reveal">
-          <img
-            src="assets/hearts.png"
-            alt="Cute bear and panda couple with hearts"
-            class="sticker sticker-hero"
-            width="320"
-            height="320"
-          />
-        </div>
-
-        <p class="eyebrow reveal">A love letter</p>
-        <h1 class="title reveal">For my wife, Gobi</h1>
-        <p class="subline reveal">
-          Every day with you feels like the softest part of the internet — warm,
-          silly, and entirely ours.
+    <div id="gate" class="gate">
+      <div class="gate-card">
+        <img
+          src="assets/hug.png"
+          alt=""
+          class="sticker sticker-gate"
+          width="160"
+          height="160"
+          aria-hidden="true"
+        />
+        <p class="gate-eyebrow">Arre Gobi!</p>
+        <h1 class="gate-title">Yeh sirf tumhare liye hai</h1>
+        <p class="gate-lede">
+          Pehle batao tum mujhse kitna pyaar karti ho... phir main letter khol
+          dunga.
         </p>
-        <a class="btn reveal" href="#letter">Read my letter</a>
-      </section>
 
-      <section id="letter" class="letter">
-        <div class="letter-wrap reveal">
-          <img
-            src="assets/panda-solo.png"
-            alt=""
-            class="sticker sticker-letter"
-            width="120"
-            height="120"
-            aria-hidden="true"
+        <form id="gate-form" class="gate-form">
+          <label class="gate-label" for="gate-password">Secret password</label>
+          <input
+            id="gate-password"
+            class="gate-input"
+            type="password"
+            name="password"
+            autocomplete="off"
+            placeholder="Yahan likho..."
+            required
           />
-        <div class="letter-inner">
-          <div class="stamp" aria-hidden="true"></div>
-          <p class="letter-greeting">Dear Gobi,</p>
-          <p>
-            I made this little corner of the internet just for you. Not because
-            the world needed another webpage — but because <em>you</em> deserve
-            something made with love, the kind that takes time and care and a
-            whole lot of heart.
+          <p class="gate-hint">
+            Hint:
+            <span class="hint-code" aria-label="Password hint">i*****a**</span>
           </p>
-          <p>
-            You are my favorite person to share quiet mornings with, loud
-            laughter with, and everything in between. This is my way of saying
-            what I sometimes forget to say out loud: thank you for choosing me,
-            again and again.
+          <p id="gate-error" class="gate-error" hidden>
+            Arre meri jaan, galat hai! Hint dekho aur phir try karo.
           </p>
-        </div>
-        </div>
-      </section>
+          <button class="btn btn-gate" type="submit">Dil khol do</button>
+        </form>
+      </div>
+    </div>
 
-      <section class="reasons">
-        <h2 class="section-title reveal">Why you</h2>
-        <div class="cards">
-          <article class="card reveal">
-            <img src="assets/hug.png" alt="" class="sticker sticker-card" width="100" height="100" aria-hidden="true" />
-            <p>You make ordinary Tuesdays feel like something worth celebrating.</p>
-          </article>
-          <article class="card reveal">
-            <img src="assets/hearts.png" alt="" class="sticker sticker-card" width="100" height="100" aria-hidden="true" />
-            <p>Your laugh is my favorite notification.</p>
-          </article>
-          <article class="card reveal">
-            <img src="assets/back-hug.png" alt="" class="sticker sticker-card" width="100" height="100" aria-hidden="true" />
-            <p>Home isn't a place — it's wherever Gobi is.</p>
-          </article>
-          <article class="card reveal">
-            <img src="assets/piggyback.png" alt="" class="sticker sticker-card" width="100" height="100" aria-hidden="true" />
-            <p>You turn the smallest moments into the ones I remember forever.</p>
-          </article>
-        </div>
-      </section>
+    <div id="site" class="site" hidden>
+      <header class="top">
+        <p class="mark">for gobi · from amar</p>
+      </header>
 
-      <section class="everyday">
-        <div class="everyday-inner reveal">
-          <img
-            src="assets/piggyback.png"
-            alt="Bear carrying panda on shoulders"
-            class="sticker sticker-everyday"
-            width="220"
-            height="220"
-          />
-          <div class="everyday-copy">
-          <h2 class="section-title">Everyday magic</h2>
-          <p>
-            It's the way we cook together and steal bites before dinner is ready.
-            The way you find comfort in my presence and I find mine in yours.
-            The inside jokes that only we understand, the late-night talks, the
-            sleepy good mornings — all of it woven into the life we've built.
-          </p>
-          <p>
-            I don't need grand gestures to know how lucky I am. I see it in the
-            ordinary, beautiful, perfectly-us moments we share every single day.
-          </p>
+      <main>
+        <section class="hero">
+          <div class="hero-sticker reveal">
+            <img
+              src="assets/hearts.png"
+              alt="Cute bear and panda couple with hearts"
+              class="sticker sticker-hero"
+              width="320"
+              height="320"
+            />
           </div>
-        </div>
-      </section>
 
-      <section class="closing">
-        <div class="closing-sticker reveal">
-          <img
-            src="assets/back-hug.png"
-            alt="Panda hugging bear from behind with love hearts"
-            class="sticker sticker-closing"
-            width="280"
-            height="280"
-          />
-        </div>
+          <p class="eyebrow reveal">Ek pyaari si love letter</p>
+          <h1 class="title reveal">Meri jaan, Gobi</h1>
+          <p class="subline reveal">
+            Har din tumhare saath lagta hai jaise duniya thodi aur pyaari ho
+            gayi ho — warm, silly, aur bilkul sirf humari.
+          </p>
+          <a class="btn reveal" href="#letter">Letter padho</a>
+        </section>
 
-        <blockquote class="signoff reveal">
-          <p>Thank you for being my person.</p>
-          <p class="signoff-love">I love you, Gobi.</p>
-          <cite>— Amar</cite>
-        </blockquote>
-      </section>
-    </main>
+        <section id="letter" class="letter">
+          <div class="letter-wrap reveal">
+            <img
+              src="assets/panda-solo.png"
+              alt=""
+              class="sticker sticker-letter"
+              width="120"
+              height="120"
+              aria-hidden="true"
+            />
+            <div class="letter-inner">
+              <div class="stamp" aria-hidden="true"></div>
+              <p class="letter-greeting">Pyari Gobi,</p>
+              <p>
+                Maine yeh chhota sa internet-wala surprise sirf tumhare liye
+                banaya hai. Kyunki duniya ko ek aur webpage ki zaroorat nahi
+                thi — <em>tumhe</em> zaroorat thi kisi cheez ki jo pyaar se
+                bani ho, time liya ho, aur dil se likhi ho.
+              </p>
+              <p>
+                Tum meri favourite person ho — shaant subah ke liye, zor se
+                hasne ke liye, aur beech ke har pal ke liye. Kabhi kabhi main
+                bol nahi paata, lekin aaj bol raha hoon: shukriya ki tumne
+                mujhe choose kiya. Baar baar.
+              </p>
+            </div>
+          </div>
+        </section>
 
-    <footer class="foot">
-      <p>© <span id="year"></span> Amar &amp; Gobi</p>
-    </footer>
+        <section class="reasons">
+          <h2 class="section-title reveal">Tum kyun special ho</h2>
+          <div class="cards">
+            <article class="card reveal">
+              <img
+                src="assets/hug.png"
+                alt=""
+                class="sticker sticker-card"
+                width="100"
+                height="100"
+                aria-hidden="true"
+              />
+              <p>
+                Tumhare saath normal Tuesday bhi kisi celebration jaisa lagta
+                hai.
+              </p>
+            </article>
+            <article class="card reveal">
+              <img
+                src="assets/hearts.png"
+                alt=""
+                class="sticker sticker-card"
+                width="100"
+                height="100"
+                aria-hidden="true"
+              />
+              <p>Tumhari hasi meri favourite notification hai.</p>
+            </article>
+            <article class="card reveal">
+              <img
+                src="assets/back-hug.png"
+                alt=""
+                class="sticker sticker-card"
+                width="100"
+                height="100"
+                aria-hidden="true"
+              />
+              <p>Ghar koi jagah nahi — ghar ho tum, Gobi.</p>
+            </article>
+            <article class="card reveal">
+              <img
+                src="assets/piggyback.png"
+                alt=""
+                class="sticker sticker-card"
+                width="100"
+                height="100"
+                aria-hidden="true"
+              />
+              <p>
+                Chhoti chhoti baatein bhi meri sabse pyaari yaadein ban jaati
+                hain.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="everyday">
+          <div class="everyday-inner reveal">
+            <img
+              src="assets/piggyback.png"
+              alt="Bear carrying panda on shoulders"
+              class="sticker sticker-everyday"
+              width="220"
+              height="220"
+            />
+            <div class="everyday-copy">
+              <h2 class="section-title">Roz ka pyaar</h2>
+              <p>
+                Jab hum saath khana banate hain aur dinner se pehle chupke se
+                taste kar lete hain. Jab tum mere paas aake comfortable ho
+                jaati ho aur main tumhare paas aake apna sa lagta hoon. Woh
+                inside jokes, raat ki baatein, neend bhari subah — sab kuch
+                milke humari zindagi bana raha hai.
+              </p>
+              <p>
+                Mujhe bade jazbaaton ki zaroorat nahi — main roz ke chhote
+                chhote palon mein apni kismet dekhta hoon. Aur woh pal tum ho.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="proposal">
+          <div class="proposal-inner reveal">
+            <img
+              src="assets/back-hug.png"
+              alt=""
+              class="sticker sticker-proposal"
+              width="200"
+              height="200"
+              aria-hidden="true"
+            />
+            <h2 class="section-title">Ek sawaal...</h2>
+            <p class="proposal-question">
+              Kya tum phir se meri duniya banogi?
+            </p>
+            <p class="proposal-spoiler">(Spoiler: tum already meri ho.)</p>
+            <p class="proposal-note">
+              Lekin har din dil yahi kehta hai — Gobi, will you stay mine,
+              forever and always?
+            </p>
+          </div>
+        </section>
+
+        <section class="closing">
+          <div class="closing-sticker reveal">
+            <img
+              src="assets/back-hug.png"
+              alt="Panda hugging bear from behind with love hearts"
+              class="sticker sticker-closing"
+              width="280"
+              height="280"
+            />
+          </div>
+
+          <blockquote class="signoff reveal">
+            <p>Thank you for being my person.</p>
+            <p class="signoff-hindi">Shukriya ki tum meri ho.</p>
+            <p class="signoff-love">I love you, Gobi.</p>
+            <p class="signoff-hindi signoff-love-hindi">
+              Main tumse bahut pyaar karta hoon.
+            </p>
+            <cite>Hamesha tumhara, Amar</cite>
+          </blockquote>
+        </section>
+      </main>
+
+      <footer class="foot">
+        <p>© <span id="year"></span> Amar &amp; Gobi</p>
+      </footer>
+    </div>
 
     <script src="script.js"></script>
   </body>
