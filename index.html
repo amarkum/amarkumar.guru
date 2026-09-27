@@ -1,459 +1,355 @@
 <!DOCTYPE html>
-<html lang="hi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#ffd1e6" />
-    <meta name="color-scheme" content="light" />
-    <title>For Gucchu — from Amar</title>
-    <meta
-      name="description"
-      content="Ek chhoti si love letter — sirf Gucchu ke liye, sirf Amar se."
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&family=Nunito:wght@400;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body class="is-locked">
-    <div class="sky" aria-hidden="true">
-      <div class="glow glow-a"></div>
-      <div class="glow glow-b"></div>
-      <div class="glow glow-c"></div>
-      <div class="sparkles">
-        <span class="sparkle sparkle-1"></span>
-        <span class="sparkle sparkle-2"></span>
-        <span class="sparkle sparkle-3"></span>
-        <span class="sparkle sparkle-4"></span>
-        <span class="sparkle sparkle-5"></span>
-        <span class="sparkle sparkle-6"></span>
-        <span class="sparkle sparkle-7"></span>
-        <span class="sparkle sparkle-8"></span>
-      </div>
-    </div>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Design Crash Course | amarkumar.guru</title>
+  <meta name="description" content="A 10-module system design crash course for interviews: framework, estimation, caching, databases, queues, classic designs, payments and Amazon Leadership Principles, with 51 quiz questions.">
+  <script>(function(){try{var t=localStorage.getItem("sc-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}})();</script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+  <script>(function(){var a=document.documentElement.getAttribute("data-theme"),d=a?a==="dark":matchMedia("(prefers-color-scheme: dark)").matches;mermaid.initialize({startOnLoad:false,theme:d?"dark":"neutral"})})();</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{
+  --bg:#F3F5F8;--surface:#FFFFFF;--ink:#16212E;--muted:#566476;--line:#D9DFE7;
+  --accent:#1F5FD1;--accent-soft:#E3ECFB;--say:#9A5B00;--say-soft:#FBF0DC;--ok:#1E7B4A;--bad:#B3261E;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10151C;--surface:#18202A;--ink:#E6ECF3;--muted:#98A6B8;--line:#2A3542;
+  --accent:#7FA8F5;--accent-soft:#1D2B44;--say:#F0B660;--say-soft:#2E2413;--ok:#5FD08F;--bad:#F28B82;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10151C;--surface:#18202A;--ink:#E6ECF3;--muted:#98A6B8;--line:#2A3542;
+  --accent:#7FA8F5;--accent-soft:#1D2B44;--say:#F0B660;--say-soft:#2E2413;--ok:#5FD08F;--bad:#F28B82;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 "Source Sans 3",system-ui,sans-serif;padding-inline:16px;padding-block:28px 60px}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(2rem,6vw,3rem);font-weight:800;letter-spacing:-.02em}
+.lede{color:var(--muted);margin:6px 0 0;max-width:60ch}
+.prog{display:flex;align-items:center;gap:12px;font:500 13px "JetBrains Mono",monospace;color:var(--muted)}
+.bar{flex:1;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav button{font:600 14px "Source Sans 3",sans-serif;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer;display:flex;gap:6px;align-items:center}
+nav button .n{font:500 12px "JetBrains Mono",monospace;color:var(--muted)}
+nav button[aria-current="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+nav button[aria-current="true"] .n{color:var(--bg)}
+nav button.done::after{content:"✓";color:var(--ok);font-weight:700}
+nav button[aria-current="true"].done::after{color:var(--bg)}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mod{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(18px,4vw,32px);display:flex;flex-direction:column;gap:22px}
+.meta{font:500 12px "JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.mod h2{font-size:clamp(1.5rem,4vw,2rem);font-weight:800}
+.why{color:var(--muted);margin:4px 0 0}
+.ideas{display:grid;gap:14px;margin:0;padding:0;list-style:none}
+.ideas li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.ideas li b{font-weight:600}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--accent);margin-top:9px}
+.say{background:var(--say-soft);border-radius:10px;padding:14px 16px}
+.say h3{font-size:13px;font-family:"JetBrains Mono",monospace;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--say);margin-bottom:6px}
+.say p{margin:6px 0 0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13px}
+code,.mono{font-family:"JetBrains Mono",monospace;font-size:.88em}
+pre.mermaid{background:transparent;margin:0}
+.quiz{border-top:1px dashed var(--line);padding-top:18px;display:flex;flex-direction:column;gap:16px}
+.q p{margin:0 0 8px;font-weight:600}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts button{text-align:left;font:inherit;font-size:16px;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.opts button.right{border-color:var(--ok);color:var(--ok);font-weight:600}
+.opts button.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.expl{font-size:15px;color:var(--muted);margin-top:6px}
+.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.foot button{font:600 15px "Source Sans 3",sans-serif;padding:10px 16px;border-radius:8px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.foot .primary{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.themebtn{font:600 14px inherit;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer}
+</style>
+</head>
+<body>
+<style>
+body{padding:0}
+.site-head{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--surface);border-bottom:1px solid var(--line)}
+.site-head .in{max-width:1180px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font:800 20px "Bricolage Grotesque",system-ui,sans-serif;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.brand span{color:var(--accent)}
+.site-nav{display:flex;gap:4px;margin-left:auto;align-items:center;flex-wrap:wrap}
+.site-nav a{color:var(--muted);text-decoration:none;font-weight:600;font-size:15px;padding:6px 10px;border-radius:8px}
+.site-nav a[aria-current="page"],.site-nav a:hover{color:var(--ink);background:var(--bg)}
+.crumbs{font-size:14px;color:var(--muted)}
+.crumbs a{color:var(--muted)}
+.layout{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:28px 60px;display:grid;grid-template-columns:280px minmax(0,1fr);gap:32px;align-items:start}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);display:flex;flex-direction:column;gap:14px}
+.side h2{font-size:16px}
+.side .sub{font-size:14px;color:var(--muted);margin:2px 0 0}
+.side nav{flex-direction:column;flex-wrap:nowrap;gap:2px}
+.side nav button{border:0;background:transparent;border-radius:8px;padding:8px 10px;text-align:left;font-weight:600;font-size:15px;width:100%;justify-content:flex-start}
+.side nav button:hover{background:var(--bg)}
+.side nav button[aria-current="true"]{background:var(--accent-soft);color:var(--accent)}
+.side nav button[aria-current="true"] .n{color:var(--accent)}
+.side nav button[aria-current="true"].done::after{color:var(--ok)}
+.side nav button.done::after{margin-left:auto}
+.content{display:flex;flex-direction:column;gap:22px;min-width:0}
+.site-foot{border-top:1px solid var(--line);color:var(--muted);font-size:14px;text-align:center;padding:20px 16px}
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr;gap:20px}
+  .side{position:static}
+  .side nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+  .side nav button{width:auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px}
+}
+</style>
+<header class="site-head"><div class="in">
+  <a class="brand" href="/">amarkumar<span>.guru</span></a>
+  <nav class="site-nav" aria-label="Site">
+    <a href="/" aria-current="page">System Design</a>
+    <a href="#modules">Modules</a>
+    <button id="themebtn" class="themebtn" type="button">Dark mode</button>
+  </nav>
+</div></header>
 
-    <div id="gate" class="gate">
-      <div class="gate-card">
-        <div class="circle-wrap circle-wrap-gate circle-bob">
-          <img
-            src="assets/hug.png"
-            alt=""
-            class="sticker"
-            width="160"
-            height="160"
-            aria-hidden="true"
-          />
-        </div>
-        <p class="gate-eyebrow">Arre meri Gucchu!</p>
-        <h1 class="gate-title">Yeh sirf tumhare liye hai</h1>
-        <p class="gate-lede">
-          Pehle prove karo tum mujhse kitna pyaar karti ho... tabhi andar
-          jaane dunga, my princess.
-        </p>
+<div class="layout">
+  <aside class="side" id="modules">
+    <div><h2>System Design Crash Course</h2><p class="sub">10 modules · ~1h 40m · 51 questions</p></div>
+    <div class="prog"><span id="pct">0 of 10 done</span><div class="bar"><i id="barfill"></i></div></div>
+    <nav id="nav" aria-label="Modules"></nav>
+  </aside>
+  <div class="content">
+    <div class="crumbs">Learn / System Design / Crash Course</div>
+    <header>
+      <h1>System Design in One Night</h1>
+      <p class="lede">Ten short modules, about 10 minutes each. Read the ideas, learn the lines to say out loud, take the quick quiz. Built for interviews like Amazon SDE II.</p>
+    </header>
+    <main id="mod" class="mod"></main>
+  </div>
+</div>
+<footer class="site-foot">© <span id="yr"></span> amarkumar.guru</footer>
 
-        <form id="gate-form" class="gate-form">
-          <label class="gate-label" for="gate-password">Secret password</label>
-          <input
-            id="gate-password"
-            class="gate-input"
-            type="text"
-            name="password"
-            autocomplete="off"
-            autocapitalize="none"
-            autocorrect="off"
-            spellcheck="false"
-            placeholder=""
-            required
-          />
-          <p class="gate-hint">
-            Hint:
-            <span id="hint-code" class="hint-code" aria-label="Password hint"></span>
-            <span class="hint-note">(9 letters — bina space)</span>
-          </p>
-          <p id="gate-error" class="gate-error" hidden>
-            Arre draamebaaz, galat hai! Hint dekho na, phir try karo.
-          </p>
-          <button class="btn btn-gate" type="submit">Dil khol do</button>
-        </form>
-      </div>
-    </div>
+<script>
+const M=[
+{t:"The 45-minute game plan",why:"Interviewers grade the process more than the final diagram. Having a fixed routine keeps you calm and in charge.",
+ideas:[
+["Requirements (5 min).","Ask: who uses it, the 3 core features, and scale. Write functional and non-functional requirements on the board. Cut scope out loud."],
+["Estimate (3 min).","Users → requests/sec → storage per year. Round hard. Only estimate what changes a decision."],
+["API (3 min).","List 3–4 endpoints, e.g. <code>POST /urls</code>, <code>GET /{code}</code>."],
+["High-level design (10 min).","Client → load balancer → stateless app servers → cache → database. Add a queue if work can happen later."],
+["Deep dive (15 min).","Pick the 1–2 hardest parts (the bottleneck) and go deep. Ask: “Which part would you like me to dig into?”"],
+["Wrap up (5 min).","Name bottlenecks, failure cases, and what you'd add next: monitoring, rate limiting, multi-region."]],
+say:["“Before I draw anything, let me confirm the requirements and the scale.”","“I'll start simple and then scale the parts that break.”","“The trade-off here is X versus Y. Given our requirements, I'd pick X.”"],
+diagram:`flowchart LR
+  R[Requirements] --> E[Estimate] --> A[API] --> H[High-level] --> D[Deep dive] --> W[Wrap up]`,
+quiz:[["The interviewer says “Design Twitter.” What do you do first?",["Draw the database schema","Ask clarifying questions about features and scale","Pick Cassandra","Talk about microservices"],1,"Always clarify scope first. Twitter is huge; agree on 2–3 core features (post, follow, timeline)."],
+["You have 10 minutes left and haven't gone deep on anything. Best move?",["Add more boxes","Pick the main bottleneck and discuss it in depth","Restart the design","Talk about CI/CD"],1,"Depth on the hardest part is what separates strong candidates."]]},
 
-    <div id="site" class="site" hidden>
-      <header class="top">
-        <p class="mark">for my gucchu · from your amar</p>
-        <nav class="menu" aria-label="Menu">
-          <a href="#letter">Letter</a>
-          <a href="#reasons">Reasons</a>
-          <a class="menu-hl" href="/system-design/">System Design prep</a>
-        </nav>
-      </header>
+{t:"Back-of-envelope numbers",why:"You don't need precision. You need the right order of magnitude so you choose the right tools.",
+table:[["Fact","Number to remember"],["Seconds in a day","~100,000 (86,400)"],["1M requests/day","~12 per second"],["100M requests/day","~1,200/s avg, peak ≈ 2–3× avg"],["Memory read","~100 ns"],["SSD read","~100 µs"],["Same-datacenter round trip","~0.5 ms"],["Cross-continent round trip","~150 ms"],["One app server","~1,000–10,000 simple req/s"],["One SQL DB (single node)","~a few thousand writes/s"],["Redis","~100,000 ops/s"]],
+ideas:[["Formula for QPS.","Daily active users × actions per user ÷ 100,000."],["Formula for storage.","Items per day × size per item × 365 × years. Then add replication (×3)."],["Read:write ratio.","Most apps are read-heavy (10:1 to 100:1). That tells you to cache and add read replicas."]],
+say:["“Let's say 100M daily users, each doing 10 reads a day. That's 1 billion reads a day, around 10,000 per second, so a single database won't handle it. We'll need caching.”"],
+quiz:[["10M users each post 2 photos a day at 500 KB. Storage per day?",["10 GB","100 GB","10 TB","1 PB"],2,"10M × 2 × 500 KB = 10,000,000 KB × ... = 10 TB per day."],
+["50M requests per day is roughly how many per second?",["50","500","5,000","50,000"],1,"50M ÷ 100,000 ≈ 500 per second."]]},
 
-      <main>
-        <section class="hero">
-          <div class="hero-sticker reveal">
-            <div class="circle-wrap circle-wrap-hero circle-bob">
-              <img
-                src="assets/hearts.png"
-                alt="Cute bear and panda couple with hearts"
-                class="sticker"
-                width="320"
-                height="320"
-              />
-            </div>
-          </div>
+{t:"Scaling and load balancing",why:"Every design starts with one server and grows. This module is how it grows.",
+ideas:[["Vertical vs horizontal.","Vertical = bigger machine (simple, has a ceiling). Horizontal = more machines (needs a load balancer, scales far)."],
+["Stateless servers.","Keep no user session in app server memory. Put sessions in Redis or a token (JWT). Then any server can handle any request and you can add servers freely."],
+["Load balancer.","Spreads traffic across servers. Algorithms: round robin, least connections, hash by user. Does health checks and removes dead servers."],
+["L4 vs L7.","L4 routes by IP/port (fast). L7 reads the HTTP request and can route by path, e.g. <code>/api</code> vs <code>/images</code>."],
+["No single point of failure.","Run 2+ of everything, across availability zones. The load balancer itself runs as a pair."],
+["Autoscaling.","Add servers when CPU or queue length goes up, remove them when it drops."]],
+diagram:`flowchart LR
+  U[Users] --> CDN
+  U --> LB[Load balancer]
+  LB --> S1[App server]
+  LB --> S2[App server]
+  LB --> S3[App server]
+  S1 & S2 & S3 --> C[(Cache)]
+  S1 & S2 & S3 --> DB[(Database)]`,
+say:["“I'll keep the app servers stateless so we can scale them horizontally behind a load balancer.”"],
+quiz:[["Why must app servers be stateless to scale horizontally?",["It's faster","Any server can serve any request, so we can add or remove servers freely","It saves disk","Load balancers require it by law"],1,"If a server holds a user's session, that user is stuck to it and losing the server loses the session."],
+["You want /video traffic on different servers from /api. Which load balancer?",["L4","L7","DNS only","None"],1,"L7 understands HTTP paths."]]},
 
-          <p class="eyebrow reveal">Tumhare liye, sirf tumhare liye</p>
-          <h1 class="title reveal">Meri jaan, Gucchu</h1>
-          <p class="subline reveal">
-            I love you so much... tum ho meri sukoon, meri hasi, meri duniya —
-            aur haan, thodi si draamebaazi bhi allowed hai.
-          </p>
-          <a class="btn reveal" href="#letter">Letter padho na</a>
-        </section>
+{t:"Caching",why:"The single most common answer to “how do you make this faster?” Know where caches go and what goes wrong.",
+ideas:[["Where caches live.","Browser → CDN (static files, images, video) → app cache (Redis/Memcached) → database's own cache."],
+["Cache-aside (most common).","Read: check cache, on miss read DB and put it in cache. Write: update DB, then delete the cache key."],
+["Write-through vs write-back.","Write-through: write cache and DB together (consistent, slower writes). Write-back: write cache, flush to DB later (fast, can lose data)."],
+["Eviction.","LRU (least recently used) is the default answer. Always set a TTL."],
+["Stampede.","A hot key expires and 10,000 requests hit the DB at once. Fixes: lock so one request refills, or refresh before expiry, add jitter to TTLs."],
+["Hot keys.","One celebrity key overloads one cache node. Fix: replicate that key or add a small local in-memory cache."]],
+say:["“This is read-heavy, so I'll put Redis in front of the database with cache-aside and a TTL. On writes, I'll invalidate the key.”","“Staleness of a few seconds is fine for a feed, so caching is safe here.”"],
+quiz:[["In cache-aside, what happens on a cache miss?",["Return an error","App reads DB, writes result to cache, returns it","Cache reads DB by itself","Request is dropped"],1,"The application does the loading. That's why it's called cache-aside."],
+["A viral post's cache key expires and the DB falls over. Name?",["Split brain","Cache stampede (thundering herd)","Deadlock","Sharding"],1,"Fix with a lock/single-flight or early refresh."]]},
 
-        <section id="letter" class="letter">
-          <div class="letter-wrap reveal">
-            <div class="circle-wrap circle-wrap-letter circle-bob">
-              <img
-                src="assets/panda-solo.png"
-                alt=""
-                class="sticker"
-                width="120"
-                height="120"
-                aria-hidden="true"
-              />
-            </div>
-            <div class="letter-inner">
-              <div class="stamp" aria-hidden="true"></div>
-              <p class="letter-greeting">My Gulgul, my Gobi, my Guggu...</p>
-              <p>
-                Dil se likh raha hoon — bottom of my heart se. I so much love
-                you. Tum meri <em>sukoon</em> ho. Jab bhi tumhe lipat ke baithta
-                hoon, lagta hai sab theek hai duniya mein. You are my reason for
-                smiles and tears both — aur honestly, dono mein bhi tum hi
-                sabse pyaari lagti ho.
-              </p>
-              <p>
-                Maine yeh chhota sa page sirf tumhare liye banaya hai, meri
-                princess. Kyunki kabhi kabhi main bol nahi paata kitna pyaar
-                karta hoon — lekin dil mein toh hamesha wahi baat rehti hai:
-                <em>I love you to infinity.</em>
-              </p>
-              <p>
-                Sorry agar kabhi kuch galat ho gaya ho — paap ka prayschit samajh
-                ke yeh sab likh raha hoon. Ab sirf tumhare liye jeena chahta hoon.
-                Protective hoon tumhare liye, bilkul papa jaisa — aur jab tum
-                door hoti ho toh thoda darr bhi lagta hai. Bas tum safe raho,
-                mera doll.
-              </p>
-            </div>
-          </div>
-        </section>
+{t:"Databases: pick, replicate, shard",why:"Most deep dives end up here. Know how to choose and how to scale.",
+table:[["Need","Pick","Why"],["Money, orders, relationships","SQL (Postgres, MySQL)","Transactions, joins, strong consistency"],["Huge write volume, simple lookups","Wide-column (Cassandra, DynamoDB)","Scales writes horizontally"],["Flexible documents","Document (MongoDB)","Schema changes easily"],["Cache, counters, sessions","Key-value (Redis)","In-memory, very fast"],["Search text","Elasticsearch","Inverted index"],["Images, video, files","Object storage (S3)","Cheap, durable blobs; store the URL in the DB"]],
+ideas:[["Indexes.","Make reads fast, slow down writes a bit. Index what you filter or sort on."],
+["Replication.","One leader takes writes, followers serve reads. Replica lag means a follower can be slightly stale."],
+["Sharding.","Split data across machines by a shard key (e.g. user_id). Pick a key that spreads load evenly and keeps a user's queries on one shard."],
+["Consistent hashing.","Place servers on a ring; a key goes to the next server clockwise. Adding a server only moves a small slice of keys."],
+["CAP.","During a network partition you choose Consistency (refuse/wait) or Availability (answer, maybe stale). Banks pick C, social feeds pick A."],
+["Transactions across services.","Avoid 2-phase commit. Use a saga: a chain of local steps with undo (compensating) steps."]],
+say:["“The access pattern is lookups by user_id, so I'll shard by user_id using consistent hashing.”","“For payments I want strong consistency, so SQL with transactions. For the activity feed, eventual consistency is fine.”"],
+quiz:[["Chat messages: billions of writes per day, always read by conversation. Best store?",["Single MySQL","Cassandra with partition key = conversation_id","Elasticsearch","S3"],1,"High write volume, simple access pattern by one key."],
+["Why consistent hashing instead of hash(key) % N?",["It's more secure","Adding/removing a server moves only a small fraction of keys","It uses less memory","It sorts keys"],1,"With % N, changing N reshuffles almost every key."]]},
 
-        <section class="real-letter">
-          <div class="real-letter-inner reveal">
-            <h2 class="section-title">Mera asli letter</h2>
-            <p class="real-letter-note">
-              Birthday letter se — wahi baatein, thoda saaf karke.
-            </p>
+{t:"Queues and async work",why:"Anything slow or spiky goes into a queue. This one idea fixes many designs.",
+ideas:[["Why a queue.","Decouples producer and consumer, absorbs traffic spikes, lets you retry. User gets a fast response while work happens in the background."],
+["Queue vs pub/sub.","Queue (SQS, RabbitMQ): each message handled by one worker. Pub/sub or log (Kafka): many consumers each read every event."],
+["Delivery guarantees.","“At least once” is the realistic default, so consumers must be idempotent: processing the same message twice has the same effect as once. Use an idempotency key."],
+["Dead-letter queue.","Messages that keep failing go aside so they don't block everything."],
+["Sync vs async APIs.","REST for request/response. WebSockets for real-time push (chat). Long polling as a fallback. Webhooks for server-to-server callbacks."],
+["Rate limiting.","Token bucket: tokens refill at a fixed rate, each request uses one. Store counters in Redis, keyed by user or IP. Return HTTP 429."]],
+diagram:`flowchart LR
+  API[Upload API] -->|fast 202| U[User]
+  API --> Q[[Queue]]
+  Q --> W1[Worker: transcode]
+  Q --> W2[Worker: thumbnail]
+  W1 & W2 --> S[(Object storage)]`,
+say:["“Video processing is slow, so the upload API just stores the file and puts a job on a queue. Workers process it and we notify the user when it's done.”","“Delivery is at-least-once, so the consumer uses an idempotency key to avoid double charges.”"],
+quiz:[["A payment message might be delivered twice. What protects you?",["Faster workers","Idempotency key checked before charging","Bigger queue","Using UDP"],1,"Store processed keys; skip duplicates."],
+["Which rate limiting algorithm allows short bursts but a steady average?",["Fixed window","Token bucket","Round robin","LRU"],1,"The bucket holds extra tokens for bursts."]]},
 
-            <article class="agreement-letter">
-              <p class="agreement-salutation">My Gucchu,</p>
+{t:"Four classic designs, as skeletons",why:"Most questions are variations of these. Know the skeleton and the one hard part of each.",
+table:[["System","Core pieces","The hard part to deep-dive"],
+["URL shortener","API → app → DB (code → long URL), Redis cache, 301/302 redirect","Generating unique short codes: base62 of an ID from a counter or Snowflake-style IDs; heavy read caching"],
+["Chat (WhatsApp)","WebSocket gateways, message service, Cassandra by conversation_id, presence in Redis","Delivering to online vs offline users: route via user→gateway map; store and push notification if offline; message ordering per conversation"],
+["News feed (Twitter)","Post service, follow graph, feed cache per user","Fan-out on write (push to followers' feeds) vs on read; hybrid: push for normal users, pull for celebrities"],
+["Notification system","Event → queue → workers per channel (push, SMS, email) → providers","Retries, dedupe, user preferences, rate limits per user, templates"]],
+ideas:[["Unique IDs.","Snowflake: 41 bits time + machine ID + sequence. Sortable by time, no central bottleneck."],
+["Typeahead.","Trie of prefixes with top-k suggestions stored at each node, served from cache, rebuilt offline."],
+["File storage (Drive).","Split files into chunks, store in S3, metadata in SQL, sync only changed chunks."],
+["Video (YouTube).","Upload → queue → transcode into multiple resolutions → CDN. Adaptive bitrate streaming."]],
+say:["“For celebrities with millions of followers, fan-out on write is too expensive, so I'd use a hybrid: push for regular users and pull celebrity posts at read time.”"],
+quiz:[["A user with 50M followers posts. Fan-out on write means…",["1 write","50M feed writes","No writes","Only a cache write"],1,"That's why celebrities are handled by pull at read time."],
+["How does a chat server send a message to a user connected to a different server?",["Broadcast to all servers","Look up which gateway holds the user's WebSocket and route there","Email it","Wait for the user to poll"],1,"Keep a user → gateway map in Redis or use pub/sub."]]},
 
-              <p>
-                Bahut pyaar karta hoon tumse, dil se. Tum meri sukoon ho.
-                Tumhe lipat ke meko sukoon aata.
-              </p>
+{t:"Amazon FinTech: design a payment system",why:"Her team is FinTech, so a payment, ledger, wallet, or billing question is very likely. Amazon's reports say resiliency is weighted more than raw scale.",
+ideas:[["Requirements to ask for.","Charge a customer, refund, check payment status. Never double-charge, never lose money, keep a full audit trail. Strong consistency for money, eventual consistency is fine for status pages and analytics."],
+["Flow.","Client → Payment API (with an idempotency key) → Payment service writes a <code>PENDING</code> record → calls the external processor (card network/bank) → updates to <code>SUCCESS</code>/<code>FAILED</code> → emits an event → ledger, notifications, and order service consume it."],
+["Idempotency is the #1 topic.","Client sends a unique key per payment attempt. Server stores key → result. A retry with the same key returns the stored result instead of charging again."],
+["Double-entry ledger.","Every movement is two rows: debit one account, credit another, and they always sum to zero. Append-only. Never update or delete, only add correcting entries."],
+["Failures and retries.","Processor times out? You don't know if it charged. Mark as <code>UNKNOWN</code>, retry with the same idempotency key, and run a reconciliation job that compares your records with the processor's daily report."],
+["Multi-step flows.","Order → charge → reserve inventory: use a saga with compensations (refund if inventory fails), plus the outbox pattern so the DB write and the event are never out of sync."],
+["Storage.","SQL (e.g. Aurora/Postgres) with transactions for payments and ledger. Shard by account or merchant ID. Kafka/SQS for events. Encrypt card data; better, store only a token from the processor (PCI)."]],
+diagram:`flowchart LR
+  C[Client] -->|idempotency key| API[Payment API]
+  API --> PS[Payment service]
+  PS --> DB[(Payments DB)]
+  PS --> PSP[External processor]
+  PS --> K[[Event queue]]
+  K --> L[(Ledger)]
+  K --> N[Notifications]
+  R[Reconciliation job] --> DB
+  R --> PSP`,
+say:["“For money I'd choose consistency over availability. If we're unsure whether a charge went through, we'd rather show 'processing' than risk a double charge.”","“Every request carries an idempotency key, so client or network retries are safe.”","“A nightly reconciliation job catches anything our retries missed.”"],
+quiz:[["The processor call times out. What's the safe action?",["Charge again with a new request","Mark it unknown, retry with the same idempotency key, reconcile later","Tell the user it failed","Delete the record"],1,"A new request risks a double charge. The same key makes the retry safe."],
+["Why is a ledger append-only?",["It saves space","You get a full audit trail; corrections are new entries, never edits","SQL requires it","It's faster to delete"],1,"Auditors and debugging both need full history."]]},
 
-              <p>
-                Tum baahon mein rehti ho to lagta hai sab jeet lenge hum. Koi
-                bhi pareshaani saath mein dekh lenge.
-              </p>
+{t:"Amazon's twist: Leadership Principles",why:"At Amazon, each interviewer also scores 2–4 Leadership Principles, even in the design round. There's usually a behavioral question too.",
+ideas:[["Customer Obsession.","Open the design with the customer: “A customer paying at checkout needs it to be fast and never charged twice.” Tie choices back to them."],
+["Ownership.","Talk about monitoring, alarms, on-call, and what happens at 3 a.m. when something fails. Owners design for operations, not only the happy path."],
+["Dive Deep.","When pushed, go one level deeper with numbers and specifics instead of changing the subject."],
+["Are Right, A Lot / Have Backbone.","Defend a choice with a reason, and change it gracefully if the interviewer shows a real flaw."],
+["Frugality.","Mention cost: “S3 for old records, not the main DB.” “Start with managed services.”"],
+["STAR stories.","Prepare 4–5 stories: Situation, Task, Action (what <b>I</b> did, say “I” not “we”), Result with a number. Cover: a tough bug, a disagreement, a deadline, a mistake, going beyond scope."]],
+say:["“I'd add alarms on payment failure rate and latency, and a dashboard so the on-call engineer can see issues quickly.”","“In my last project, I owned… The result was a 30% drop in…”"],
+quiz:[["Which is the strongest Ownership signal in a design round?",["Using the newest database","Covering monitoring, alarms, failure handling, and rollback","Drawing more boxes","Saying 'the team handled it'"],1,"Owners think about running the system, not just building it."],
+["In a STAR story, how should she describe her actions?",["We did it","I did X, specifically","The manager decided","Skip the action part"],1,"Interviewers need her individual contribution."]]},
 
-              <p>
-                Tumhare liye bahut protective hoon. Jab tum mere se door hoti
-                ho, thoda darr lagta hai — papa jaisa wala.
-              </p>
+{t:"Night-before checklist",why:"Read this once tonight and once in the morning. Then close the laptop.",
+ideas:[["Talk the whole time.","Silence reads as stuck. Think out loud, even “I'm weighing two options here…”"],
+["Clarify, then commit.","Ask questions early. Once you pick, state it and move on. You can revisit later."],
+["Every choice gets a reason.","“Redis because it's read-heavy.” “Queue because the work is slow.” Never just name a tool."],
+["Say the trade-off.","Consistency vs availability, latency vs cost, simple vs scalable. Naming it shows seniority."],
+["It's a conversation.","Check in: “Does this direction make sense?” Follow the interviewer's hints; they are giving you points."],
+["Know your default toolbox.","Load balancer, stateless servers, Redis, SQL + replicas, sharding by key, Kafka/SQS queue, S3 + CDN, WebSockets. This covers 90% of questions."],
+["When stuck.","Go back to requirements and numbers. Find what breaks first at that scale and fix that one thing."]],
+say:["“Let me find the bottleneck. At 10k writes per second a single database breaks first, so I'd shard it.”","“I don't know that tool in depth, but here's how I'd reason about it.”"],
+quiz:[["The interviewer says “What if the cache goes down?” Good answer?",["“It won't.”","Requests fall through to the DB; protect it with replicas, rate limits, and a Redis cluster with replicas","Restart the servers","Remove the cache"],1,"Always plan for failure of each component."],
+["You chose Postgres. What should you say next?",["Nothing","Why: we need transactions and joins for orders, and it handles our write rate","It's popular","My friend uses it"],1,"Tool + reason tied to a requirement."]]}
+];
 
-              <p>
-                Ab bas tumhare liye jeena chahta hoon. Peeche jo galat hua,
-                maan leta hoon. Ab meri life mein bas tum ho.
-              </p>
 
-              <p>
-                Tumhare liye hasta hun, tumhare liye rota bhi. Meri zindagi
-                jeene ki wajah tum ho.
-              </p>
+const EXTRA=[
+[["Which is a non-functional requirement?",["Users can post photos","99.99% availability and p99 latency under 200 ms","Users can follow others","Users can comment"],1,"Non-functional = qualities like availability, latency, durability, consistency."],
+["How long should requirements and scoping take in a 45–60 min round?",["Under a minute","About 5 minutes","20 minutes","The whole interview"],1,"Enough to lock scope, then move on."],
+["The interviewer pushes back on your database choice. Best response?",["Switch immediately","Explain the reasoning, consider their point, and adjust if the flaw is real","Argue until they agree","Ignore it"],1,"Shows backbone plus openness."]],
+[["Peak traffic is usually estimated as…",["Same as average","2–3× average","100× average","Half of average"],1,"Use a peak multiplier to size capacity."],
+["Which is fastest?",["SSD read","Memory read","Cross-continent round trip","Disk seek"],1,"Memory ~100 ns, SSD ~100 µs, cross-continent ~150 ms."],
+["1 billion reads/day with a 100:1 read:write ratio means writes/day are about…",["1 million","10 million","100 million","1 billion"],1,"1B ÷ 100 = 10M writes/day ≈ 100/s."]],
+[["What does a load balancer health check do?",["Encrypts traffic","Stops sending traffic to unhealthy servers","Caches responses","Shards the DB"],1,"Dead servers are removed from rotation automatically."],
+["Where should user sessions live so app servers stay stateless?",["In app server memory","In a shared store like Redis, or a signed token","On the load balancer's disk","In the CDN"],1,"Any server can then handle any request."],
+["What is the main downside of vertical scaling?",["Needs a load balancer","There's a hardware ceiling and it's a single point of failure","It's always slower","It requires sharding"],1,"Bigger boxes only go so far."]],
+[["Which content belongs on a CDN?",["Bank balances","Images, videos, JS/CSS files","Payment transactions","Session tokens"],1,"Static, widely-read content close to users."],
+["Default eviction policy to mention?",["FIFO","LRU","Random","Never evict"],1,"Least recently used plus a TTL."],
+["Write-back caching risks…",["Slow reads","Losing data if the cache crashes before flushing","Too many DB writes","Stale CDN"],1,"Writes sit only in cache until flushed."]],
+[["What is replica lag?",["Slow network cable","Followers being slightly behind the leader","A crashed leader","A slow index"],1,"Reads from a follower may be a bit stale."],
+["A bad shard key causes…",["Encryption failures","Hot shards: one machine gets most of the load","Faster queries","Fewer replicas"],1,"Pick a key that spreads load evenly."],
+["Adding an index to a column usually…",["Speeds writes, slows reads","Speeds reads on that column, slightly slows writes","Has no effect","Deletes duplicates"],1,"Writes must also update the index."]],
+[["Kafka differs from a simple queue because…",["It can't retry","Multiple consumer groups can each read every event, and events are retained","It only runs in memory","It's synchronous"],1,"It's a durable log, replayable by many consumers."],
+["Best transport for real-time chat delivery?",["Polling every minute","WebSockets","Email","FTP"],1,"A persistent two-way connection."],
+["What HTTP status does a rate limiter return?",["200","404","429","500"],2,"429 Too Many Requests."]],
+[["Why does Snowflake put the timestamp first in the ID?",["Security","IDs sort by creation time","Shorter IDs","Encryption"],1,"Time-ordered IDs help indexing and pagination."],
+["URL shortener: 301 vs 302 redirect?",["No difference","301 is cached by browsers (less load, less analytics); 302 hits your server each time","302 is permanent","301 is faster to generate"],1,"Pick 302 if you need click tracking."],
+["For a typeahead, where are top suggestions stored for speed?",["Computed on each keystroke from raw logs","Precomputed top-k at each trie node, served from cache","In S3","In the load balancer"],1,"Rebuilt offline, read in milliseconds."]],
+[["What is the outbox pattern for?",["Sending email","Writing the DB change and the event in one transaction so they never diverge","Encrypting cards","Rate limiting"],1,"A relay later publishes events from the outbox table."],
+["Where should raw card numbers be stored?",["In your DB in plain text","Ideally nowhere: store the processor's token","In logs","In Redis"],1,"Tokenization keeps you out of most PCI scope."],
+["Reconciliation compares…",["Two cache nodes","Your payment records against the processor/bank settlement report","Frontend and backend code","CPU and memory"],1,"Catches mismatches retries missed."],
+["For a payments DB, which do you favor during a partition?",["Availability","Consistency","Neither","Latency"],1,"Better to wait than to move money wrongly."]],
+[["Which Leadership Principle is shown by mentioning cost trade-offs?",["Frugality","Invent and Simplify","Earn Trust","Hire and Develop"],0,"Accomplish more with less."],
+["The Result in a STAR story should ideally include…",["A metric or measurable outcome","Only feelings","Nothing","The manager's name"],0,"Numbers make impact concrete."],
+["Starting a design with “Who is the customer and what do they need?” shows…",["Bias for Action","Customer Obsession","Frugality","Think Big"],1,"Amazon's first principle."]],
+[["You don't know a technology the interviewer mentions. Best move?",["Bluff","Say so and reason from first principles","Change the topic","Stay silent"],1,"Honest reasoning scores better than bluffing."],
+["You've been quiet for a minute while thinking. What should you do?",["Keep silent","Think out loud so the interviewer can follow","Ask to end","Draw random boxes"],1,"They grade your reasoning, so make it visible."],
+["The interviewer drops a hint. You should…",["Ignore it","Pick it up and explore it","Say you already knew","Argue"],1,"Hints are points being offered."]]
+];
+EXTRA.forEach((q,i)=>M[i]&&M[i].quiz.push(...q));
+const KEY="sd1n-v2";
+let st={cur:0,done:[]};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s)st=s}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
+const esc=s=>s.replace(/&(?!amp;)/g,"&amp;");
 
-              <p>
-                Tumhari khushi ke liye sab kar dunga. Promise — maine tumhe
-                kisi cheez ki kami nahi hone dunga. Jo kar sakta hun, sab
-                karunga.
-              </p>
+function nav(){
+  const n=document.getElementById("nav");n.innerHTML="";
+  M.forEach((m,i)=>{const b=document.createElement("button");b.id="nav"+i;
+    b.innerHTML=`<span class="n">${i+1}</span>${m.t}`;
+    b.setAttribute("aria-current",i===st.cur);if(st.done.includes(i))b.classList.add("done");
+    b.onclick=()=>{st.cur=i;save();render()};n.appendChild(b)});
+  const d=st.done.length;document.getElementById("pct").textContent=`${d} of ${M.length} done`;
+  document.getElementById("barfill").style.width=(d/M.length*100)+"%";
+}
+function render(){
+  nav();const m=M[st.cur],el=document.getElementById("mod");
+  let h=`<div><div class="meta">Module ${st.cur+1} of ${M.length} · ~10 min</div><h2>${m.t}</h2><p class="why">${m.why}</p></div>`;
+  if(m.table)h+=`<div class="tbl"><table><thead><tr>${m.table[0].map(c=>`<th>${c}</th>`).join("")}</tr></thead><tbody>${m.table.slice(1).map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  h+=`<ul class="ideas">${m.ideas.map(([a,b])=>`<li><span class="dot"></span><div><b>${a}</b> ${b}</div></li>`).join("")}</ul>`;
+  if(m.diagram)h+=`<pre class="mermaid">${m.diagram}</pre>`;
+  h+=`<div class="say"><h3>Say this out loud</h3>${m.say.map(s=>`<p>${s}</p>`).join("")}</div>`;
+  h+=`<div class="quiz">${m.quiz.map((q,qi)=>`<div class="q"><p>${qi+1}. ${q[0]}</p><div class="opts">${q[1].map((o,oi)=>`<button id="q${st.cur}-${qi}-${oi}" data-q="${qi}" data-o="${oi}">${o}</button>`).join("")}</div><div class="expl" hidden id="e${qi}">${q[3]}</div></div>`).join("")}</div>`;
+  const last=st.cur===M.length-1;
+  h+=`<div class="foot"><button id="prev" ${st.cur===0?"hidden":""}>← Previous</button><button id="next" class="primary">${last?"Finish · go sleep":"Mark done · next →"}</button></div>`;
+  el.innerHTML=h;
+  el.querySelectorAll(".opts button").forEach(b=>b.onclick=()=>{
+    const q=m.quiz[+b.dataset.q],box=b.parentNode;
+    box.querySelectorAll("button").forEach((x,i)=>{x.classList.remove("wrong");if(i===q[2])x.classList.add("right")});
+    if(+b.dataset.o!==q[2])b.classList.add("wrong");
+    document.getElementById("e"+b.dataset.q).hidden=false});
+  document.getElementById("prev").onclick=()=>{st.cur--;save();render();scrollTo(0,0)};
+  document.getElementById("next").onclick=()=>{if(!st.done.includes(st.cur))st.done.push(st.cur);
+    if(!last)st.cur++;save();render();scrollTo(0,0)};
+  if(window.mermaid){try{mermaid.run({nodes:el.querySelectorAll(".mermaid")})}catch(e){}}
+}
+function curTheme(){const a=document.documentElement.getAttribute("data-theme");return a||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}
+function setBtn(){document.getElementById("themebtn").textContent=curTheme()==="dark"?"Light mode":"Dark mode"}
+document.getElementById("themebtn").onclick=()=>{const t=curTheme()==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",t);document.documentElement.style.colorScheme=t;
+  try{localStorage.setItem("sc-theme",t)}catch(e){}
+  if(window.mermaid){try{mermaid.initialize({startOnLoad:false,theme:t==="dark"?"dark":"neutral"})}catch(e){}}
+  setBtn();render()};
+setBtn();
+document.getElementById("yr").textContent=new Date().getFullYear();
+render();
+</script>
 
-              <p>
-                Mera gulgul, mera gobi, mera guggu — tum meri support ho, hasne
-                ki wajah ho. I love you.
-              </p>
-
-              <p>
-                Happy birthday meri princess. Hamesha princess ki tarah pyaar
-                karunga, mera baby.
-              </p>
-
-              <p>
-                Tumhari success ke liye apni se zyada dua karta rahunga. Grow
-                karo, badho — main side mein hoon.
-              </p>
-
-              <p>
-                Main tumhara husband hoon, aur tumhare papa jaisa protective
-                bhi.
-              </p>
-
-              <p>
-                Mujhe ladki chahiye par wish karunga beta ho — bas tum khush
-                raho. Tumhari khushi ke liye meri saari kurbaani.
-              </p>
-
-              <p>
-                Jaldi shaadi kar lo, draamebaaz! Pehle thoda bura kiya ho to
-                chup chaap sunn leta hoon — paap ka prayschit samajh ke.
-              </p>
-
-              <p>Love you mela doll. Muaah.</p>
-
-              <div class="agreement-birthday">
-                <p>Happy 30th Birthday!</p>
-                <p>Welcome to the club!</p>
-                <p>From</p>
-                <p>Senior club member</p>
-                <p>And your hubby soon!</p>
-                <p>Muaah — happy birthday.</p>
-              </div>
-
-              <p class="agreement-sign">You are my sukoon.</p>
-            </article>
-          </div>
-        </section>
-
-        <section id="reasons" class="reasons">
-          <h2 class="section-title reveal">Tum kyun meri ho</h2>
-          <p class="carousel-hint reveal">Swipe karo meri jaan — thoda funky, thoda pyaar</p>
-
-          <div class="carousel reveal" id="reasons-carousel">
-            <div class="carousel-controls">
-              <button
-                class="carousel-btn carousel-prev"
-                type="button"
-                aria-label="Previous reason"
-              >
-                Prev
-              </button>
-              <button
-                class="carousel-btn carousel-next"
-                type="button"
-                aria-label="Next reason"
-              >
-                Next
-              </button>
-            </div>
-
-            <div class="carousel-viewport">
-              <div class="carousel-track">
-                <article class="card carousel-slide is-active" data-slide="0">
-                  <span class="card-tag">Reason #1</span>
-                  <div class="circle-wrap circle-wrap-card">
-                    <img
-                      src="assets/hug.png"
-                      alt=""
-                      class="sticker"
-                      width="100"
-                      height="100"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <p>
-                    Tumhe lipat ke mujhe sukoon aata hai — bas yahi reason kaafi
-                    hai.
-                  </p>
-                </article>
-
-                <article class="card carousel-slide" data-slide="1">
-                  <span class="card-tag">Reason #2</span>
-                  <div class="circle-wrap circle-wrap-card">
-                    <img
-                      src="assets/hearts.png"
-                      alt=""
-                      class="sticker"
-                      width="100"
-                      height="100"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <p>
-                    Tumhari hasi meri favourite cheez hai — notification se zyada
-                    important.
-                  </p>
-                </article>
-
-                <article class="card carousel-slide" data-slide="2">
-                  <span class="card-tag">Reason #3</span>
-                  <div class="circle-wrap circle-wrap-card">
-                    <img
-                      src="assets/back-hug.png"
-                      alt=""
-                      class="sticker"
-                      width="100"
-                      height="100"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <p>
-                    I promise — maine tumhe kisi chiz ki kami ni hone dunga.
-                    Sab karunga. Jo kar sakta hun.
-                  </p>
-                </article>
-
-                <article class="card carousel-slide" data-slide="3">
-                  <span class="card-tag">Reason #4</span>
-                  <div class="circle-wrap circle-wrap-card">
-                    <img
-                      src="assets/piggyback.png"
-                      alt=""
-                      class="sticker"
-                      width="100"
-                      height="100"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <p>
-                    Tum meri princess ho — thodi draamebaaz bhi, lekin meri
-                    favourite draamebaaz.
-                  </p>
-                </article>
-              </div>
-            </div>
-
-            <div class="carousel-dots" aria-label="Carousel pagination">
-              <button
-                class="carousel-dot is-active"
-                type="button"
-                aria-label="Go to reason 1"
-                data-slide="0"
-              ></button>
-              <button
-                class="carousel-dot"
-                type="button"
-                aria-label="Go to reason 2"
-                data-slide="1"
-              ></button>
-              <button
-                class="carousel-dot"
-                type="button"
-                aria-label="Go to reason 3"
-                data-slide="2"
-              ></button>
-              <button
-                class="carousel-dot"
-                type="button"
-                aria-label="Go to reason 4"
-                data-slide="3"
-              ></button>
-            </div>
-          </div>
-        </section>
-
-        <section class="everyday">
-          <div class="everyday-inner reveal">
-            <div class="circle-wrap circle-wrap-everyday">
-              <img
-                src="assets/piggyback.png"
-                alt="Bear carrying panda on shoulders"
-                class="sticker"
-                width="220"
-                height="220"
-              />
-            </div>
-            <div class="everyday-copy">
-              <h2 class="section-title">Humari chhoti si duniya</h2>
-              <p>
-                Koi badi filmy kahani nahi — bas tu aur main. Subah ka message,
-                raat ki call, beech mein thodi ladai, phir patch up. Normal
-                couple stuff. Bada romance har din nahi chahiye — bas yeh pata
-                ho ki dono ek team hain.
-              </p>
-              <p>
-                Kabhi tu draamebaaz karti hai, kabhi main zyada bol deta hoon.
-                Phir hasi, phir lipat ke baith jaate hain. Jab tum door hoti ho
-                na, wahi chhoti si cheezein sabse zyada miss hoti hain.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section class="proposal">
-          <div class="proposal-inner reveal">
-            <div class="circle-wrap circle-wrap-proposal circle-bob">
-              <img
-                src="assets/back-hug.png"
-                alt=""
-                class="sticker"
-                width="200"
-                height="200"
-                aria-hidden="true"
-              />
-            </div>
-            <h2 class="section-title">Ek sawaal phir se...</h2>
-            <p class="proposal-question">
-              Kya tum phir se meri duniya banogi, meri Gucchu?
-            </p>
-            <p class="proposal-spoiler">
-              (Spoiler alert: tum already meri ho, meri wife, meri jaan.)
-            </p>
-            <p class="proposal-note">
-              Lekin har din, har raat, har subah — dil yahi kehta hai: stay
-              mine, forever. I love you to infinity and beyond, my princess.
-            </p>
-          </div>
-        </section>
-
-        <section class="closing">
-          <div class="closing-sticker reveal">
-            <div class="circle-wrap circle-wrap-closing circle-bob">
-              <img
-                src="assets/back-hug.png"
-                alt="Panda hugging bear from behind with love hearts"
-                class="sticker"
-                width="280"
-                height="280"
-              />
-            </div>
-          </div>
-
-          <blockquote class="signoff reveal">
-            <p>Thank you for being my person, my sukoon, my everything.</p>
-            <p class="signoff-hindi">
-              Shukriya ki tum meri ho — meri Gobi, meri Gulgul, meri Gucchu.
-            </p>
-            <p class="signoff-love">I love you so much, Gobi.</p>
-            <p class="signoff-hindi signoff-love-hindi">
-              Main tumse bahut bahut pyaar karta hoon — infinity tak.
-            </p>
-            <cite>— Amar</cite>
-          </blockquote>
-        </section>
-      </main>
-
-      <footer class="foot">
-        <p><a href="/system-design/">System design prep for your Amazon interview →</a></p>
-        <p>© <span id="year"></span> Amar &amp; Gucchu</p>
-      </footer>
-    </div>
-
-    <script src="script.js"></script>
-  </body>
+</body>
 </html>
