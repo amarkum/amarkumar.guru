@@ -54,6 +54,7 @@ th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);verti
 th{font-weight:600;color:var(--muted);font-size:13px}
 code,.mono{font-family:"JetBrains Mono",monospace;font-size:.88em}
 pre.mermaid{background:transparent;margin:0}
+.prep{border:1px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 16px}.prep h3{font-size:13px;font-family:"JetBrains Mono",monospace;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}.prep p{margin:6px 0 0}.prep a,.ideas a{color:var(--accent);font-weight:600}
 .quiz{border-top:1px dashed var(--line);padding-top:18px;display:flex;flex-direction:column;gap:16px}
 .q p{margin:0 0 8px;font-weight:600}
 .opts{display:flex;flex-direction:column;gap:6px}
@@ -105,21 +106,22 @@ body{padding:0}
   <nav class="site-nav" aria-label="Site">
     <a href="/" aria-current="page">System Design</a>
     <a href="#modules">Modules</a>
+    <a href="https://excalidraw.com" target="_blank" rel="noopener">Whiteboard ↗</a>
     <button id="themebtn" class="themebtn" type="button">Dark mode</button>
   </nav>
 </div></header>
 
 <div class="layout">
   <aside class="side" id="modules">
-    <div><h2>System Design Crash Course</h2><p class="sub">10 modules · ~1h 40m · 51 questions</p></div>
-    <div class="prog"><span id="pct">0 of 10 done</span><div class="bar"><i id="barfill"></i></div></div>
+    <div><h2>System Design Crash Course</h2><p class="sub">11 modules · ~2h · 57 questions</p></div>
+    <div class="prog"><span id="pct">0 of 11 done</span><div class="bar"><i id="barfill"></i></div></div>
     <nav id="nav" aria-label="Modules"></nav>
   </aside>
   <div class="content">
     <div class="crumbs">Learn / System Design / Crash Course</div>
     <header>
       <h1>System Design in One Night</h1>
-      <p class="lede">Ten short modules, about 10 minutes each. Read the ideas, learn the lines to say out loud, take the quick quiz. Built for interviews like Amazon SDE II.</p>
+      <p class="lede">Start with “Before you go” for a 2-day prep plan, then ten short modules of about 10 minutes each. Read the ideas, learn the lines to say out loud, take the quick quiz. Built for interviews like Amazon SDE II.</p>
     </header>
     <main id="mod" class="mod"></main>
   </div>
@@ -303,7 +305,40 @@ const EXTRA=[
 ["The interviewer drops a hint. You should…",["Ignore it","Pick it up and explore it","Say you already knew","Argue"],1,"Hints are points being offered."]]
 ];
 EXTRA.forEach((q,i)=>M[i]&&M[i].quiz.push(...q));
-const KEY="sd1n-v2";
+const PREP=[
+"Close the page and say the six steps out loud from memory. Then run one full mock (“Design a URL shortener”) with a 45-minute timer on Excalidraw.",
+"Take 3 prompts (Instagram, Uber, WhatsApp) and do only the numbers: QPS, storage per year, read:write ratio. 3 minutes each, out loud.",
+"Draw the scaling diagram from memory: users → CDN → load balancer → stateless servers → cache → DB. Explain each box in one sentence.",
+"For any design you practice, say where the cache goes, which pattern you'd use (cache-aside), the TTL, and what happens when the cache is down.",
+"For 3 systems (payments, chat, feed), pick a database and shard key and say why in one sentence each.",
+"Take one slow feature (video upload, sending receipts) and redraw it with a queue. Say how you'd handle retries and duplicates.",
+"Pick two skeletons and do them end to end on Excalidraw with a timer. Record yourself and listen back once.",
+"Do a full 45-minute mock of “Design a payment system for Amazon checkout”. Must mention: idempotency key, ledger, reconciliation, saga/outbox.",
+"Write 5 STAR stories in bullets (tough bug, disagreement, missed deadline, mistake, going beyond scope). Say each in under 2 minutes, with a number in the result.",
+"Read this checklist once tonight and once the morning of the interview. Then stop studying."
+];
+M.forEach((m,i)=>m.prep=PREP[i]);
+M.unshift({t:"Before you go: how to prepare",why:"Start here. A 2-day plan, what to have ready on the call, and where to practice drawing designs.",
+table:[["When","Do this"],
+["2 days before","Modules 1–6. After each one, do its “How to practice this” task out loud."],
+["1 day before","Modules 7–10. Two timed 45-minute mocks on Excalidraw: a payment system and a notification system. Write your 5 STAR stories."],
+["Interview morning","Skim the Night-before checklist and your STAR bullets. No new topics."],
+["30 min before","Test Zoom, camera, mic, and screen sharing. Open a blank Excalidraw board. Water, pen and paper nearby. Join 5 minutes early."]],
+ideas:[
+["Practice drawing, not just reading.","You'll share your screen and draw while you talk. Use <a href=\"https://excalidraw.com\" target=\"_blank\" rel=\"noopener\">Excalidraw</a> (fastest, no login) or <a href=\"https://app.diagrams.net\" target=\"_blank\" rel=\"noopener\">draw.io</a>. Keep a template: Requirements · Numbers · API · Diagram · Deep dive."],
+["Brainstorm prompts to practice.","Payment system · Wallet / gift card balance · Notification service · URL shortener · Rate limiter · Order history for Amazon · Invoice/billing system · Distributed cache."],
+["Mock with a partner.","Have someone play interviewer and interrupt with “What if this fails?” and “Why that database?” Answering push-back is the skill being tested."],
+["Say it out loud.","Silent reading feels like learning but doesn't transfer. Explain every module in your own words once."]],
+say:["“Can I share my screen and draw as I go?”","“Let me write the requirements on the board first so we're aligned.”"],
+quiz:[
+["What is the best way to prepare in the last 2 days?",["Read all 18 long lessons","Short modules plus timed mock designs said out loud","Memorize tool names","Only watch videos"],1,"Mocks build the skill they actually test: talking through a design under time pressure."],
+["Where should you practice drawing designs?",["On paper only","On a shared whiteboard like Excalidraw, the way you'll do it on the call","In your head","In a Word doc"],1,"Practice with the same kind of tool you'll use in the interview so it feels normal."],
+["What's the most useful thing to do 30 minutes before?",["Learn a new topic","Test Zoom, mic, camera, screen share and open a blank board","Read Glassdoor reviews","Skip the call test"],1,"Tech problems eat confidence and minutes. Remove them early."],
+["What should the Result part of a STAR story include?",["Only “it went well”","A measurable outcome, like “cut latency by 40%”","The team's opinion","Nothing"],1,"Write a number into every story tonight."],
+["The night before the interview, what should you do?",["Study until 3 a.m.","Light review of the checklist, then sleep","Try a new mock with a new topic","Rewrite all notes"],1,"Sleep improves recall and calm more than one more hour of reading."],
+["Which practice prompt fits a FinTech team best?",["Design Netflix","Design a payment or wallet system","Design a game engine","Design a compiler"],1,"Practice the domain you're interviewing for."]]});
+
+const KEY="sd1n-v3";
 let st={cur:0,done:[]};
 try{const s=JSON.parse(localStorage.getItem(KEY));if(s)st=s}catch(e){}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
@@ -325,6 +360,7 @@ function render(){
   h+=`<ul class="ideas">${m.ideas.map(([a,b])=>`<li><span class="dot"></span><div><b>${a}</b> ${b}</div></li>`).join("")}</ul>`;
   if(m.diagram)h+=`<pre class="mermaid">${m.diagram}</pre>`;
   h+=`<div class="say"><h3>Say this out loud</h3>${m.say.map(s=>`<p>${s}</p>`).join("")}</div>`;
+  if(m.prep)h+=`<div class="prep"><h3>How to practice this</h3><p>${m.prep}</p><p><a href="https://excalidraw.com" target="_blank" rel="noopener">Open a whiteboard on Excalidraw ↗</a></p></div>`;
   h+=`<div class="quiz">${m.quiz.map((q,qi)=>`<div class="q"><p>${qi+1}. ${q[0]}</p><div class="opts">${q[1].map((o,oi)=>`<button id="q${st.cur}-${qi}-${oi}" data-q="${qi}" data-o="${oi}">${o}</button>`).join("")}</div><div class="expl" hidden id="e${qi}">${q[3]}</div></div>`).join("")}</div>`;
   const last=st.cur===M.length-1;
   h+=`<div class="foot"><button id="prev" ${st.cur===0?"hidden":""}>← Previous</button><button id="next" class="primary">${last?"Finish · go sleep":"Mark done · next →"}</button></div>`;
