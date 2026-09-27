@@ -19,6 +19,7 @@ window.mmInit();
 <link rel="stylesheet" href="/assets/site.css">
 </head>
 <body>
+<div class="readbar" aria-hidden="true"><i id="readfill"></i></div>
 <header class="site-head"><div class="in">
   <a class="brand" href="/">amarkumar<span>.guru</span></a>
   <nav class="site-nav" aria-label="Site">
@@ -37,6 +38,15 @@ window.mmInit();
   <aside class="side" id="modules">
     <div><h2>System Design Crash Course</h2><p class="sub">11 modules · ~2h · 57 questions</p></div>
     <div class="prog"><span id="pct">0 of 11 done</span><div class="bar"><i id="barfill"></i></div></div>
+    <div class="tracker" aria-label="Progress tracker">
+      <h3>Tracker</h3>
+      <div class="tstats">
+        <div><b id="tMods">0/11</b><span>modules</span></div>
+        <div><b id="tAns">0/0</b><span>answered</span></div>
+        <div><b id="tAcc">–</b><span>correct</span></div>
+      </div>
+      <div class="tgrid" id="tgrid"></div>
+    </div>
     <nav id="nav" aria-label="Modules"></nav>
     <div class="savebox">
       <p>Your progress and quiz answers are saved in this browser, so you can close the tab and pick up where you left off.</p>
@@ -278,12 +288,27 @@ const esc=s=>s.replace(/&(?!amp;)/g,"&amp;");
 function nav(){
   const n=document.getElementById("nav");n.innerHTML="";
   M.forEach((m,i)=>{const b=document.createElement("button");b.id="nav"+i;
-    b.innerHTML=`<span class="n">${i+1}</span>${m.t}`;
+    const sc=score(i);b.innerHTML=`<span class="n">${i+1}</span>${m.t}${sc.a?`<span class="nav-score">${sc.c}/${m.quiz.length}</span>`:""}`;
     b.setAttribute("aria-current",i===st.cur);if(st.done.includes(i))b.classList.add("done");
     b.onclick=()=>{st.cur=i;save();render()};n.appendChild(b)});
   const d=st.done.length;document.getElementById("pct").textContent=`${d} of ${M.length} done`;
   document.getElementById("barfill").style.width=(d/M.length*100)+"%";
+  tracker();
 }
+function score(i){let a=0,c=0;M[i].quiz.forEach((q,qi)=>{const v=st.ans[i+"-"+qi];if(v!==undefined){a++;if(v===q[2])c++}});return{a,c}}
+function tracker(){
+  let a=0,c=0,t=0;const g=document.getElementById("tgrid");g.innerHTML="";
+  M.forEach((m,i)=>{const s=score(i);a+=s.a;c+=s.c;t+=m.quiz.length;
+    const x=document.createElement("i");x.title=`${i+1}. ${m.t.replace(/<[^>]+>/g,"")} · quiz ${s.c}/${m.quiz.length}${st.done.includes(i)?" · done":""}`;
+    if(st.done.includes(i))x.className="done";else if(s.a)x.className="part";if(i===st.cur)x.classList.add("cur");
+    x.onclick=()=>{st.cur=i;save();render();scrollTo(0,0)};g.appendChild(x)});
+  document.getElementById("tMods").textContent=`${st.done.length}/${M.length}`;
+  document.getElementById("tAns").textContent=`${a}/${t}`;
+  document.getElementById("tAcc").textContent=a?Math.round(c/a*100)+"%":"–";
+}
+function readProg(){const h=document.documentElement,max=h.scrollHeight-innerHeight;
+  document.getElementById("readfill").style.width=(max>0?Math.min(100,scrollY/max*100):0)+"%"}
+addEventListener("scroll",readProg,{passive:true});addEventListener("resize",readProg);
 function render(){
   nav();const m=M[st.cur],el=document.getElementById("mod");
   let h=`<div><div class="meta">Module ${st.cur+1} of ${M.length} · ~10 min</div><h2>${m.t}</h2><p class="why">${m.why}</p></div>`;
@@ -302,11 +327,12 @@ function render(){
     document.getElementById("e"+qi).hidden=false};
   m.quiz.forEach((q,qi)=>{const a=st.ans[st.cur+"-"+qi];if(a!==undefined)mark(qi,a)});
   el.querySelectorAll(".opts button").forEach(b=>b.onclick=()=>{
-    st.ans[st.cur+"-"+b.dataset.q]=+b.dataset.o;save();mark(+b.dataset.q,+b.dataset.o)});
+    st.ans[st.cur+"-"+b.dataset.q]=+b.dataset.o;save();mark(+b.dataset.q,+b.dataset.o);nav()});
   document.getElementById("prev").onclick=()=>{st.cur--;save();render();scrollTo(0,0)};
   document.getElementById("next").onclick=()=>{if(!st.done.includes(st.cur))st.done.push(st.cur);
     if(!last)st.cur++;save();render();scrollTo(0,0)};
-  if(m.diagram&&window.mermaid){const box=document.getElementById("mmd");mermaid.render("mm"+Date.now(),m.diagram).then(r=>{box.innerHTML=r.svg}).catch(()=>{box.textContent=m.diagram})}
+  if(m.diagram&&window.mermaid){const box=document.getElementById("mmd");mermaid.render("mm"+Date.now(),m.diagram).then(r=>{box.innerHTML=r.svg}).catch(()=>{box.textContent=m.diagram}).finally(readProg)}
+  readProg();
 }
 function curTheme(){const a=document.documentElement.getAttribute("data-theme");return a||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}
 function setBtn(){document.getElementById("themebtn").textContent=curTheme()==="dark"?"Light mode":"Dark mode"}
