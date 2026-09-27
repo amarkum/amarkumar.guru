@@ -158,3 +158,13 @@ th{font-weight:600;color:var(--ink);font-size:13px;background:var(--bg)}
   .prac .panel{position:static}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+/* saved progress + reset */
+.savebox{border-top:1px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--muted)}
+.savebox p{margin:0;line-height:1.5}
+.linkbtn{align-self:flex-start;background:none;border:0;padding:0;color:var(--ink);font-size:13px;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.ask{border:1px solid var(--bad);background:var(--bad-soft);border-radius:var(--radius);padding:12px;display:flex;flex-direction:column;gap:10px}
+.ask p{color:var(--ink)}
+.askrow{display:flex;gap:8px;flex-wrap:wrap}
+.askrow button{font-size:13px;font-weight:600;padding:6px 12px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.askrow button.danger{background:var(--bad);border-color:var(--bad);color:#fff}

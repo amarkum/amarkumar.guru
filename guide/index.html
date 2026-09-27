@@ -33,18 +33,18 @@ window.mmInit();
   <header>
     <div class="meta">Guide</div>
     <h1>What to do in the interview</h1>
-    <p class="lede">How an Amazon SDE II design round usually runs, what to say at each step, and what to avoid. Read this once the day before and once in the morning.</p>
+    <p class="lede">This is roughly how the hour will go, what to say along the way, and a few things to avoid. Read it the day before and skim it again on the morning of the interview.</p>
   </header>
 
   <section class="card">
     <h2>How the hour usually goes</h2>
     <ul class="tl">
-      <li><span class="time">0–5 min</span><div><b>Intros.</b> Give a 60–90 second summary: current role, one project you owned, the impact with a number. Then stop.</div></li>
-      <li><span class="time">5–15 min</span><div><b>Leadership Principles.</b> Usually 1–2 behavioral questions (“Tell me about a time…”). Answer in STAR. Expect follow-ups like “What would you do differently?”</div></li>
-      <li><span class="time">15–25 min</span><div><b>Requirements.</b> The problem may be vague on purpose (“Design a logging framework”). Ask questions, list functional and non-functional requirements, write assumptions down.</div></li>
-      <li><span class="time">25–50 min</span><div><b>Design.</b> LLD: entities → classes → interfaces → core code. HLD: API → diagram → data model → deep dive. Expect a new requirement mid-way (“now add peak pricing”, “find the nearest store”).</div></li>
-      <li><span class="time">50–55 min</span><div><b>Follow-ups.</b> Concurrency, failure, scale, extensibility. “What if two users do this at once?” is very common.</div></li>
-      <li><span class="time">55–60 min</span><div><b>Your questions.</b> Always ask one or two (list below).</div></li>
+      <li><span class="time">0–5 min</span><div><b>Intros.</b> Keep it to about a minute. Say what you do now, one project you owned, and what changed because of it, with a number if you can. Then stop and let them lead.</div></li>
+      <li><span class="time">5–15 min</span><div><b>Leadership Principles.</b> You'll usually get one or two “tell me about a time…” questions. Tell the story in order: what was going on, what you had to do, what you did, and how it turned out. They'll often ask follow-ups like “what would you do differently?”</div></li>
+      <li><span class="time">15–25 min</span><div><b>Requirements.</b> The question might be vague on purpose, like “design a logging framework”. That's normal. Ask questions, write down what the system needs to do and how well it needs to do it, and note any assumptions you're making.</div></li>
+      <li><span class="time">25–50 min</span><div><b>Design.</b> LLD: entities → classes → interfaces → core code. HLD: API → diagram → data model → deep dive. Expect them to add something halfway through, like “now add peak-hour pricing” or “how would you find the nearest store?”. That's part of the test, not a sign you're doing badly.</div></li>
+      <li><span class="time">50–55 min</span><div><b>Follow-ups.</b> They'll poke at the edges: what if two people do this at once, what if something fails, what if traffic grows 10×, how would you add a new feature.</div></li>
+      <li><span class="time">55–60 min</span><div><b>Your questions.</b> Always have one or two questions ready. There are some ideas below.</div></li>
     </ul>
   </section>
 
@@ -121,9 +121,9 @@ window.mmInit();
     </ul>
     <h3>How to play it</h3>
     <ul>
-      <li>Treat her as a teammate reviewing a design: ask “Is this close to what your team does?”</li>
-      <li>For money, always say correctness before speed, and bring up idempotency before she does.</li>
-      <li>Name AWS services only with a reason. Keep code clean and runnable; SDE IIIs notice naming and structure.</li>
+      <li>Talk to her like a teammate you're reviewing a design with. It's fine to ask, “Is this close to what your team works on?”</li>
+      <li>With money, say early that getting it right matters more than being fast, and bring up retries and duplicate payments before she has to ask.</li>
+      <li>If you mention an AWS service, say why you picked it. Keep your code tidy and your names clear. Senior engineers notice that.</li>
     </ul>
     <div class="cta"><a class="primary" href="/practice/">Practice these →</a> <a href="/interviewer/">Know your interviewer →</a></div>
   </section>

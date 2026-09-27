@@ -33,23 +33,23 @@ window.mmInit();
   <header>
     <div class="meta">Know your interviewer</div>
     <h1>Prepare for the person, not just the problem</h1>
-    <p class="lede">Your interviewer is an <b>SDE III at Amazon</b>. Here's what that means for the round, what she is likely to ask, and what's worth a two-minute look on her public profile before the call.</p>
+    <p class="lede">Your interviewer is a senior engineer (<b>SDE III</b>) at Amazon. This page covers what that usually means for the round, the kind of questions to expect, and what's worth a quick look at on her public profile before the call.</p>
   </header>
 
   <section class="card">
     <h2>What an SDE III looks for</h2>
     <ul>
-      <li><b>Ownership of the whole design.</b> Not only the happy path: failures, monitoring, rollout, on-call.</li>
-      <li><b>Depth under push-back.</b> They'll keep asking “why?” until you hit the edge of what you know. Stay calm and reason out loud.</li>
-      <li><b>Clean, extensible code.</b> Good names, small interfaces, easy to add the next feature.</li>
-      <li><b>Trade-offs stated clearly.</b> Consistency vs availability, simple vs scalable, cost vs speed.</li>
-      <li><b>Whether they'd want you on their team.</b> Treat the hour as a design review with a future teammate.</li>
+      <li><b>Ownership of the whole design.</b> Don't stop at the happy path. Talk about what happens when things fail, how you'd know, and how you'd fix it.</li>
+      <li><b>Depth under push-back.</b> She'll keep asking “why?” until you reach the edge of what you know. That's expected. Stay calm and think out loud.</li>
+      <li><b>Clean, extensible code.</b> Clear names, small pieces, and a design where adding the next feature doesn't mean rewriting everything.</li>
+      <li><b>Trade-offs stated clearly.</b> When you choose something, say what you're giving up, like simple vs scalable or fast vs always correct.</li>
+      <li><b>Whether they'd want you on their team.</b> Think of the hour as working through a design with a future teammate.</li>
     </ul>
   </section>
 
   <section class="card">
     <h2>What she is likely to ask</h2>
-    <p>She is an <b>SDE III at Amazon</b>. Expect a hands-on design round with sharp follow-ups and 1–2 Leadership Principles. The list below is the probable question set for this loop — her level is confirmed, not guessed. Do not mention that you researched her.</p>
+    <p>Expect a hands-on design round with plenty of follow-up questions, plus one or two “tell me about a time” questions. These are the most likely topics. Don't mention in the interview that you looked her up.</p>
 
     <h3>Most likely design prompts</h3>
     <ol>
@@ -81,20 +81,20 @@ window.mmInit();
 
     <h3>How to play the hour</h3>
     <ul>
-      <li>Treat her as a teammate in a design review: “Is this close to what your team does?”</li>
-      <li>For money: say correctness before speed; bring up idempotency before she does.</li>
-      <li>Name AWS services only with a reason (“SQS because work can retry safely”).</li>
-      <li>Keep code clean and runnable; SDE IIIs notice naming and structure.</li>
-      <li>In STAR stories say <b>I</b>, not we, and end with a number.</li>
+      <li>Talk to her like a teammate you're reviewing a design with. It's fine to ask, “Is this close to what your team works on?”</li>
+      <li>With money, say early that getting it right matters more than being fast, and bring up retries and duplicate payments before she asks.</li>
+      <li>If you mention an AWS service, say why, for example “SQS, because the work can be retried safely”.</li>
+      <li>Keep your code tidy and your names clear. Senior engineers notice that.</li>
+      <li>In your stories, say “I”, not “we”, and finish with a real result, ideally a number.</li>
     </ul>
     <div class="cta"><a class="primary" href="/practice/">Practice FinTech questions →</a> <a href="/guide/#best-guess">Full list in the Guide →</a></div>
   </section>
 
   <section class="card">
     <h2>Two-minute check on her public profile</h2>
-    <p>Look only at work info. Use it to guess domain — never bring the profile up in the call.</p>
+    <p>Only look at work details. Use them to guess what kind of problem might come up, and never bring the profile up during the call.</p>
     <ul class="tl">
-      <li><span class="time">Level</span><div><b>SDE III at Amazon</b> — she expects ownership of failures, monitoring, and trade-offs, not just boxes on a diagram.</div></li>
+      <li><span class="time">Level</span><div><b>SDE III at Amazon</b> She'll expect you to think about failures, monitoring and trade-offs, not just draw boxes.</div></li>
       <li><span class="time">Team</span><div>FinTech → payments, billing, invoicing, payouts, tax, ledgers. Practice one end to end.</div></li>
       <li><span class="time">Tech</span><div>AWS-heavy → be ready on DynamoDB, SQS, SNS, Lambda, S3, and when you'd pick each.</div></li>
       <li><span class="time">Tenure</span><div>Years at Amazon → deeper LP scoring. Polish 4–5 STAR stories the night before.</div></li>

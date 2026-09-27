@@ -33,7 +33,7 @@ window.mmInit();
   <header>
     <div class="meta">Practice</div>
     <h1>62 Amazon design questions</h1>
-    <p class="lede">Reported Amazon LLD/HLD prompts plus a FinTech set (payments, ledger, AWS) aimed at this loop. Read the diagram, pick an answer, read why. Progress is saved in this browser. Use the <b>FinTech</b> filter first.</p>
+    <p class="lede">These are based on questions people say they were asked at Amazon, plus a set on payments and money since the team is FinTech. Look at the diagram, pick the answer you'd give, and read why it's right. If you only have a little time, start with the <b>FinTech</b> filter.</p>
   </header>
   <div class="prac">
   <div class="card panel">
@@ -41,10 +41,14 @@ window.mmInit();
     <div class="bar"><i id="pbar"></i></div>
     <div class="filters" id="filters"></div>
     <div class="grid" id="grid" aria-label="Question list"></div>
-    <div class="tools">
-      <button id="nextUn" type="button">Next unanswered</button>
-      <button id="reset" class="danger" type="button">Reset progress</button>
-      <span id="confirmBox" hidden>Clear all answers? <button id="yes" class="danger" type="button">Yes, reset</button> <button id="no" type="button">Cancel</button></span>
+    <div class="tools"><button id="nextUn" type="button">Go to next unanswered</button></div>
+    <div class="savebox">
+      <p>Your answers are saved in this browser, so you can stop and come back later.</p>
+      <button id="reset" type="button" class="linkbtn">Start over</button>
+      <div id="confirmBox" class="ask" hidden>
+        <p>This clears all your answers on this device.</p>
+        <div class="askrow"><button id="yes" type="button" class="danger">Clear everything</button><button id="no" type="button">Keep them</button></div>
+      </div>
     </div>
   </div>
   <main class="card" id="qcard"></main>
@@ -641,9 +645,9 @@ async function drawQ(){const i=P.cur,q=Q[i],a=P.ans[i];
   try{const {svg}=await mermaid.render("m"+(rid++),q.d);el.innerHTML=svg}catch(e){el.innerHTML="<pre>"+q.d.replace(/</g,"&lt;")+"</pre>"}}
 function all(){stats();drawFilters();drawGrid();drawQ()}
 nextUn.onclick=()=>{const n=Q.findIndex((q,i)=>P.ans[i]===undefined);if(n>=0){P.f="All";P.cur=n;saveP();all()}};
-reset.onclick=()=>{confirmBox.hidden=false};
-no.onclick=()=>{confirmBox.hidden=true};
-yes.onclick=()=>{P={cur:0,ans:{},f:"All"};saveP();confirmBox.hidden=true;all()};
+reset.onclick=()=>{confirmBox.hidden=false;reset.hidden=true};
+no.onclick=()=>{confirmBox.hidden=true;reset.hidden=false};
+yes.onclick=()=>{P={cur:0,ans:{},f:"All"};saveP();confirmBox.hidden=true;reset.hidden=false;all()};
 window.onTheme=()=>drawQ();
 all();
 

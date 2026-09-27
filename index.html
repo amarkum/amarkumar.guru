@@ -36,12 +36,20 @@ window.mmInit();
     <div><h2>System Design Crash Course</h2><p class="sub">11 modules · ~2h · 57 questions</p></div>
     <div class="prog"><span id="pct">0 of 11 done</span><div class="bar"><i id="barfill"></i></div></div>
     <nav id="nav" aria-label="Modules"></nav>
+    <div class="savebox">
+      <p>Your progress and quiz answers are saved in this browser, so you can close the tab and pick up where you left off.</p>
+      <button id="resetBtn" type="button" class="linkbtn">Start over</button>
+      <div id="resetAsk" class="ask" hidden>
+        <p>This clears your progress and quiz answers on this device.</p>
+        <div class="askrow"><button id="resetYes" type="button" class="danger">Clear everything</button><button id="resetNo" type="button">Keep it</button></div>
+      </div>
+    </div>
   </aside>
   <div class="content">
     <div class="crumbs">Learn / System Design / Crash Course</div>
     <header>
       <h1>System Design in One Night</h1>
-      <p class="lede">Start with “Before you go” for a 2-day prep plan, then ten short modules of about 10 minutes each. Read the ideas, learn the lines to say out loud, take the quick quiz. Built for interviews like Amazon SDE II. Then read the <a href="/guide/">interview guide</a> and try the <a href="/practice/">62 practice questions</a>.</p>
+      <p class="lede">Start with “Before you go”. It has a simple plan for the next two days. After that, work through the modules in order. Each one takes about ten minutes: read the main ideas, practise the lines out loud, and try the short quiz at the end. When you're done, read the <a href="/guide/">interview guide</a> and try the <a href="/practice/">practice questions</a>.</p>
     </header>
     <main id="mod" class="mod"></main>
   </div>
@@ -50,7 +58,7 @@ window.mmInit();
 
 <script>
 const M=[
-{t:"The 45-minute game plan",why:"Interviewers grade the process more than the final diagram. Having a fixed routine keeps you calm and in charge.",
+{t:"The 45-minute game plan",why:"Interviewers care more about how you get to a design than the final picture. If you follow the same steps every time, you won't panic and you'll stay in control of the hour.",
 ideas:[
 ["Requirements (5 min).","Ask: who uses it, the 3 core features, and scale. Write functional and non-functional requirements on the board. Cut scope out loud."],
 ["Estimate (3 min).","Users → requests/sec → storage per year. Round hard. Only estimate what changes a decision."],
@@ -64,14 +72,14 @@ diagram:`flowchart LR
 quiz:[["The interviewer says “Design Twitter.” What do you do first?",["Draw the database schema","Ask clarifying questions about features and scale","Pick Cassandra","Talk about microservices"],1,"Always clarify scope first. Twitter is huge; agree on 2–3 core features (post, follow, timeline)."],
 ["You have 10 minutes left and haven't gone deep on anything. Best move?",["Add more boxes","Pick the main bottleneck and discuss it in depth","Restart the design","Talk about CI/CD"],1,"Depth on the hardest part is what separates strong candidates."]]},
 
-{t:"Back-of-envelope numbers",why:"You don't need precision. You need the right order of magnitude so you choose the right tools.",
+{t:"Back-of-envelope numbers",why:"Nobody expects exact numbers. You just need to know roughly how big things are, so you can tell when one database is enough and when it isn't.",
 table:[["Fact","Number to remember"],["Seconds in a day","~100,000 (86,400)"],["1M requests/day","~12 per second"],["100M requests/day","~1,200/s avg, peak ≈ 2–3× avg"],["Memory read","~100 ns"],["SSD read","~100 µs"],["Same-datacenter round trip","~0.5 ms"],["Cross-continent round trip","~150 ms"],["One app server","~1,000–10,000 simple req/s"],["One SQL DB (single node)","~a few thousand writes/s"],["Redis","~100,000 ops/s"]],
 ideas:[["Formula for QPS.","Daily active users × actions per user ÷ 100,000."],["Formula for storage.","Items per day × size per item × 365 × years. Then add replication (×3)."],["Read:write ratio.","Most apps are read-heavy (10:1 to 100:1). That tells you to cache and add read replicas."]],
 say:["“Let's say 100M daily users, each doing 10 reads a day. That's 1 billion reads a day, around 10,000 per second, so a single database won't handle it. We'll need caching.”"],
 quiz:[["10M users each post 2 photos a day at 500 KB. Storage per day?",["10 GB","100 GB","10 TB","1 PB"],2,"10M × 2 × 500 KB = 10,000,000 KB × ... = 10 TB per day."],
 ["50M requests per day is roughly how many per second?",["50","500","5,000","50,000"],1,"50M ÷ 100,000 ≈ 500 per second."]]},
 
-{t:"Scaling and load balancing",why:"Every design starts with one server and grows. This module is how it grows.",
+{t:"Scaling and load balancing",why:"Every system starts as one server. This module walks through what you add, and why, as more people start using it.",
 ideas:[["Vertical vs horizontal.","Vertical = bigger machine (simple, has a ceiling). Horizontal = more machines (needs a load balancer, scales far)."],
 ["Stateless servers.","Keep no user session in app server memory. Put sessions in Redis or a token (JWT). Then any server can handle any request and you can add servers freely."],
 ["Load balancer.","Spreads traffic across servers. Algorithms: round robin, least connections, hash by user. Does health checks and removes dead servers."],
@@ -90,7 +98,7 @@ say:["“I'll keep the app servers stateless so we can scale them horizontally b
 quiz:[["Why must app servers be stateless to scale horizontally?",["It's faster","Any server can serve any request, so we can add or remove servers freely","It saves disk","Load balancers require it by law"],1,"If a server holds a user's session, that user is stuck to it and losing the server loses the session."],
 ["You want /video traffic on different servers from /api. Which load balancer?",["L4","L7","DNS only","None"],1,"L7 understands HTTP paths."]]},
 
-{t:"Caching",why:"The single most common answer to “how do you make this faster?” Know where caches go and what goes wrong.",
+{t:"Caching",why:"When someone asks “how do we make this faster?”, the answer is usually a cache. Learn where caches sit and the few ways they go wrong.",
 ideas:[["Where caches live.","Browser → CDN (static files, images, video) → app cache (Redis/Memcached) → database's own cache."],
 ["Cache-aside (most common).","Read: check cache, on miss read DB and put it in cache. Write: update DB, then delete the cache key."],
 ["Write-through vs write-back.","Write-through: write cache and DB together (consistent, slower writes). Write-back: write cache, flush to DB later (fast, can lose data)."],
@@ -101,7 +109,7 @@ say:["“This is read-heavy, so I'll put Redis in front of the database with cac
 quiz:[["In cache-aside, what happens on a cache miss?",["Return an error","App reads DB, writes result to cache, returns it","Cache reads DB by itself","Request is dropped"],1,"The application does the loading. That's why it's called cache-aside."],
 ["A viral post's cache key expires and the DB falls over. Name?",["Split brain","Cache stampede (thundering herd)","Deadlock","Sharding"],1,"Fix with a lock/single-flight or early refresh."]]},
 
-{t:"Databases: pick, replicate, shard",why:"Most deep dives end up here. Know how to choose and how to scale.",
+{t:"Databases: pick, replicate, shard",why:"Most deep dives end up talking about the database. Know how to pick one and what to do when it gets too big.",
 table:[["Need","Pick","Why"],["Money, orders, relationships","SQL (Postgres, MySQL)","Transactions, joins, strong consistency"],["Huge write volume, simple lookups","Wide-column (Cassandra, DynamoDB)","Scales writes horizontally"],["Flexible documents","Document (MongoDB)","Schema changes easily"],["Cache, counters, sessions","Key-value (Redis)","In-memory, very fast"],["Search text","Elasticsearch","Inverted index"],["Images, video, files","Object storage (S3)","Cheap, durable blobs; store the URL in the DB"]],
 ideas:[["Indexes.","Make reads fast, slow down writes a bit. Index what you filter or sort on."],
 ["Replication.","One leader takes writes, followers serve reads. Replica lag means a follower can be slightly stale."],
@@ -113,7 +121,7 @@ say:["“The access pattern is lookups by user_id, so I'll shard by user_id usin
 quiz:[["Chat messages: billions of writes per day, always read by conversation. Best store?",["Single MySQL","Cassandra with partition key = conversation_id","Elasticsearch","S3"],1,"High write volume, simple access pattern by one key."],
 ["Why consistent hashing instead of hash(key) % N?",["It's more secure","Adding/removing a server moves only a small fraction of keys","It uses less memory","It sorts keys"],1,"With % N, changing N reshuffles almost every key."]]},
 
-{t:"Queues and async work",why:"Anything slow or spiky goes into a queue. This one idea fixes many designs.",
+{t:"Queues and async work",why:"If some work is slow or comes in bursts, put it on a queue and do it in the background. This one idea fixes a lot of designs.",
 ideas:[["Why a queue.","Decouples producer and consumer, absorbs traffic spikes, lets you retry. User gets a fast response while work happens in the background."],
 ["Queue vs pub/sub.","Queue (SQS, RabbitMQ): each message handled by one worker. Pub/sub or log (Kafka): many consumers each read every event."],
 ["Delivery guarantees.","“At least once” is the realistic default, so consumers must be idempotent: processing the same message twice has the same effect as once. Use an idempotency key."],
@@ -130,7 +138,7 @@ say:["“Video processing is slow, so the upload API just stores the file and pu
 quiz:[["A payment message might be delivered twice. What protects you?",["Faster workers","Idempotency key checked before charging","Bigger queue","Using UDP"],1,"Store processed keys; skip duplicates."],
 ["Which rate limiting algorithm allows short bursts but a steady average?",["Fixed window","Token bucket","Round robin","LRU"],1,"The bucket holds extra tokens for bursts."]]},
 
-{t:"Four classic designs, as skeletons",why:"Most questions are variations of these. Know the skeleton and the one hard part of each.",
+{t:"Four classic designs, as skeletons",why:"Most interview questions are a twist on one of these. Know the basic shape of each one and the one hard part people get asked about.",
 table:[["System","Core pieces","The hard part to deep-dive"],
 ["URL shortener","API → app → DB (code → long URL), Redis cache, 301/302 redirect","Generating unique short codes: base62 of an ID from a counter or Snowflake-style IDs; heavy read caching"],
 ["Chat (WhatsApp)","WebSocket gateways, message service, Cassandra by conversation_id, presence in Redis","Delivering to online vs offline users: route via user→gateway map; store and push notification if offline; message ordering per conversation"],
@@ -144,7 +152,7 @@ say:["“For celebrities with millions of followers, fan-out on write is too exp
 quiz:[["A user with 50M followers posts. Fan-out on write means…",["1 write","50M feed writes","No writes","Only a cache write"],1,"That's why celebrities are handled by pull at read time."],
 ["How does a chat server send a message to a user connected to a different server?",["Broadcast to all servers","Look up which gateway holds the user's WebSocket and route there","Email it","Wait for the user to poll"],1,"Keep a user → gateway map in Redis or use pub/sub."]]},
 
-{t:"Amazon FinTech: design a payment system",why:"Her team is FinTech, so a payment, ledger, wallet, or billing question is very likely. Amazon's reports say resiliency is weighted more than raw scale.",
+{t:"Amazon FinTech: design a payment system",why:"The team is FinTech, so expect something about payments, wallets, billing or a ledger. For money, being correct and handling failures matters more than huge scale.",
 ideas:[["Requirements to ask for.","Charge a customer, refund, check payment status. Never double-charge, never lose money, keep a full audit trail. Strong consistency for money, eventual consistency is fine for status pages and analytics."],
 ["Flow.","Client → Payment API (with an idempotency key) → Payment service writes a <code>PENDING</code> record → calls the external processor (card network/bank) → updates to <code>SUCCESS</code>/<code>FAILED</code> → emits an event → ledger, notifications, and order service consume it."],
 ["Idempotency is the #1 topic.","Client sends a unique key per payment attempt. Server stores key → result. A retry with the same key returns the stored result instead of charging again."],
@@ -166,7 +174,7 @@ say:["“For money I'd choose consistency over availability. If we're unsure whe
 quiz:[["The processor call times out. What's the safe action?",["Charge again with a new request","Mark it unknown, retry with the same idempotency key, reconcile later","Tell the user it failed","Delete the record"],1,"A new request risks a double charge. The same key makes the retry safe."],
 ["Why is a ledger append-only?",["It saves space","You get a full audit trail; corrections are new entries, never edits","SQL requires it","It's faster to delete"],1,"Auditors and debugging both need full history."]]},
 
-{t:"Amazon's twist: Leadership Principles",why:"At Amazon, each interviewer also scores 2–4 Leadership Principles, even in the design round. There's usually a behavioral question too.",
+{t:"Amazon's twist: Leadership Principles",why:"Every Amazon interviewer also checks a few Leadership Principles, even in a design round. You'll probably get at least one “tell me about a time” question too.",
 ideas:[["Customer Obsession.","Open the design with the customer: “A customer paying at checkout needs it to be fast and never charged twice.” Tie choices back to them."],
 ["Ownership.","Talk about monitoring, alarms, on-call, and what happens at 3 a.m. when something fails. Owners design for operations, not only the happy path."],
 ["Dive Deep.","When pushed, go one level deeper with numbers and specifics instead of changing the subject."],
@@ -177,7 +185,7 @@ say:["“I'd add alarms on payment failure rate and latency, and a dashboard so 
 quiz:[["Which is the strongest Ownership signal in a design round?",["Using the newest database","Covering monitoring, alarms, failure handling, and rollback","Drawing more boxes","Saying 'the team handled it'"],1,"Owners think about running the system, not just building it."],
 ["In a STAR story, how should she describe her actions?",["We did it","I did X, specifically","The manager decided","Skip the action part"],1,"Interviewers need her individual contribution."]]},
 
-{t:"Night-before checklist",why:"Read this once tonight and once in the morning. Then close the laptop.",
+{t:"Night-before checklist",why:"Read this once the night before and once on the morning of the interview. Then close the laptop and rest.",
 ideas:[["Talk the whole time.","Silence reads as stuck. Think out loud, even “I'm weighing two options here…”"],
 ["Clarify, then commit.","Ask questions early. Once you pick, state it and move on. You can revisit later."],
 ["Every choice gets a reason.","“Redis because it's read-heavy.” “Queue because the work is slow.” Never just name a tool."],
@@ -226,29 +234,29 @@ const EXTRA=[
 ];
 EXTRA.forEach((q,i)=>M[i]&&M[i].quiz.push(...q));
 const PREP=[
-"Close the page and say the six steps out loud from memory. Then run one full mock (“Design a URL shortener”) with a 45-minute timer on Excalidraw.",
-"Take 3 prompts (Instagram, Uber, WhatsApp) and do only the numbers: QPS, storage per year, read:write ratio. 3 minutes each, out loud.",
-"Draw the scaling diagram from memory: users → CDN → load balancer → stateless servers → cache → DB. Explain each box in one sentence.",
-"For any design you practice, say where the cache goes, which pattern you'd use (cache-aside), the TTL, and what happens when the cache is down.",
-"For 3 systems (payments, chat, feed), pick a database and shard key and say why in one sentence each.",
-"Take one slow feature (video upload, sending receipts) and redraw it with a queue. Say how you'd handle retries and duplicates.",
-"Pick two skeletons and do them end to end on Excalidraw with a timer. Record yourself and listen back once.",
-"Do a full 45-minute mock of “Design a payment system for Amazon checkout”. Must mention: idempotency key, ledger, reconciliation, saga/outbox.",
-"Write 5 STAR stories in bullets (tough bug, disagreement, missed deadline, mistake, going beyond scope). Say each in under 2 minutes, with a number in the result.",
-"Read this checklist once tonight and once the morning of the interview. Then stop studying."
+"Close this page and say the steps out loud from memory. Then set a 45-minute timer and design a URL shortener on Excalidraw, talking the whole time.",
+"Pick three apps you know (Instagram, Uber, WhatsApp). For each one, spend three minutes working out requests per second, storage per year and how many reads there are per write. Say it out loud.",
+"Draw the basic setup from memory: users, CDN, load balancer, app servers, cache, database. Explain what each box does in one sentence.",
+"In every design you practice, say where the cache goes, how it gets filled, how long things stay in it, and what happens if it goes down.",
+"For payments, chat and a news feed, pick a database and how you'd split the data. Give one sentence of reasoning for each.",
+"Take something slow, like a video upload or sending receipts, and redraw it with a queue. Explain what happens if a step fails or runs twice.",
+"Pick two of these and design them start to finish on Excalidraw with a timer. Record yourself once and listen back. You'll notice things you'd never catch otherwise.",
+"Do a full 45-minute practice run of “design payments for Amazon checkout”. Make sure you bring up idempotency keys, the ledger, reconciliation, and what happens when a step fails halfway.",
+"Write five short stories in bullet points: a tough bug, a disagreement, a tight deadline, a mistake, and a time you went beyond your job. Practise telling each in under two minutes, and end with a real number.",
+"Read this list tonight and again on the morning of the interview. After that, stop studying. You're ready."
 ];
 M.forEach((m,i)=>m.prep=PREP[i]);
-M.unshift({t:"Before you go: how to prepare",why:"Start here. A 2-day plan, what to have ready on the call, and where to practice drawing designs.",
+M.unshift({t:"Before you go: how to prepare",why:"Start here. It's a simple two-day plan, what to have ready for the call, and where to practice drawing designs.",
 table:[["When","Do this"],
-["2 days before","Modules 1–6. After each one, do its “How to practice this” task out loud."],
-["1 day before","Modules 7–10. Two timed 45-minute mocks on Excalidraw: a payment system and a notification system. Write your 5 STAR stories."],
-["Interview morning","Skim the Night-before checklist and your STAR bullets. No new topics."],
-["30 min before","Test Zoom, camera, mic, and screen sharing. Open a blank Excalidraw board. Water, pen and paper nearby. Join 5 minutes early."]],
+["2 days before","Go through modules 2 to 7. After each one, do the short practice task at the bottom, out loud."],
+["1 day before","Finish the rest of the modules. Then do two timed 45-minute practice runs on Excalidraw, one for a payment system and one for a notification system. Write down your five stories for the “tell me about a time” questions."],
+["Interview morning","Skim the last module and your story notes. Don't start anything new."],
+["30 min before","Check that Zoom, your camera, mic and screen sharing all work. Open a blank Excalidraw board. Keep water and a pen and paper nearby, and join five minutes early."]],
 ideas:[
-["Practice drawing, not just reading.","You'll share your screen and draw while you talk. Use <a href=\"https://excalidraw.com\" target=\"_blank\" rel=\"noopener\">Excalidraw</a> (fastest, no login) or <a href=\"https://app.diagrams.net\" target=\"_blank\" rel=\"noopener\">draw.io</a>. Keep a template: Requirements · Numbers · API · Diagram · Deep dive."],
-["Brainstorm prompts to practice.","Payment system · Wallet / gift card balance · Notification service · URL shortener · Rate limiter · Order history for Amazon · Invoice/billing system · Distributed cache."],
-["Mock with a partner.","Have someone play interviewer and interrupt with “What if this fails?” and “Why that database?” Answering push-back is the skill being tested."],
-["Say it out loud.","Silent reading feels like learning but doesn't transfer. Explain every module in your own words once."]],
+["Practise drawing, not just reading.","You'll probably share your screen and draw while you talk, so practise that way too. Use <a href=\"https://excalidraw.com\" target=\"_blank\" rel=\"noopener\">Excalidraw</a> (quickest, no sign-up) or <a href=\"https://app.diagrams.net\" target=\"_blank\" rel=\"noopener\">draw.io</a>. It helps to start every board with the same headings: requirements, numbers, API, diagram, deep dive."],
+["Good questions to practise with.","Payment system · Wallet / gift card balance · Notification service · URL shortener · Rate limiter · Order history for Amazon · Invoice/billing system · Distributed cache."],
+["Practise with someone.","Ask a friend to play the interviewer and keep interrupting with things like “what if this fails?” and “why that database?”. Handling those questions calmly is a big part of what's being tested."],
+["Say it out loud.","Reading quietly feels productive, but it doesn't stick the same way. After each module, explain it out loud in your own words, as if you were teaching someone."]],
 say:["“Can I share my screen and draw as I go?”","“Let me write the requirements on the board first so we're aligned.”"],
 quiz:[
 ["What is the best way to prepare in the last 2 days?",["Read all 18 long lessons","Short modules plus timed mock designs said out loud","Memorize tool names","Only watch videos"],1,"Mocks build the skill they actually test: talking through a design under time pressure."],
@@ -259,8 +267,9 @@ quiz:[
 ["Which practice prompt fits a FinTech team best?",["Design Netflix","Design a payment or wallet system","Design a game engine","Design a compiler"],1,"Practice the domain you're interviewing for."]]});
 
 const KEY="sd1n-v3";
-let st={cur:0,done:[]};
-try{const s=JSON.parse(localStorage.getItem(KEY));if(s)st=s}catch(e){}
+let st={cur:0,done:[],ans:{}};
+try{const s=JSON.parse(localStorage.getItem(KEY));if(s)st=Object.assign(st,s)}catch(e){}
+if(!st.ans)st.ans={};
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
 const esc=s=>s.replace(/&(?!amp;)/g,"&amp;");
 
@@ -285,11 +294,13 @@ function render(){
   const last=st.cur===M.length-1;
   h+=`<div class="foot"><button id="prev" ${st.cur===0?"hidden":""}>← Previous</button><button id="next" class="primary">${last?"Finish · go sleep":"Mark done · next →"}</button></div>`;
   el.innerHTML=h;
-  el.querySelectorAll(".opts button").forEach(b=>b.onclick=()=>{
-    const q=m.quiz[+b.dataset.q],box=b.parentNode;
+  const mark=(qi,oi)=>{const q=m.quiz[qi],box=document.getElementById("q"+st.cur+"-"+qi+"-0").parentNode;
     box.querySelectorAll("button").forEach((x,i)=>{x.classList.remove("wrong");if(i===q[2])x.classList.add("right")});
-    if(+b.dataset.o!==q[2])b.classList.add("wrong");
-    document.getElementById("e"+b.dataset.q).hidden=false});
+    if(oi!==q[2])document.getElementById("q"+st.cur+"-"+qi+"-"+oi).classList.add("wrong");
+    document.getElementById("e"+qi).hidden=false};
+  m.quiz.forEach((q,qi)=>{const a=st.ans[st.cur+"-"+qi];if(a!==undefined)mark(qi,a)});
+  el.querySelectorAll(".opts button").forEach(b=>b.onclick=()=>{
+    st.ans[st.cur+"-"+b.dataset.q]=+b.dataset.o;save();mark(+b.dataset.q,+b.dataset.o)});
   document.getElementById("prev").onclick=()=>{st.cur--;save();render();scrollTo(0,0)};
   document.getElementById("next").onclick=()=>{if(!st.done.includes(st.cur))st.done.push(st.cur);
     if(!last)st.cur++;save();render();scrollTo(0,0)};
@@ -302,6 +313,9 @@ document.getElementById("themebtn").onclick=()=>{const t=curTheme()==="dark"?"li
   try{localStorage.setItem("sc-theme",t)}catch(e){}
   if(window.mmInit)mmInit();
   setBtn();render()};
+resetBtn.onclick=()=>{resetAsk.hidden=false;resetBtn.hidden=true};
+resetNo.onclick=()=>{resetAsk.hidden=true;resetBtn.hidden=false};
+resetYes.onclick=()=>{st={cur:0,done:[],ans:{}};save();resetAsk.hidden=true;resetBtn.hidden=false;render();scrollTo(0,0)};
 setBtn();
 document.getElementById("yr").textContent=new Date().getFullYear();
 render();
