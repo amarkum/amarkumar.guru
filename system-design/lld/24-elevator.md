@@ -39,71 +39,78 @@ Single controller (embedded); not distributed. Controller state is authoritative
 classDiagram
     class Direction {
       <<enumeration>>
-      UP DOWN IDLE
+      UP
+      DOWN
+      IDLE
     }
     class ElevatorState {
       <<enumeration>>
-      MOVING STOPPED DOORS_OPEN MAINTENANCE
+      MOVING
+      DOORS_OPEN
+      IDLE
+      MAINTENANCE
+    }
+    class HallRequest {
+      <<record>>
+      +int floor
+      +Direction dir
+    }
+    class ElevatorListener {
+      <<interface>>
+      +onStatus(int, int, Direction, ElevatorState)
     }
     class Elevator {
+      <<class>>
       +int id
       -int floor
       -Direction dir
       -ElevatorState state
       -TreeSet~Integer~ upStops
-      -TreeSet~Integer~ downStops
-      +addStop(floor, dir)
+      -List~ElevatorListener~ listeners
+      +addStop(int, Direction)
       +step()
+      +setMaintenance(boolean)
+      +direction() Direction
+      +pendingStops() int
+    }
+    class DispatchStrategy {
+      <<interface>>
+      +select(List~Elevator~, HallRequest) Optional~Elevator~
+    }
+    class NearestCarStrategy {
+      <<class>>
+      -int floors
+      +select(List~Elevator~, HallRequest) Optional~Elevator~
+    }
+    class ElevatorController {
+      <<class>>
+      -int floors
+      -List~Elevator~ elevators
+      -DispatchStrategy strategy
+      -Queue~HallRequest~ pending
+      +hallCall(int, Direction)
+      +carCall(int, int)
+      +tick()
+    }
+    class CarRequest {
+      <<class>>
+      +int elevatorId
+      +int floor
     }
     class Request {
       <<interface>>
       +floor() int
-    }
-    class HallRequest {
-      +int floor
-      +Direction dir
-    }
-    class CarRequest {
-      +int elevatorId
-      +int floor
-    }
-    class DispatchStrategy {
-      <<interface>>
-      +select(List~Elevator~, HallRequest) Elevator
-    }
-    class NearestCarStrategy {
-      <<class>>
-    }
-    class ElevatorController {
-      -List~Elevator~ elevators
-      -DispatchStrategy strategy
-      +hallCall(HallRequest)
-      +carCall(CarRequest)
-      +tick()
     }
     Request <|.. HallRequest
     Request <|.. CarRequest
     DispatchStrategy <|.. NearestCarStrategy
     ElevatorController o-- Elevator
     ElevatorController --> DispatchStrategy
-    class Request {
-      <<class>>
-    }
-    class CarRequest {
-      <<class>>
-    }
-    class ElevatorController {
-      <<class>>
-    }
-    class DispatchStrategy {
-      <<interface>>
-    }
-    class HallRequest {
-      <<record>>
-    }
-    class Elevator {
-      <<class>>
-    }
+    HallRequest --> Direction
+    Elevator --> Direction
+    Elevator --> ElevatorState
+    Elevator --> "*" ElevatorListener
+    ElevatorController --> "*" HallRequest
 ```
 
 ## APIs

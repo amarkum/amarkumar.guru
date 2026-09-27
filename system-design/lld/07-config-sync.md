@@ -39,45 +39,70 @@ Custom team problem: syncing configurations (settings/preferences) across a user
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
+    class Scope {
+      <<enumeration>>
+      GLOBAL
+      DEVICE
+    }
     class ConfigEntry {
+      <<record>>
       +String key
       +String value
       +Scope scope
       +long hlc
       +String deviceId
-    }
-    class ConfigDocument {
-      +String userId
-      +long version
-      +Map~String,ConfigEntry~ entries
+      +boolean deleted
     }
     class Change {
       <<record>>
       +long seq
       +ConfigEntry entry
     }
+    class SyncResult {
+      <<record>>
+      +long version
+      +List~ConfigEntry~ applied
+      +List~ConfigEntry~ overridden
+    }
     class ConflictResolver {
       <<interface>>
-      +resolve(ConfigEntry current, ConfigEntry incoming) ConfigEntry
+      +resolve(ConfigEntry, ConfigEntry) ConfigEntry
     }
     class LastWriterWinsResolver {
       <<class>>
+      +resolve(ConfigEntry, ConfigEntry) ConfigEntry
     }
     class SetUnionResolver {
       <<class>>
-    }
-    class ChangeLog {
-      +append(userId, entry) long
-      +since(userId, seq) List~Change~
+      +resolve(ConfigEntry, ConfigEntry) ConfigEntry
     }
     class PushGateway {
       <<interface>>
-      +notify(deviceId, List~Change~)
+      +notify(String, String, List~Change~)
+    }
+    class ChangeLog {
+      <<class>>
+      -Map~String,List~ log
+      +append(String, ConfigEntry) long
+      +since(String, long) List~Change~
     }
     class SyncService {
-      +snapshot(userId, deviceId)
-      +push(userId, deviceId, baseSeq, List~ConfigEntry~) SyncResult
-      +pull(userId, sinceSeq)
+      <<class>>
+      -Map~String,Map~ docs
+      -Map~String,Long~ versions
+      -ChangeLog changeLog
+      -Map~String,ConflictResolver~ resolverByPrefix
+      -ConflictResolver defaultResolver
+      -PushGateway push
+      +snapshot(String) Map~String,ConfigEntry~
+      +push(String, String, List~ConfigEntry~) SyncResult
+      +pull(String, long) List~Change~
+    }
+    class ConfigDocument {
+      <<class>>
+      +String userId
+      +long version
+      +Map~String,ConfigEntry~ entries
     }
     ConflictResolver <|.. LastWriterWinsResolver
     ConflictResolver <|.. SetUnionResolver
@@ -85,24 +110,11 @@ classDiagram
     SyncService --> ConflictResolver
     SyncService --> PushGateway
     ConfigDocument *-- ConfigEntry
-    class SyncService {
-      <<class>>
-    }
-    class ChangeLog {
-      <<class>>
-    }
-    class PushGateway {
-      <<interface>>
-    }
-    class ConflictResolver {
-      <<interface>>
-    }
-    class ConfigDocument {
-      <<class>>
-    }
-    class ConfigEntry {
-      <<record>>
-    }
+    ConfigEntry --> Scope
+    Change --> ConfigEntry
+    SyncResult --> "*" ConfigEntry
+    ChangeLog --> "*" Change
+    SyncService --> "*" ConfigEntry
 ```
 
 ## APIs

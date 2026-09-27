@@ -39,46 +39,89 @@ Design a social feed: users post text/images/videos, view posts in a feed, like/
 ```mermaid
 classDiagram
     class Post {
+      <<record>>
       +String id
       +String authorId
       +String text
-      +List~Media~ media
       +Instant createdAt
-    }
-    class Media {
-      +String id
-      +MediaType type
-      +String cdnUrl
     }
     class FeedItem {
       <<record>>
       +String postId
       +String authorId
       +long ts
-      +double score
+    }
+    class Counts {
+      <<record>>
+      +long likes
+      +long views
+    }
+    class FeedEntry {
+      <<record>>
+      +Post post
+      +Counts counts
+    }
+    class GraphService {
+      <<interface>>
+      +followers(String) Set~String~
+      +followees(String) Set~String~
+      +followerCount(String) long
+    }
+    class PostStore {
+      <<class>>
+      -Map~String,Post~ posts
+      -Map~String,Deque~ byAuthor
+      +save(Post)
+      +get(String) Optional~Post~
+      +recentBy(String, int) List~Post~
+    }
+    class FeedCache {
+      <<class>>
+      -Map~String,ConcurrentSkipListSet~ feeds
+      +push(String, FeedItem)
+      +top(String, int) List~FeedItem~
+    }
+    class CounterService {
+      <<class>>
+      -Map~String,LongAdder~ likes
+      -Set~String~ likedBy
+      +like(String, String) boolean
+      +view(String)
+      +get(String) Counts
     }
     class FanoutStrategy {
       <<interface>>
       +onPost(Post)
     }
     class HybridFanout {
+      <<class>>
+      -GraphService graph
+      -FeedCache cache
       -long celebrityThreshold
+      -ExecutorService workers
+      +isCelebrity(String) boolean
+      +onPost(Post)
+      +shutdown()
     }
-    class FeedCache {
-      <<interface>>
-      +push(userId, FeedItem)
-      +range(userId, cursor, n)
+    class FeedService {
+      <<class>>
+      -PostStore posts
+      -FeedCache cache
+      -GraphService graph
+      -HybridFanout fanout
+      -CounterService counters
+      +createPost(String, String) Post
+      +feed(String, int) List~FeedEntry~
+    }
+    class Media {
+      <<class>>
+      +String id
+      +MediaType type
+      +String cdnUrl
     }
     class Ranker {
       <<interface>>
       +rank(userId, List~FeedItem~) List~FeedItem~
-    }
-    class FeedService {
-      +getFeed(userId, cursor, n) FeedPage
-    }
-    class CounterService {
-      +incrementLike(postId)
-      +get(postId) Counts
     }
     Post *-- Media
     FanoutStrategy <|.. HybridFanout
@@ -86,30 +129,15 @@ classDiagram
     FeedService --> Ranker
     FeedService --> FanoutStrategy
     FeedService --> CounterService
-    class FeedService {
-      <<class>>
-    }
-    class FanoutStrategy {
-      <<interface>>
-    }
-    class FeedCache {
-      <<class>>
-    }
-    class CounterService {
-      <<class>>
-    }
-    class Post {
-      <<record>>
-    }
-    class Media {
-      <<class>>
-    }
-    class Ranker {
-      <<class>>
-    }
-    class HybridFanout {
-      <<class>>
-    }
+    FeedEntry --> Post
+    FeedEntry --> Counts
+    PostStore --> "*" Post
+    FeedCache --> "*" FeedItem
+    HybridFanout --> GraphService
+    HybridFanout --> FeedCache
+    FeedService --> PostStore
+    FeedService --> GraphService
+    FeedService --> HybridFanout
 ```
 
 ## APIs

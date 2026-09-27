@@ -40,18 +40,11 @@ Design an artifact repository: upload (publish) an artifact and fetch an artifac
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Repository {
-      <<interface>>
-      +resolve(ArtifactCoordinates) Optional~ArtifactVersion~
-    }
-    class LocalRepository {
-      <<class>>
-    }
-    class RemoteRepository {
-      -String upstreamUrl
-    }
-    class VirtualRepository {
-      -List~Repository~ members
+    class ArtifactStatus {
+      <<enumeration>>
+      QUARANTINED
+      AVAILABLE
+      BLOCKED
     }
     class ArtifactCoordinates {
       <<record>>
@@ -59,31 +52,77 @@ classDiagram
       +String group
       +String name
       +String version
+      +isSnapshot() boolean
     }
     class ArtifactVersion {
       <<class>>
       +ArtifactCoordinates coords
       +String sha256
       +long size
-      +ArtifactStatus status
+      -ArtifactStatus status
+      +status(ArtifactStatus)
+    }
+    class ScanResult {
+      <<record>>
+      +boolean clean
+      +String reason
     }
     class StorageBackend {
       <<interface>>
-      +put(InputStream) String digest
-      +get(digest) InputStream
-      +exists(digest)
+      +put(InputStream) String
+      +get(String) InputStream
+    }
+    class InMemoryStorage {
+      <<class>>
+      -Map~String,byte[]~ blobs
+      +put(InputStream) String
+      +get(String) InputStream
+      +raw(String) byte[]
+      +sha256(byte[])$ String
     }
     class Scanner {
       <<interface>>
-      +scan(digest) ScanResult
+      +scan(byte[]) ScanResult
+    }
+    class SignatureScanner {
+      <<class>>
+      -Set~String~ badSignatures
+      +scan(byte[]) ScanResult
+    }
+    class Repository {
+      <<interface>>
+      +resolve(ArtifactCoordinates) Optional~ArtifactVersion~
+    }
+    class LocalRepository {
+      <<class>>
+      -Map~ArtifactCoordinates,ArtifactVersion~ versions
+      +resolve(ArtifactCoordinates) Optional~ArtifactVersion~
+      +putIfAbsent(ArtifactVersion) boolean
+      +put(ArtifactVersion)
+    }
+    class VirtualRepository {
+      <<class>>
+      -List~Repository~ members
+      +resolve(ArtifactCoordinates) Optional~ArtifactVersion~
     }
     class ScanPipeline {
+      <<class>>
       -List~Scanner~ scanners
-      +run(ArtifactVersion)
+      -ExecutorService workers
+      +submit(ArtifactVersion, byte[]) Future~?~
+      +shutdown()
     }
     class ArtifactService {
-      +publish(coords, InputStream, token)
-      +fetch(coords, token) InputStream
+      <<class>>
+      -Map~String,LocalRepository~ repos
+      -InMemoryStorage storage
+      -ScanPipeline scans
+      +publish(ArtifactCoordinates, InputStream, String) Future~?~
+      +fetch(Repository, ArtifactCoordinates) InputStream
+    }
+    class RemoteRepository {
+      <<class>>
+      -String upstreamUrl
     }
     Repository <|.. LocalRepository
     Repository <|.. RemoteRepository
@@ -93,27 +132,15 @@ classDiagram
     ArtifactService --> StorageBackend
     ArtifactService --> ScanPipeline
     ScanPipeline o-- Scanner
-    class Repository {
-      <<interface>>
-    }
-    class VirtualRepository {
-      <<class>>
-    }
-    class RemoteRepository {
-      <<class>>
-    }
-    class ArtifactService {
-      <<class>>
-    }
-    class ScanPipeline {
-      <<class>>
-    }
-    class Scanner {
-      <<interface>>
-    }
-    class StorageBackend {
-      <<interface>>
-    }
+    StorageBackend <|.. InMemoryStorage
+    Scanner <|.. SignatureScanner
+    ArtifactVersion --> ArtifactCoordinates
+    ArtifactVersion --> ArtifactStatus
+    LocalRepository --> "*" ArtifactCoordinates
+    LocalRepository --> "*" ArtifactVersion
+    ArtifactService --> "*" LocalRepository
+    ArtifactService --> InMemoryStorage
+    Scanner ..> ScanResult : uses
 ```
 
 ## APIs

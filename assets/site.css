@@ -296,3 +296,29 @@ h1{font-weight:800;letter-spacing:-.03em}
 .tgrid i.done{background:var(--ink)}
 .tgrid i.cur{outline:2px solid var(--ink);outline-offset:1px}
 .nav-score{margin-left:auto;font:500 11px var(--mono);color:var(--muted)}
+/* Notes tracker */
+.tgrid.notes{grid-template-columns:repeat(13,1fr)}
+.tgrid.notes i{height:14px}
+.nlist a.done .num{color:var(--ink)}
+.nlist a.done::after{content:"✓";margin-left:auto;font-size:12px;color:var(--muted)}
+.markrow{display:flex;justify-content:center;margin:20px 0 0}
+.markrow .pbtn{cursor:pointer;font-family:inherit}
+/* UML class diagrams: readable size, zoom, legend */
+.diagram.uml{padding:0;text-align:left;overflow:hidden}
+.uml-bar{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--bg)}
+.uml-legend{display:flex;flex-wrap:wrap;gap:6px 12px;font:500 12px var(--font);color:var(--mid)}
+.uml-legend .lg{display:inline-flex;align-items:center;gap:6px}
+.uml-legend .lg b{font:600 11px var(--mono);color:var(--muted)}
+.uml-legend i{width:12px;height:12px;border-radius:3px;border:1.5px solid #525252;background:var(--surface)}
+.lg-interface i{border-color:#2563eb;background:color-mix(in srgb,#2563eb 14%,var(--surface))}
+.lg-enumeration i{border-color:#b45309;background:color-mix(in srgb,#d97706 16%,var(--surface))}
+.lg-abstract i{border-color:#7c3aed;border-style:dashed}
+.lg-record i{border-color:#15803d;background:color-mix(in srgb,#15803d 14%,var(--surface))}
+.uml-zoom{display:flex;gap:4px}
+.uml-zoom button{font:600 12px var(--font);padding:5px 10px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;min-width:32px}
+.uml-zoom button:hover{background:var(--soft)}
+.uml-wrap{overflow:auto;max-height:78vh;padding:16px}
+.uml-view svg{display:block;margin:0 auto}
+.diagram.uml.full{position:fixed;inset:0;z-index:100;border-radius:0;display:flex;flex-direction:column;margin:0}
+.diagram.uml.full .uml-wrap{flex:1;max-height:none}
+body.noscroll{overflow:hidden}

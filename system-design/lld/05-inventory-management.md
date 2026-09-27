@@ -37,40 +37,70 @@ Design an inventory management system. Deep dive: only one unit left and two use
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
+    class ReservationStatus {
+      <<enumeration>>
+      PENDING
+      COMMITTED
+      RELEASED
+      EXPIRED
+    }
     class InventoryItem {
-      -String sku
-      -String warehouseId
-      -int onHand
-      -int reserved
-      -long version
+      <<record>>
+      +String sku
+      +String warehouseId
+      +int onHand
+      +int reserved
+      +long version
       +available() int
     }
-    class Reservation {
-      -String id
-      -String orderId
-      -List~ReservationLine~ lines
-      -ReservationStatus status
-      -Instant expiresAt
-    }
     class ReservationLine {
+      <<record>>
       +String sku
       +String warehouseId
       +int qty
     }
+    class Reservation {
+      <<class>>
+      +String id
+      +String orderId
+      +List~ReservationLine~ lines
+      +Instant expiresAt
+      -ReservationStatus status
+      +transition(ReservationStatus, ReservationStatus) boolean
+    }
     class InventoryRepository {
       <<interface>>
-      +find(sku, wh) InventoryItem
-      +compareAndSet(old, new) boolean
+      +find(String, String) Optional~InventoryItem~
+      +compareAndSet(InventoryItem, InventoryItem) boolean
+      +save(InventoryItem)
+    }
+    class InMemoryInventoryRepository {
+      <<class>>
+      -ConcurrentMap~String,InventoryItem~ rows
+      +find(String, String) Optional~InventoryItem~
+      +compareAndSet(InventoryItem, InventoryItem) boolean
+      +save(InventoryItem)
     }
     class WarehouseSelectionStrategy {
       <<interface>>
-      +candidates(sku, qty, pincode) List~String~
+      +candidates(String, String) List~String~
+    }
+    class OutOfStockException {
+      <<class>>
     }
     class InventoryService {
-      +reserve(orderId, sku, qty, pincode) Reservation
-      +commit(resId)
-      +release(resId)
-      +replenish(sku, wh, qty)
+      <<class>>
+      -InventoryRepository repo
+      -WarehouseSelectionStrategy selector
+      -Clock clock
+      -Duration ttl
+      -Map~String,Reservation~ byId
+      -Map~String,Reservation~ byOrder
+      +reserve(String, String, int, String) Reservation
+      +commit(String)
+      +release(String)
+      +expireStale()
+      +replenish(String, String, int)
     }
     class StockListener {
       <<interface>>
@@ -81,27 +111,10 @@ classDiagram
     InventoryService --> WarehouseSelectionStrategy
     InventoryService --> StockListener
     InventoryRepository ..> InventoryItem
-    class Reservation {
-      <<class>>
-    }
-    class ReservationLine {
-      <<record>>
-    }
-    class InventoryService {
-      <<class>>
-    }
-    class StockListener {
-      <<class>>
-    }
-    class WarehouseSelectionStrategy {
-      <<interface>>
-    }
-    class InventoryRepository {
-      <<interface>>
-    }
-    class InventoryItem {
-      <<record>>
-    }
+    InventoryRepository <|.. InMemoryInventoryRepository
+    Reservation --> ReservationStatus
+    InMemoryInventoryRepository --> "*" InventoryItem
+    InventoryService --> "*" Reservation
 ```
 
 ## APIs

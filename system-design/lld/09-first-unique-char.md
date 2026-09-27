@@ -30,41 +30,46 @@ Not distributed. If sharded across machines, "first" needs a global order (seque
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
+    class FirstUnique {
+      <<class>>
+      +firstUniqChar(String)$ int
+    }
     class FirstUniqueStream {
       <<interface>>
       +add(char)
       +firstUnique() Optional~Character~
     }
     class DllFirstUniqueStream {
+      <<class>>
       -Map~Character,Node~ nodes
       -Set~Character~ repeated
       -Node head
-      -Node tail
-    }
-    class LinkedHashSetStream {
-      -LinkedHashSet~Character~ uniques
-      -Set~Character~ seen
+      +add(char)
+      +firstUnique() Optional~Character~
     }
     class Node {
-      char c
-      Node prev
-      Node next
+      <<class>>
+      +char c
+      +Node prev
+      +Node next
+    }
+    class LinkedHashSetStream {
+      <<class>>
+      -Set~Character~ uniques
+      -Set~Character~ seen
+      +add(char)
+      +firstUnique() Optional~Character~
+    }
+    class SynchronizedFirstUniqueStream {
+      <<class>>
+      -FirstUniqueStream delegate
+      +add(char)
+      +firstUnique() Optional~Character~
     }
     FirstUniqueStream <|.. DllFirstUniqueStream
     FirstUniqueStream <|.. LinkedHashSetStream
     DllFirstUniqueStream *-- Node
-    class DllFirstUniqueStream {
-      <<class>>
-    }
-    class Node {
-      <<class>>
-    }
-    class FirstUniqueStream {
-      <<interface>>
-    }
-    class LinkedHashSetStream {
-      <<class>>
-    }
+    FirstUniqueStream <|.. SynchronizedFirstUniqueStream
 ```
 
 ## APIs

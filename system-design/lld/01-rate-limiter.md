@@ -38,21 +38,11 @@ Design a rate limiter. Discuss Fixed Window, Sliding Window, Token Bucket; then 
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class RateLimitAlgorithm {
-      <<interface>>
-      +tryAcquire(key, rule) RateLimitResult
-    }
-    class TokenBucketLimiter {
-      <<class>>
-    }
-    class FixedWindowLimiter {
-      <<class>>
-    }
-    class SlidingWindowLogLimiter {
-      <<class>>
-    }
-    class RedisTokenBucketLimiter {
-      <<class>>
+    class AlgorithmType {
+      <<enumeration>>
+      TOKEN_BUCKET
+      FIXED_WINDOW
+      SLIDING_LOG
     }
     class RateLimitRule {
       <<record>>
@@ -60,19 +50,69 @@ classDiagram
       +Duration window
       +AlgorithmType type
     }
-    class RuleProvider {
-      <<interface>>
-      +ruleFor(clientId, route) RateLimitRule
-    }
-    class RateLimiterService {
-      <<class>>
-      +allow(clientId, route) RateLimitResult
-    }
     class RateLimitResult {
       <<record>>
       +boolean allowed
       +long remaining
       +long retryAfterMs
+    }
+    class RateLimitAlgorithm {
+      <<interface>>
+      +tryAcquire(String, RateLimitRule) RateLimitResult
+    }
+    class RuleProvider {
+      <<interface>>
+      +ruleFor(String, String) RateLimitRule
+    }
+    class TokenBucketLimiter {
+      <<class>>
+      -Map~String,Bucket~ buckets
+      -java.util.function.LongSupplier nanoClock
+      +tryAcquire(String, RateLimitRule) RateLimitResult
+    }
+    class Bucket {
+      <<class>>
+      +double tokens
+      +long lastRefillNanos
+    }
+    class FixedWindowLimiter {
+      <<class>>
+      -Map~String,Window~ windows
+      -Clock clock
+      +tryAcquire(String, RateLimitRule) RateLimitResult
+    }
+    class Window {
+      <<record>>
+      +long windowStart
+      +int count
+    }
+    class SlidingWindowLogLimiter {
+      <<class>>
+      -Map~String,java.util.ArrayDeque~ logs
+      -Clock clock
+      +tryAcquire(String, RateLimitRule) RateLimitResult
+    }
+    class AlgorithmFactory {
+      <<class>>
+      -Map~AlgorithmType,RateLimitAlgorithm~ registry
+      +get(AlgorithmType) RateLimitAlgorithm
+    }
+    class RateLimiterService {
+      <<class>>
+      -RuleProvider rules
+      -AlgorithmFactory factory
+      +allow(String, String) RateLimitResult
+    }
+    class RedisTokenBucketLimiter {
+      <<class>>
+      -RedisClient redis
+      -String scriptSha
+      +tryAcquire(String, RateLimitRule) RateLimitResult
+    }
+    class RedisClient {
+      <<interface>>
+      +evalSha(String, String, Object[]) long[]
+      +timeMs() long
     }
     RateLimitAlgorithm <|.. TokenBucketLimiter
     RateLimitAlgorithm <|.. FixedWindowLimiter
@@ -81,13 +121,13 @@ classDiagram
     RateLimiterService --> RuleProvider
     RateLimiterService --> RateLimitAlgorithm
     RateLimiterService ..> RateLimitResult
-    class AlgorithmType {
-      <<enumeration>>
-      TOKEN_BUCKET
-      FIXED_WINDOW
-      SLIDING_LOG
-    }
     RateLimitRule --> AlgorithmType
+    TokenBucketLimiter --> "*" Bucket
+    FixedWindowLimiter --> "*" Window
+    AlgorithmFactory --> "*" AlgorithmType
+    AlgorithmFactory --> "*" RateLimitAlgorithm
+    RateLimiterService --> AlgorithmFactory
+    RedisTokenBucketLimiter --> RedisClient
 ```
 
 ## APIs

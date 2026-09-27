@@ -41,31 +41,55 @@ Delivery driver deposits a package into a locker; customer receives a code; cust
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class LockerLocation {
-      +String id
-      +Location geo
-      +List~Compartment~ compartments
+    class Size {
+      <<enumeration>>
+      S
+      M
+      L
+      XL
+    }
+    class CompartmentStatus {
+      <<enumeration>>
+      AVAILABLE
+      RESERVED
+      OCCUPIED
+      OUT_OF_SERVICE
+    }
+    class AssignmentStatus {
+      <<enumeration>>
+      RESERVED
+      DEPOSITED
+      PICKED_UP
+      EXPIRED
+      CANCELLED
     }
     class Compartment {
+      <<class>>
       +String id
       +Size size
       -AtomicReference~CompartmentStatus~ status
-      +tryReserve() boolean
-      +release()
+      +move(CompartmentStatus, CompartmentStatus) boolean
+    }
+    class LockerLocation {
+      <<record>>
+      +String id
+      +List~Compartment~ compartments
     }
     class Package {
+      <<record>>
       +String id
-      +String orderId
-      +Size size
       +String customerId
+      +Size size
     }
     class Assignment {
+      <<class>>
       +String id
       +Package pkg
       +Compartment compartment
+      +String locationId
+      +AtomicReference~AssignmentStatus~ status
       +String otpHash
       +Instant expiresAt
-      +AssignmentStatus status
     }
     class AllocationStrategy {
       <<interface>>
@@ -73,17 +97,33 @@ classDiagram
     }
     class SmallestFitAllocation {
       <<class>>
+      +allocate(LockerLocation, Size) Optional~Compartment~
     }
     class OtpService {
+      <<class>>
+      -SecureRandom random
       +generate() String
-      +hash(String) String
-      +matches(String, String) boolean
+      +hash(String, String) String
+    }
+    class Notifier {
+      <<interface>>
+      +send(String, String)
     }
     class LockerService {
-      +reserve(locationId, pkg) Assignment
-      +deposit(assignmentId) String
-      +pickup(locationId, otp) Compartment
-      +expire()
+      <<class>>
+      -Map~String,LockerLocation~ locations
+      -Map~String,Assignment~ byId
+      -Map~String,Assignment~ byPackage
+      -AllocationStrategy allocation
+      -OtpService otp
+      -Notifier notifier
+      -Clock clock
+      +addLocation(LockerLocation)
+      +reserve(String, Package) Assignment
+      +deposit(String)
+      +pickup(String, String) Compartment
+      +expire() int
+      +available(String, Size) long
     }
     LockerLocation *-- Compartment
     Assignment --> Compartment
@@ -91,27 +131,13 @@ classDiagram
     AllocationStrategy <|.. SmallestFitAllocation
     LockerService --> AllocationStrategy
     LockerService --> OtpService
-    class LockerService {
-      <<class>>
-    }
-    class OtpService {
-      <<class>>
-    }
-    class Assignment {
-      <<class>>
-    }
-    class Compartment {
-      <<class>>
-    }
-    class AllocationStrategy {
-      <<interface>>
-    }
-    class LockerLocation {
-      <<record>>
-    }
-    class Package {
-      <<record>>
-    }
+    Compartment --> Size
+    Compartment --> CompartmentStatus
+    Package --> Size
+    Assignment --> AssignmentStatus
+    LockerService --> "*" LockerLocation
+    LockerService --> "*" Assignment
+    LockerService --> Notifier
 ```
 
 ## State transitions

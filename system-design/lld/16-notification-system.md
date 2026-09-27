@@ -37,47 +37,74 @@
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
+    class Channel {
+      <<enumeration>>
+      EMAIL
+      SMS
+      PUSH
+    }
+    class Priority {
+      <<enumeration>>
+      URGENT
+      NORMAL
+    }
     class Notification {
       <<record>>
       +String id
       +String userId
       +Priority priority
       +String type
-      +Map payload
+      +Map~String,String~ payload
     }
     class UserPreference {
       <<record>>
+      +String userId
       +Channel preferred
       +Set~Channel~ enabled
+      +Set~Channel~ optedOut
+    }
+    class PreferenceService {
+      <<interface>>
+      +get(String) UserPreference
     }
     class RoutingRule {
       <<interface>>
-      +apply(Notification, UserPreference, Set~Channel~ current) Set~Channel~
+      +apply(Notification, UserPreference, Set~Channel~) Set~Channel~
     }
     class UrgentAllChannelsRule {
       <<class>>
+      +apply(Notification, UserPreference, Set~Channel~) Set~Channel~
     }
     class PreferredChannelRule {
       <<class>>
+      +apply(Notification, UserPreference, Set~Channel~) Set~Channel~
     }
     class OptOutFilterRule {
       <<class>>
+      +apply(Notification, UserPreference, Set~Channel~) Set~Channel~
     }
     class NotificationRouter {
+      <<class>>
+      -PreferenceService prefs
       -List~RoutingRule~ rules
       +route(Notification) Set~Channel~
     }
     class ChannelHandler {
       <<interface>>
       +channel() Channel
-      +send(Notification, UserPreference)
+      +send(Notification)
     }
     class HandlerRegistry {
+      <<class>>
       -Map~Channel,ChannelHandler~ handlers
-      +get(Channel)
+      +get(Channel) Optional~ChannelHandler~
     }
     class NotificationService {
-      +notify(Notification)
+      <<class>>
+      -NotificationRouter router
+      -HandlerRegistry registry
+      -Set~String~ seen
+      +notify(Notification) Set~Channel~
     }
     RoutingRule <|.. UrgentAllChannelsRule
     RoutingRule <|.. PreferredChannelRule
@@ -86,21 +113,10 @@ classDiagram
     NotificationService --> NotificationRouter
     NotificationService --> HandlerRegistry
     HandlerRegistry o-- ChannelHandler
-    class RoutingRule {
-      <<interface>>
-    }
-    class NotificationService {
-      <<class>>
-    }
-    class NotificationRouter {
-      <<class>>
-    }
-    class HandlerRegistry {
-      <<class>>
-    }
-    class ChannelHandler {
-      <<interface>>
-    }
+    Notification --> Priority
+    UserPreference --> Channel
+    NotificationRouter --> PreferenceService
+    HandlerRegistry --> "*" Channel
 ```
 
 ## APIs

@@ -40,44 +40,76 @@ classDiagram
     class Song {
       <<record>>
       +String id
+      +String title
       +String artist
       +String genre
       +int durationSec
       +boolean explicit
     }
+    class UserPreferences {
+      <<record>>
+      +boolean allowExplicit
+      +Set~String~ genres
+      +int maxDurationSec
+      +Set~String~ blockedArtists
+    }
     class SongSource {
       <<interface>>
       +name() String
-      +songs(userId) Iterator~Song~
+      +songs(String) Iterator~Song~
+    }
+    class ListSource {
+      <<class>>
+      -String name
+      -List~Song~ songs
+      +songs(String) Iterator~Song~
+    }
+    class SafeSource {
+      <<class>>
+      -SongSource delegate
+      +name() String
+      +songs(String) Iterator~Song~
+    }
+    class WeightedSource {
+      <<record>>
+      +SongSource source
+      +int weight
+    }
+    class MixStrategy {
+      <<interface>>
+      +mix(String, List~WeightedSource~) Iterator~Song~
+    }
+    class WeightedRoundRobinMix {
+      <<class>>
+      +mix(String, List~WeightedSource~) Iterator~Song~
+    }
+    class SongFilter {
+      <<interface>>
+    }
+    class Playlist {
+      <<class>>
+      -List~Song~ songs
+    }
+    class PlaylistGenerator {
+      <<class>>
+      -List~WeightedSource~ sources
+      -MixStrategy mix
+      -int maxScan
+      +builder()$ Builder
+      +generate(String, UserPreferences, int) Playlist
+    }
+    class Builder {
+      <<class>>
+      -List~WeightedSource~ sources
+      -MixStrategy mix
+      -int maxScan
+      +build() PlaylistGenerator
     }
     class DjServiceSource {
       <<class>>
     }
     class RecommendationSource {
       <<class>>
-    }
-    class WeightedSource {
-      +SongSource source
-      +int weight
-    }
-    class MixStrategy {
-      <<interface>>
-      +mix(List~WeightedIterator~) Iterator~Song~
-    }
-    class WeightedRoundRobinMix {
-      <<class>>
-    }
-    class SongFilter {
-      <<interface>>
-      +test(Song) boolean
-      +and(SongFilter)
-    }
-    class PlaylistGenerator {
-      +generate(userId, prefs, size) Playlist
-    }
-    class Playlist {
-      <<class>>
-      +List~Song~ songs
     }
     SongSource <|.. DjServiceSource
     SongSource <|.. RecommendationSource
@@ -86,21 +118,14 @@ classDiagram
     PlaylistGenerator --> MixStrategy
     PlaylistGenerator ..> SongFilter
     WeightedSource --> SongSource
-    class SongSource {
-      <<interface>>
-    }
-    class PlaylistGenerator {
-      <<class>>
-    }
-    class SongFilter {
-      <<interface>>
-    }
-    class MixStrategy {
-      <<interface>>
-    }
-    class WeightedSource {
-      <<record>>
-    }
+    SongSource <|.. ListSource
+    SongSource <|.. SafeSource
+    ListSource --> "*" Song
+    Playlist --> "*" Song
+    Builder --> "*" WeightedSource
+    Builder --> MixStrategy
+    PlaylistGenerator *-- Builder : nested
+    PlaylistGenerator ..> UserPreferences : uses
 ```
 
 ## APIs

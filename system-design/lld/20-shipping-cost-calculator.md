@@ -37,6 +37,32 @@ Quotes are computed from cached rule sets (**AP**; versioned). Store `ruleSetVer
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
+    class DeliveryType {
+      <<enumeration>>
+      STANDARD
+      EXPRESS
+      SAME_DAY
+    }
+    class HandlingFlag {
+      <<enumeration>>
+      FRAGILE
+      HAZARDOUS
+      OVERSIZED
+    }
+    class Zone {
+      <<enumeration>>
+      LOCAL
+      REGIONAL
+      NATIONAL
+      REMOTE
+    }
+    class Dimensions {
+      <<record>>
+      +double lCm
+      +double wCm
+      +double hCm
+      +volumetricKg() double
+    }
     class Shipment {
       <<record>>
       +double weightKg
@@ -45,16 +71,28 @@ classDiagram
       +String toPin
       +DeliveryType type
       +Set~HandlingFlag~ flags
-      +boolean prime
+      +boolean priority
+    }
+    class LineItem {
+      <<record>>
+      +String label
+      +BigDecimal amount
+    }
+    class Quote {
+      <<record>>
+      +BigDecimal total
+      +List~LineItem~ lines
+      +String ruleSetVersion
     }
     class PricingContext {
       <<class>>
       +Shipment shipment
       +Zone zone
       +double chargeableKg
-      +BigDecimal running
-      +List~LineItem~ items
-      +add(label, amount)
+      -BigDecimal running
+      -List~LineItem~ items
+      +add(String, BigDecimal)
+      +toQuote(String) Quote
     }
     class PricingRule {
       <<interface>>
@@ -62,32 +100,68 @@ classDiagram
       +applies(PricingContext) boolean
       +apply(PricingContext)
     }
+    class ZoneResolver {
+      <<interface>>
+      +resolve(String, String) Zone
+    }
     class BaseWeightDistanceRule {
       <<record>>
+      +Map~Zone,BigDecimal~ firstHalfKg
+      +Map~Zone,BigDecimal~ perAdditionalHalfKg
+      +order() int
+      +apply(PricingContext)
     }
     class DeliveryTypeRule {
       <<record>>
+      +Map~DeliveryType,BigDecimal~ multiplier
+      +order() int
+      +applies(PricingContext) boolean
+      +apply(PricingContext)
+    }
+    class PriorityRule {
+      <<record>>
+      +BigDecimal flatFee
+      +order() int
+      +applies(PricingContext) boolean
+      +apply(PricingContext)
     }
     class RegionSurchargeRule {
       <<record>>
+      +Map~Zone,BigDecimal~ percent
+      +order() int
+      +applies(PricingContext) boolean
+      +apply(PricingContext)
     }
     class SpecialHandlingRule {
       <<class>>
+      +order() int
+      +applies(PricingContext) boolean
+      +apply(PricingContext)
     }
     class PrimeDiscountRule {
       <<class>>
+      +order() int
+      +applies(PricingContext) boolean
+      +apply(PricingContext)
     }
     class MinimumChargeRule {
       <<record>>
+      +BigDecimal min
+      +order() int
+      +applies(PricingContext) boolean
+      +apply(PricingContext)
     }
     class ShippingCalculator {
-      -List~PricingRule~ rules
+      <<class>>
+      -AtomicReference~RuleSet~ ruleSet
+      -ZoneResolver zones
+      +reload(String, List~PricingRule~)
       +quote(Shipment) Quote
     }
-    class Quote {
-      +BigDecimal total
-      +List~LineItem~ lines
-      +String ruleSetVersion
+    class RuleSet {
+      <<record>>
+      +String version
+      +List~PricingRule~ rules
     }
     PricingRule <|.. BaseWeightDistanceRule
     PricingRule <|.. DeliveryTypeRule
@@ -97,15 +171,20 @@ classDiagram
     PricingRule <|.. MinimumChargeRule
     ShippingCalculator o-- PricingRule
     ShippingCalculator ..> Quote
-    class PricingRule {
-      <<interface>>
-    }
-    class ShippingCalculator {
-      <<class>>
-    }
-    class Quote {
-      <<record>>
-    }
+    PricingRule <|.. PriorityRule
+    Shipment --> Dimensions
+    Shipment --> DeliveryType
+    Shipment --> "*" HandlingFlag
+    Quote --> "*" LineItem
+    PricingContext --> Shipment
+    PricingContext --> Zone
+    PricingContext --> "*" LineItem
+    BaseWeightDistanceRule --> "*" Zone
+    DeliveryTypeRule --> "*" DeliveryType
+    RegionSurchargeRule --> "*" Zone
+    ShippingCalculator --> RuleSet
+    ShippingCalculator --> ZoneResolver
+    RuleSet --> "*" PricingRule
 ```
 
 ## APIs

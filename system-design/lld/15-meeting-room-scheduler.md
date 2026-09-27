@@ -38,6 +38,17 @@ Design and implement a meeting room scheduler: book rooms for time intervals, no
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
+    class Amenity {
+      <<enumeration>>
+      PROJECTOR
+      VIDEO_CONF
+      WHITEBOARD
+    }
+    class BookingStatus {
+      <<enumeration>>
+      CONFIRMED
+      CANCELLED
+    }
     class Room {
       <<record>>
       +String id
@@ -46,30 +57,44 @@ classDiagram
       +Set~Amenity~ amenities
     }
     class Interval {
+      <<record>>
       +Instant start
       +Instant end
       +overlaps(Interval) boolean
     }
     class Booking {
+      <<class>>
       +String id
       +String roomId
-      +Interval interval
       +String organizer
+      +Interval interval
       +Set~String~ attendees
       +BookingStatus status
+      +toString() String
+    }
+    class BookingRequest {
+      <<record>>
+      +Interval interval
+      +int capacity
+      +Set~Amenity~ amenities
+      +String organizer
+      +Set~String~ attendees
     }
     class RoomCalendar {
+      <<class>>
       -TreeMap~Instant,Booking~ byStart
       +isFree(Interval) boolean
-      +add(Booking) boolean
+      +tryAdd(Booking) boolean
       +remove(Booking)
+      +all() List~Booking~
     }
     class RoomSelectionStrategy {
       <<interface>>
-      +choose(List~Room~, BookingRequest) Optional~Room~
+      +order(List~Room~, BookingRequest) List~Room~
     }
     class SmallestFitStrategy {
       <<class>>
+      +order(List~Room~, BookingRequest) List~Room~
     }
     class BookingListener {
       <<interface>>
@@ -77,9 +102,17 @@ classDiagram
       +onCancelled(Booking)
     }
     class BookingService {
-      +search(req) List~Room~
-      +book(req) Booking
-      +cancel(bookingId, user)
+      <<class>>
+      -Map~String,Room~ rooms
+      -Map~String,RoomCalendar~ calendars
+      -Map~String,Booking~ bookings
+      -RoomSelectionStrategy strategy
+      -List~BookingListener~ listeners
+      +addRoom(Room)
+      +search(BookingRequest) List~Room~
+      +book(BookingRequest) Booking
+      +bookRoom(String, BookingRequest) Booking
+      +cancel(String, String)
     }
     RoomSelectionStrategy <|.. SmallestFitStrategy
     BookingService --> RoomCalendar
@@ -87,24 +120,12 @@ classDiagram
     BookingService --> BookingListener
     Booking --> Interval
     RoomCalendar o-- Booking
-    class Booking {
-      <<class>>
-    }
-    class Interval {
-      <<record>>
-    }
-    class BookingService {
-      <<class>>
-    }
-    class RoomCalendar {
-      <<class>>
-    }
-    class RoomSelectionStrategy {
-      <<interface>>
-    }
-    class BookingListener {
-      <<interface>>
-    }
+    Room --> "*" Amenity
+    Booking --> BookingStatus
+    BookingRequest --> Interval
+    BookingRequest --> "*" Amenity
+    BookingService --> "*" Room
+    BookingService --> "*" Booking
 ```
 
 ## APIs

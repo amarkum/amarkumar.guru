@@ -47,52 +47,52 @@ classDiagram
       +id() String
       +onMessage(Message)
     }
-    class Subscription {
-      -Subscriber subscriber
-      -ExecutorService lane
-      +deliver(Message)
-    }
-    class Topic {
-      -String name
-      -Map~String,Subscription~ subs
-      +publish(Message)
-    }
-    class Broker {
-      -Map~String,Topic~ topics
-      +publish(topic,payload)
-      +subscribe(topic,sub)
-      +unsubscribe(topic,subId)
-    }
     class RetryPolicy {
+      <<record>>
       +int maxAttempts
       +Duration backoff
     }
     class DeadLetterQueue {
+      <<class>>
+      -Queue~String~ dead
       +add(Message, Subscriber, Exception)
+      +snapshot() List~String~
+    }
+    class Subscription {
+      <<class>>
+      -Subscriber subscriber
+      -ExecutorService lane
+      -RetryPolicy retry
+      -DeadLetterQueue dlq
+      +deliver(Message)
+      +close()
+    }
+    class Topic {
+      <<class>>
+      -String name
+      -Map~String,Subscription~ subs
+      +add(Subscriber, Subscription)
+      +remove(String)
+      +publish(Message)
+      +close()
+    }
+    class Broker {
+      <<class>>
+      -Map~String,Topic~ topics
+      -DeadLetterQueue dlq
+      +createTopic(String)
+      +publish(String, String) String
+      +subscribe(String, Subscriber)
+      +unsubscribe(String, String)
+      +shutdown()
     }
     Broker *-- Topic
     Topic *-- Subscription
     Subscription --> Subscriber
     Subscription --> RetryPolicy
     Subscription --> DeadLetterQueue
-    class Subscription {
-      <<class>>
-    }
-    class DeadLetterQueue {
-      <<class>>
-    }
-    class RetryPolicy {
-      <<record>>
-    }
-    class Broker {
-      <<class>>
-    }
-    class Topic {
-      <<class>>
-    }
-    class Subscriber {
-      <<interface>>
-    }
+    Broker --> DeadLetterQueue
+    Subscriber ..> Message : uses
 ```
 
 ## APIs

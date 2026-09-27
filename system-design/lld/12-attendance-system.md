@@ -41,47 +41,96 @@ Design an attendance system for hourly employees. Interviewer gives almost no co
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
+    class PunchType {
+      <<enumeration>>
+      IN
+      OUT
+      BREAK_START
+      BREAK_END
+    }
+    class TimesheetStatus {
+      <<enumeration>>
+      OPEN
+      SUBMITTED
+      APPROVED
+      LOCKED
+    }
     class PunchEvent {
       <<record>>
-      +String id
+      +String punchId
       +String employeeId
       +PunchType type
       +Instant at
       +String source
     }
-    class PunchService {
-      +punch(PunchEvent) PunchAck
+    class PunchAck {
+      <<record>>
+      +String punchId
+      +boolean duplicate
+    }
+    class WorkSegment {
+      <<record>>
+      +Instant start
+      +Instant end
+      +length() Duration
+    }
+    class Hours {
+      <<record>>
+      +Duration regular
+      +Duration overtime
+    }
+    class Timesheet {
+      <<record>>
+      +String employeeId
+      +LocalDate date
+      +List~WorkSegment~ segments
+      +Hours hours
+      +List~String~ anomalies
+      +TimesheetStatus status
+    }
+    class PunchValidator {
+      <<interface>>
+      +validate(PunchEvent)
     }
     class EventStore {
       <<interface>>
       +append(PunchEvent) boolean
-      +events(empId, from, to) List~PunchEvent~
-    }
-    class TimesheetCalculator {
-      +compute(empId, LocalDate, List~PunchEvent~) Timesheet
-    }
-    class Timesheet {
-      +String employeeId
-      +LocalDate date
-      +List~WorkSegment~ segments
-      +Duration regular
-      +Duration overtime
-      +TimesheetStatus status
-    }
-    class WorkSegment {
-      +Instant start
-      +Instant end
-      +SegmentType type
+      +events(String, Instant, Instant) List~PunchEvent~
     }
     class OvertimePolicy {
       <<interface>>
-      +split(Duration day, Duration weekSoFar) Hours
+      +split(Duration) Hours
+    }
+    class DailyOvertimePolicy {
+      <<class>>
+      -Duration threshold
+      +split(Duration) Hours
+    }
+    class InMemoryEventStore {
+      <<class>>
+      -Map~String,PunchEvent~ byId
+      +append(PunchEvent) boolean
+      +events(String, Instant, Instant) List~PunchEvent~
+    }
+    class PunchService {
+      <<class>>
+      -EventStore store
+      -List~PunchValidator~ validators
+      +punch(PunchEvent) PunchAck
+    }
+    class TimesheetCalculator {
+      <<class>>
+      -OvertimePolicy overtime
+      -ZoneId zone
+      +compute(String, LocalDate, List~PunchEvent~) Timesheet
     }
     class ApprovalService {
+      <<class>>
       +requestCorrection(...)
       +approve(...)
     }
     class PayrollExporter {
+      <<class>>
       +export(PayPeriod)
     }
     PunchService --> EventStore
@@ -89,30 +138,14 @@ classDiagram
     Timesheet *-- WorkSegment
     ApprovalService --> Timesheet
     PayrollExporter --> Timesheet
-    class Timesheet {
-      <<record>>
-    }
-    class WorkSegment {
-      <<record>>
-    }
-    class PayrollExporter {
-      <<class>>
-    }
-    class TimesheetCalculator {
-      <<class>>
-    }
-    class OvertimePolicy {
-      <<interface>>
-    }
-    class ApprovalService {
-      <<class>>
-    }
-    class PunchService {
-      <<class>>
-    }
-    class EventStore {
-      <<interface>>
-    }
+    OvertimePolicy <|.. DailyOvertimePolicy
+    EventStore <|.. InMemoryEventStore
+    PunchEvent --> PunchType
+    Timesheet --> Hours
+    Timesheet --> TimesheetStatus
+    InMemoryEventStore --> "*" PunchEvent
+    PunchService --> "*" PunchValidator
+    PunchService ..> PunchAck : uses
 ```
 
 ## APIs

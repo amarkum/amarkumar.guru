@@ -41,59 +41,121 @@ Design the core architecture for a food delivery platform: restaurant onboarding
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Restaurant {
-      +String id
-      +Location loc
-      +boolean open
-      +Menu menu
+    class OrderStatus {
+      <<enumeration>>
+      CREATED
+      PLACED
+      ACCEPTED
+      READY
+      PICKED_UP
+      DELIVERED
+      REJECTED
+      CANCELLED
+      PAYMENT_FAILED
+      +canMoveTo(OrderStatus) boolean
+    }
+    class DpStatus {
+      <<enumeration>>
+      OFFLINE
+      AVAILABLE
+      ASSIGNED
+    }
+    class Location {
+      <<record>>
+      +double lat
+      +double lng
+      +dist(Location) double
     }
     class MenuItem {
+      <<record>>
       +String id
       +String name
       +BigDecimal price
       +boolean veg
       +boolean available
     }
-    class Order {
+    class Restaurant {
+      <<record>>
       +String id
-      +String customerId
-      +String restaurantId
-      +List~OrderItem~ items
-      +OrderStatus status
-      +BigDecimal total
-      +transition(OrderStatus)
+      +String name
+      +Location loc
+      +Map~String,MenuItem~ menu
+    }
+    class CartLine {
+      <<record>>
+      +String itemId
+      +int qty
     }
     class OrderItem {
+      <<record>>
       +String itemId
       +int qty
       +BigDecimal unitPrice
     }
-    class DeliveryPartner {
+    class Order {
+      <<class>>
       +String id
-      +DpStatus status
+      +String customerId
+      +Restaurant restaurant
+      +List~OrderItem~ items
+      +BigDecimal total
+      +Location dropAt
+      -AtomicReference~OrderStatus~ status
+      +transition(OrderStatus, OrderStatus) boolean
+    }
+    class DeliveryPartner {
+      <<class>>
+      +String id
       +Location loc
+      +AtomicReference~DpStatus~ status
+    }
+    class PaymentGateway {
+      <<interface>>
+      +charge(String, BigDecimal) boolean
+    }
+    class EventBus {
+      <<interface>>
+      +publish(String, Order)
+    }
+    class DpAssignmentStrategy {
+      <<interface>>
+      +rank(Order, Collection~DeliveryPartner~) List~DeliveryPartner~
+    }
+    class NearestIdleDpStrategy {
+      <<class>>
+      +rank(Order, Collection~DeliveryPartner~) List~DeliveryPartner~
+    }
+    class DispatchService {
+      <<class>>
+      -Map~String,DeliveryPartner~ dps
+      -DpAssignmentStrategy strategy
+      +upsert(DeliveryPartner)
+      +assign(Order) Optional~DeliveryPartner~
+      +release(String)
+    }
+    class OrderService {
+      <<class>>
+      -Map~String,Order~ orders
+      -Map~String,Order~ byIdemKey
+      -PaymentGateway payments
+      -DispatchService dispatch
+      -EventBus events
+      +place(String, Restaurant, List~CartLine~, Location, String) Order
+      +accept(String)
+      +ready(String)
+      +pickedUp(String)
+      +delivered(String)
     }
     class Delivery {
+      <<class>>
       +String orderId
       +String dpId
       +DeliveryStatus status
       +Instant eta
     }
-    class DpAssignmentStrategy {
-      <<interface>>
-      +pick(Order, List~DeliveryPartner~) Optional~DeliveryPartner~
-    }
     class PaymentService {
+      <<class>>
       +pay(orderId, amount, method, idemKey) Payment
-    }
-    class OrderService {
-      +place(cart, method, idemKey) Order
-      +accept()
-      +ready()
-      +cancel()
-    }
-    class DispatchService {
-      +assign(Order) Delivery
     }
     Restaurant *-- MenuItem
     Order *-- OrderItem
@@ -101,36 +163,18 @@ classDiagram
     OrderService --> DispatchService
     DispatchService --> DpAssignmentStrategy
     Delivery --> DeliveryPartner
-    class OrderService {
-      <<class>>
-    }
-    class PaymentService {
-      <<class>>
-    }
-    class Order {
-      <<class>>
-    }
-    class OrderItem {
-      <<record>>
-    }
-    class Restaurant {
-      <<record>>
-    }
-    class MenuItem {
-      <<record>>
-    }
-    class DispatchService {
-      <<class>>
-    }
-    class DpAssignmentStrategy {
-      <<interface>>
-    }
-    class Delivery {
-      <<class>>
-    }
-    class DeliveryPartner {
-      <<class>>
-    }
+    DpAssignmentStrategy <|.. NearestIdleDpStrategy
+    Restaurant --> Location
+    Order --> Restaurant
+    Order --> Location
+    Order --> OrderStatus
+    DeliveryPartner --> Location
+    DeliveryPartner --> DpStatus
+    DispatchService --> "*" DeliveryPartner
+    OrderService --> "*" Order
+    OrderService --> PaymentGateway
+    OrderService --> EventBus
+    OrderService ..> CartLine : uses
 ```
 
 ## Order state machine

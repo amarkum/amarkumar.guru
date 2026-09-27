@@ -37,12 +37,31 @@ window.mmInit();
 <div class="layout">
   <aside class="side">
     <div><h2>Design notes</h2><p class="sub">Full write-ups for each question: requirements, class diagram, patterns, Java code and follow-ups.</p></div>
+    <div class="prog"><span id="npct">0 of 26 read</span><div class="bar"><i id="nbar"></i></div></div>
+    <div class="tracker" aria-label="Notes tracker">
+      <h3>Tracker</h3>
+      <div class="tstats">
+        <div><b id="tRead">0/26</b><span>read</span></div>
+        <div><b id="tLld">0</b><span>LLD left</span></div>
+        <div><b id="tLast">–</b><span>last opened</span></div>
+      </div>
+      <div class="tgrid notes" id="ngrid"></div>
+    </div>
     <input id="nq" class="nsearch" type="search" placeholder="Filter notes…" aria-label="Filter notes">
     <nav id="nlist" class="nlist" aria-label="Notes"></nav>
+    <div class="savebox">
+      <p>Notes you mark as read are saved in this browser, like your course progress.</p>
+      <button id="nReset" type="button" class="linkbtn">Clear read notes</button>
+      <div id="nAsk" class="ask" hidden>
+        <p>This clears which notes you've marked as read on this device.</p>
+        <div class="askrow"><button id="nYes" type="button" class="danger">Clear</button><button id="nNo" type="button">Keep it</button></div>
+      </div>
+    </div>
   </aside>
   <div class="content">
     <div class="crumbs"><a href="/notes/">Notes</a> <span id="ncrumb"></span></div>
     <article id="doc" class="card md">Loading…</article>
+    <div class="markrow" id="nmark" hidden><button id="nMarkBtn" type="button" class="pbtn"></button></div>
     <div class="foot" id="npager"></div>
   </div>
 </div>
@@ -53,12 +72,30 @@ require.config({paths:{vs:"https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/
 let monacoP=new Promise(res=>require(["vs/editor/editor.main"],res));
 const LANGMAP={js:"javascript",ts:"typescript",py:"python",sh:"shell",bash:"shell",yml:"yaml",md:"markdown"};
 const BASE="/system-design/lld/";let LIST=[];
+const NK="sd-notes-v1";
+let NS={read:{},last:""};
+try{const s=JSON.parse(localStorage.getItem(NK));if(s)NS=Object.assign(NS,s)}catch(e){}
+if(!NS.read)NS.read={};
+const saveN=()=>{try{localStorage.setItem(NK,JSON.stringify(NS))}catch(e){}};
+function tracker(){const n=LIST.length,r=LIST.filter(x=>NS.read[slugOf(x.f)]).length,cur=location.hash.slice(1);
+ npct.textContent=`${r} of ${n} read`;nbar.style.width=(n?r/n*100:0)+"%";tRead.textContent=`${r}/${n}`;
+ tLld.textContent=LIST.filter(x=>/LLD/i.test(x.k)&&!NS.read[slugOf(x.f)]).length;
+ const li=LIST.find(x=>slugOf(x.f)===NS.last);tLast.textContent=li?"#"+li.n:"–";tLast.parentNode.title=li?li.t:"";
+ ngrid.innerHTML="";LIST.forEach(x=>{const sl=slugOf(x.f),i=document.createElement("i");
+  i.title=`${x.n}. ${x.t}${NS.read[sl]?" · read":""}`;if(NS.read[sl])i.className="done";if(sl===cur)i.classList.add("cur");
+  i.onclick=()=>{location.hash=sl};ngrid.appendChild(i)})}
+function markBtn(){const cur=location.hash.slice(1);nmark.hidden=!cur||!LIST.some(x=>slugOf(x.f)===cur);
+ const on=!!NS.read[cur];nMarkBtn.textContent=on?"✓ Read · mark as unread":"Mark as read";nMarkBtn.classList.toggle("primary",!on)}
+nMarkBtn.onclick=()=>{const cur=location.hash.slice(1);if(!cur)return;if(NS.read[cur])delete NS.read[cur];else NS.read[cur]=Date.now();saveN();markBtn();drawList()};
+nReset.onclick=()=>{nAsk.hidden=false;nReset.hidden=true};
+nNo.onclick=()=>{nAsk.hidden=true;nReset.hidden=false};
+nYes.onclick=()=>{NS.read={};saveN();nAsk.hidden=true;nReset.hidden=false;markBtn();drawList()};
 function slugOf(f){return f.replace(/\.md$/,"")}
 async function loadList(){const t=await (await fetch(BASE+"README.md",{cache:"no-cache"})).text();
  const re=/\|\s*(\d+)\s*\|\s*\[([^\]]+)\]\(([^)]+\.md)\)\s*\|\s*([^|]*)\|/g;let m;LIST=[];
  while((m=re.exec(t)))LIST.push({n:m[1],t:m[2],f:m[3],k:m[4].trim()});drawList()}
 function drawList(){const q=(nq.value||"").toLowerCase(),cur=location.hash.slice(1);
- nlist.innerHTML=`<a href="#" class="${!cur?"on":""}"><span class="num">·</span>Overview</a>`+LIST.filter(x=>!q||x.t.toLowerCase().includes(q)).map(x=>`<a href="#${slugOf(x.f)}" class="${cur===slugOf(x.f)?"on":""}"><span class="num">${x.n}</span>${x.t}</a>`).join("")}
+ nlist.innerHTML=`<a href="#" class="${!cur?"on":""}"><span class="num">·</span>Overview</a>`+LIST.filter(x=>!q||x.t.toLowerCase().includes(q)).map(x=>`<a href="#${slugOf(x.f)}" class="${cur===slugOf(x.f)?"on":""}${NS.read[slugOf(x.f)]?" done":""}"><span class="num">${x.n}</span>${x.t}</a>`).join("");tracker()}
 nq.oninput=drawList;
 let rn=0;
 async function show(){const cur=location.hash.slice(1);const file=cur?cur+".md":"README.md";
@@ -69,13 +106,33 @@ async function show(){const cur=location.hash.slice(1);const file=cur?cur+".md":
  doc.querySelectorAll("table").forEach(t=>{const w=document.createElement("div");w.className="tbl";t.parentNode.insertBefore(w,t);w.appendChild(t)});
  for(const c of doc.querySelectorAll("pre code.language-mermaid")){const pre=c.parentNode,src=c.textContent,box=document.createElement("div");box.className="diagram";pre.replaceWith(box);
   try{const r=await mermaid.render("nm"+(rn++),src);box.innerHTML=r.svg;
-   box.querySelectorAll("g.node").forEach(g=>{const k=(g.textContent.match(/«(\w+)»/)||[])[1];if(k)g.setAttribute("data-kind",k)})}catch(e){box.innerHTML="<pre>"+src.replace(/</g,"&lt;")+"</pre>"}}
+   box.querySelectorAll("g.node").forEach(g=>{const k=(g.textContent.match(/«(\w+)»/)||[])[1];if(k)g.setAttribute("data-kind",k)});
+   if(/^\s*classDiagram/.test(src))umlTools(box)}catch(e){box.innerHTML="<pre>"+src.replace(/</g,"&lt;")+"</pre>"}}
  await renderCode(doc);
  const i=LIST.findIndex(x=>slugOf(x.f)===cur);const it=LIST[i];
- ncrumb.textContent=it?"/ "+it.t:"";document.title=(it?it.t+" | ":"")+"Notes | amarkumar.guru";
+ ncrumb.textContent=it?"/ "+it.t:"";if(it){NS.last=cur;saveN()}markBtn();document.title=(it?it.t+" | ":"")+"Notes | amarkumar.guru";
  const pv=i>0?LIST[i-1]:null,nx=i<LIST.length-1?LIST[i+1]:null;
  npager.innerHTML=(pv?`<a class="pbtn" href="#${slugOf(pv.f)}">← ${pv.t}</a>`:"<span></span>")+(nx?`<a class="pbtn primary" href="#${slugOf(nx.f)}">${nx.t} →</a>`:"");
  drawList();scrollTo(0,0)}
+const KINDS=[["interface","Interface"],["enumeration","Enum"],["abstract","Abstract class"],["record","Record"],["class","Class"]];
+function umlTools(box){const svg=box.querySelector("svg");if(!svg)return;
+ const vb=svg.viewBox.baseVal,W=vb&&vb.width||svg.getBBox().width;
+ const counts={};box.querySelectorAll("g.node[data-kind]").forEach(g=>{const k=g.getAttribute("data-kind");counts[k]=(counts[k]||0)+1});
+ box.classList.add("uml");svg.removeAttribute("style");svg.removeAttribute("width");
+ const wrap=document.createElement("div");wrap.className="uml-wrap";
+ const view=document.createElement("div");view.className="uml-view";view.appendChild(svg);
+ const bar=document.createElement("div");bar.className="uml-bar";
+ bar.innerHTML=`<div class="uml-legend">${KINDS.filter(([k])=>counts[k]).map(([k,l])=>`<span class="lg lg-${k}"><i></i>${l} <b>${counts[k]}</b></span>`).join("")}</div>
+  <div class="uml-zoom" role="group" aria-label="Zoom diagram"><button type="button" data-z="-">−</button><button type="button" data-z="fit">Fit</button><button type="button" data-z="1">100%</button><button type="button" data-z="+">+</button><button type="button" data-z="full">Full screen</button></div>`;
+ box.innerHTML="";box.appendChild(bar);wrap.appendChild(view);box.appendChild(wrap);
+ let z=1;const fitZ=()=>Math.min(1,(wrap.clientWidth-40)/W);
+ const apply=()=>{svg.style.width=Math.round(W*z)+"px";svg.style.maxWidth="none";svg.style.height="auto"};
+ z=Math.max(fitZ(),.85);apply();
+ bar.querySelector(".uml-zoom").onclick=e=>{const b=e.target.closest("button");if(!b)return;const a=b.dataset.z;
+  if(a==="full"){box.classList.toggle("full");b.textContent=box.classList.contains("full")?"Close":"Full screen";document.body.classList.toggle("noscroll",box.classList.contains("full"));z=Math.max(fitZ(),z);apply();return}
+  z=a==="+"?Math.min(3,z*1.25):a==="-"?Math.max(.3,z/1.25):a==="fit"?fitZ():1;apply()};
+}
+addEventListener("keydown",e=>{const f=e.key==="Escape"&&document.querySelector(".diagram.uml.full");if(f)f.querySelector('[data-z="full"]').click()});
 const API_RE=/^(GET|POST|PUT|PATCH|DELETE|HEAD|WS)\s+(\S+)\s*(.*)$/;
 const esc=s=>s.replace(/[&<>]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[ch]));
 function apiCard(ls){const box=document.createElement("div");box.className="api";
@@ -155,7 +212,7 @@ async function renderCode(root){
 }
 window.addEventListener("hashchange",show);
 window.onTheme=show;
-loadList().then(show);
+loadList().then(()=>{if(!location.hash&&NS.last&&LIST.some(x=>slugOf(x.f)===NS.last))history.replaceState(null,"","#"+NS.last);show()});
 
 
 function curTheme(){const a=document.documentElement.getAttribute("data-theme");return a||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}

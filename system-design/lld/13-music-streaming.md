@@ -40,39 +40,99 @@ Design a music streaming platform for millions of users to discover, search and 
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
+    class PlayerState {
+      <<enumeration>>
+      IDLE
+      BUFFERING
+      PLAYING
+      PAUSED
+    }
+    class Quality {
+      <<enumeration>>
+      LOW
+      NORMAL
+      HIGH
+      +int kbps
+    }
     class Track {
+      <<record>>
       +String id
       +String title
+      +String artist
       +int durationMs
-      +List~String~ artistIds
-      +String albumId
     }
-    class AudioFile {
-      +String trackId
-      +int bitrateKbps
-      +String codec
+    class StreamInfo {
+      <<record>>
       +String manifestUrl
+      +Quality quality
+      +Instant expiresAt
+    }
+    class CatalogService {
+      <<interface>>
+      +track(String) Optional~Track~
+      +search(String, int) List~Track~
+    }
+    class EntitlementService {
+      <<interface>>
+      +canStream(String, String) boolean
+    }
+    class UrlSigner {
+      <<interface>>
+      +sign(String, Instant) String
+    }
+    class PlaybackService {
+      <<class>>
+      -CatalogService catalog
+      -EntitlementService ent
+      -UrlSigner signer
+      +stream(String, String, Quality) StreamInfo
+    }
+    class Playlist {
+      <<class>>
+      +String id
+      +String ownerId
+      -String name
+      -long version
+      -List~String~ trackIds
+      +add(String, long) long
+      +remove(int, long) long
+      +page(int, int) List~String~
+    }
+    class LibraryService {
+      <<class>>
+      -Map~String,LinkedHashSet~ likes
+      +like(String, String)
+      +unlike(String, String)
+      +library(String) List~String~
+    }
+    class Player {
+      <<class>>
+      -PlaybackService playback
+      -String userId
+      -Deque~String~ queue
+      -PlayerState state
+      -String current
+      +enqueue(List~String~)
+      +playNext()
+      +pause()
     }
     class Album {
+      <<class>>
       +String id
       +String title
       +List~String~ trackIds
     }
     class Artist {
+      <<class>>
       +String id
       +String name
     }
-    class Playlist {
-      +String id
-      +String ownerId
-      +String name
-      +long version
-    }
-    class PlaylistItem {
+    class AudioFile {
+      <<class>>
       +String trackId
-      +String addedBy
-      +Instant addedAt
-      +String position
+      +int bitrateKbps
+      +String codec
+      +String manifestUrl
     }
     class Like {
       <<class>>
@@ -87,29 +147,24 @@ classDiagram
       +int msPlayed
       +Instant at
     }
+    class PlaylistItem {
+      <<class>>
+      +String trackId
+      +String addedBy
+      +Instant addedAt
+      +String position
+    }
     Track *-- AudioFile
     Album o-- Track
     Artist o-- Album
     Playlist *-- PlaylistItem
     PlaylistItem --> Track
-    class Artist {
-      <<class>>
-    }
-    class Album {
-      <<class>>
-    }
-    class Playlist {
-      <<class>>
-    }
-    class PlaylistItem {
-      <<class>>
-    }
-    class Track {
-      <<record>>
-    }
-    class AudioFile {
-      <<class>>
-    }
+    StreamInfo --> Quality
+    PlaybackService --> CatalogService
+    PlaybackService --> EntitlementService
+    PlaybackService --> UrlSigner
+    Player --> PlaybackService
+    Player --> PlayerState
 ```
 
 ## APIs

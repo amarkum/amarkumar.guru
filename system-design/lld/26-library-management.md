@@ -39,36 +39,17 @@ Single library DB → **CP**. Search index can be eventually consistent.
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Book {
-      +String isbn
-      +String title
-      +List~String~ authors
-      +String subject
+    class MemberType {
+      <<enumeration>>
+      STUDENT
+      FACULTY
     }
-    class BookItem {
-      +String barcode
-      +String isbn
-      -ItemStatus status
-      +BigDecimal price
-    }
-    class Member {
-      +String id
-      +MemberType type
-      +BigDecimal fineDue
-      +List~Loan~ activeLoans
-    }
-    class Loan {
-      +BookItem item
-      +Member member
-      +LocalDate issued
-      +LocalDate due
-      +LocalDate returned
-    }
-    class Reservation {
-      +String isbn
-      +String memberId
-      +ReservationStatus status
-      +LocalDate holdUntil
+    class ItemStatus {
+      <<enumeration>>
+      AVAILABLE
+      LOANED
+      ON_HOLD
+      LOST
     }
     class LendingPolicy {
       <<interface>>
@@ -76,18 +57,93 @@ classDiagram
       +loanDays() int
       +finePerDay() BigDecimal
     }
+    class SimplePolicy {
+      <<record>>
+      +int maxBooks
+      +int loanDays
+      +BigDecimal finePerDay
+    }
+    class Book {
+      <<record>>
+      +String isbn
+      +String title
+      +List~String~ authors
+      +String subject
+    }
+    class BookItem {
+      <<class>>
+      +String barcode
+      +String isbn
+      +BigDecimal price
+      +AtomicReference~ItemStatus~ status
+      +String heldFor
+    }
+    class Member {
+      <<class>>
+      +String id
+      +MemberType type
+      +LendingPolicy policy
+      +BigDecimal fineDue
+      +Set~String~ activeLoans
+    }
+    class Loan {
+      <<class>>
+      +BookItem item
+      +Member member
+      +LocalDate issued
+      +LocalDate due
+      +LocalDate returned
+    }
     class FinePolicy {
       <<interface>>
-      +fine(Loan, LocalDate returnDate) BigDecimal
+      +fine(Loan, LocalDate) BigDecimal
+    }
+    class PerDayFinePolicy {
+      <<class>>
+      +fine(Loan, LocalDate) BigDecimal
+    }
+    class Notifier {
+      <<interface>>
+      +notify(String, String)
     }
     class Catalog {
-      +search(SearchCriteria) List~Book~
+      <<class>>
+      -Map~String,Book~ books
+      +add(Book)
+      +byIsbn(String) Optional~Book~
+      +search(String) List~Book~
     }
     class LibraryService {
-      +checkout(memberId, barcode) Loan
-      +returnItem(barcode) BigDecimal
-      +renew(barcode)
-      +reserve(memberId, isbn)
+      <<class>>
+      -Catalog catalog
+      -Map~String,BookItem~ items
+      -Map~String,Member~ members
+      -Map~String,Loan~ activeLoanByBarcode
+      -Map~String,Queue~ reservations
+      -FinePolicy finePolicy
+      -Notifier notifier
+      +addBook(Book)
+      +addItem(BookItem)
+      +addMember(Member)
+      +search(String) List~Book~
+      +checkout(String, String) Loan
+      +returnItem(String) BigDecimal
+      +renew(String)
+    }
+    class MutableClock {
+      <<class>>
+      -Instant now
+      +plusDays(long)
+      +getZone() ZoneId
+      +withZone(ZoneId) Clock
+      +instant() Instant
+    }
+    class Reservation {
+      <<class>>
+      +String isbn
+      +String memberId
+      +ReservationStatus status
+      +LocalDate holdUntil
     }
     Book "1" *-- "many" BookItem
     Member "1" o-- "many" Loan
@@ -96,33 +152,17 @@ classDiagram
     LibraryService --> FinePolicy
     LibraryService ..> LendingPolicy
     LibraryService ..> Reservation
-    class LibraryService {
-      <<class>>
-    }
-    class LendingPolicy {
-      <<interface>>
-    }
-    class Loan {
-      <<class>>
-    }
-    class BookItem {
-      <<class>>
-    }
-    class Catalog {
-      <<class>>
-    }
-    class Reservation {
-      <<class>>
-    }
-    class Book {
-      <<record>>
-    }
-    class FinePolicy {
-      <<interface>>
-    }
-    class Member {
-      <<class>>
-    }
+    LendingPolicy <|.. SimplePolicy
+    FinePolicy <|.. PerDayFinePolicy
+    BookItem --> ItemStatus
+    Member --> MemberType
+    Member --> LendingPolicy
+    Catalog --> "*" Book
+    LibraryService --> "*" BookItem
+    LibraryService --> "*" Member
+    LibraryService --> "*" Loan
+    LibraryService --> Notifier
+    LibraryDemo *-- MutableClock : nested
 ```
 
 ## APIs

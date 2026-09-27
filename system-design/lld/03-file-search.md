@@ -37,42 +37,85 @@ Local tool — not a distributed concern. Filesystem may change during traversal
 classDiagram
     class FileNode {
       <<interface>>
-      +name()
-      +size()
-      +isDirectory()
-      +children()
+      +name() String
+      +size() long
+      +isDirectory() boolean
+      +children() List~FileNode~
+      +extension() String
+    }
+    class InMemoryFile {
+      <<record>>
+      +String name
+      +long size
+      +isDirectory() boolean
+      +children() List~FileNode~
+    }
+    class InMemoryDir {
+      <<record>>
+      +String name
+      +List~FileNode~ children
+      +size() long
+      +isDirectory() boolean
     }
     class FileFilter {
       <<interface>>
       +matches(FileNode) boolean
-      +and(f)
-      +or(f)
-      +negate()
     }
     class NameFilter {
       <<record>>
+      +Pattern pattern
+      +matches(FileNode) boolean
     }
     class ExtensionFilter {
       <<record>>
+      +String ext
+      +matches(FileNode) boolean
     }
     class SizeFilter {
       <<record>>
+      +long minInclusive
+      +long maxInclusive
+      +matches(FileNode) boolean
+    }
+    class TypeFilter {
+      <<record>>
+      +boolean directory
+      +matches(FileNode) boolean
     }
     class AndFilter {
-      -List~FileFilter~ filters
+      <<record>>
+      +List~FileFilter~ filters
+      +matches(FileNode) boolean
     }
     class OrFilter {
-      -List~FileFilter~ filters
+      <<record>>
+      +List~FileFilter~ filters
+      +matches(FileNode) boolean
     }
     class NotFilter {
-      -FileFilter inner
-    }
-    class FileSearcher {
-      +search(FileNode root, FileFilter f) Stream~FileNode~
+      <<record>>
+      +FileFilter inner
+      +matches(FileNode) boolean
     }
     class TraversalStrategy {
       <<interface>>
       +traverse(FileNode) Stream~FileNode~
+    }
+    class DfsTraversal {
+      <<class>>
+      -int maxDepth
+      +traverse(FileNode) Stream~FileNode~
+    }
+    class FileSearcher {
+      <<class>>
+      -TraversalStrategy traversal
+      +search(FileNode, FileFilter) Stream~FileNode~
+    }
+    class QueryParser {
+      <<class>>
+      -List~String~ t
+      -int i
+      +parse(String[])$ FileFilter
     }
     FileFilter <|.. NameFilter
     FileFilter <|.. ExtensionFilter
@@ -85,24 +128,11 @@ classDiagram
     NotFilter o-- FileFilter
     FileSearcher --> TraversalStrategy
     FileSearcher ..> FileFilter
-    class OrFilter {
-      <<record>>
-    }
-    class FileFilter {
-      <<interface>>
-    }
-    class FileSearcher {
-      <<class>>
-    }
-    class TraversalStrategy {
-      <<interface>>
-    }
-    class NotFilter {
-      <<record>>
-    }
-    class AndFilter {
-      <<record>>
-    }
+    FileNode <|.. InMemoryFile
+    FileNode <|.. InMemoryDir
+    FileFilter <|.. TypeFilter
+    TraversalStrategy <|.. DfsTraversal
+    QueryParser ..> FileFilter : uses
 ```
 
 ## APIs

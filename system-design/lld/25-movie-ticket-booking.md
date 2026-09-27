@@ -37,61 +37,101 @@ Design a movie ticket booking system: browse movies by city, theatres & shows, v
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
+    class SeatType {
+      <<enumeration>>
+      REGULAR
+      PREMIUM
+      RECLINER
+    }
+    class SeatStatus {
+      <<enumeration>>
+      AVAILABLE
+      HELD
+      BOOKED
+    }
+    class BookingStatus {
+      <<enumeration>>
+      CONFIRMED
+      CANCELLED
+    }
     class Movie {
+      <<record>>
       +String id
       +String title
-      +Duration length
-    }
-    class Theatre {
-      +String id
-      +String city
-      +List~Screen~ screens
-    }
-    class Screen {
-      +String id
-      +List~Seat~ seats
     }
     class Seat {
+      <<record>>
       +String id
-      +String row
-      +int number
       +SeatType type
     }
+    class ShowSeat {
+      <<class>>
+      +Seat seat
+      +SeatStatus status
+      +String holdId
+      +Instant holdExpiry
+      +isFree(Instant) boolean
+    }
     class Show {
+      <<class>>
       +String id
       +Movie movie
-      +Screen screen
       +Instant start
       +Map~String,ShowSeat~ seats
     }
-    class ShowSeat {
-      +Seat seat
-      -SeatStatus status
-      -String holdId
-      -Instant holdExpiry
-    }
     class SeatHold {
+      <<record>>
       +String id
       +String userId
       +String showId
       +List~String~ seatIds
       +Instant expiresAt
+      +BigDecimal amount
     }
     class Booking {
+      <<record>>
       +String id
       +SeatHold hold
-      +BigDecimal amount
+      +String paymentRef
       +BookingStatus status
     }
     class PricingStrategy {
       <<interface>>
       +price(Show, List~Seat~) BigDecimal
     }
+    class SeatTypePricing {
+      <<class>>
+      -Map~SeatType,BigDecimal~ prices
+      +price(Show, List~Seat~) BigDecimal
+    }
+    class SeatUnavailableException {
+      <<class>>
+      +List~String~ seats
+    }
     class BookingService {
-      +hold(userId, showId, seatIds) SeatHold
-      +confirm(holdId, paymentRef) Booking
-      +release(holdId)
-      +expireHolds()
+      <<class>>
+      -Map~String,Show~ shows
+      -Map~String,SeatHold~ holds
+      -Map~String,Booking~ bookingsByHold
+      -PricingStrategy pricing
+      -Clock clock
+      -Duration holdTtl
+      +addShow(Show)
+      +hold(String, String, List~String~) SeatHold
+      +confirm(String, String) Booking
+      +release(String)
+      +seatMap(String) Map~String,SeatStatus~
+    }
+    class Screen {
+      <<class>>
+      +String id
+      +List~Seat~ seats
+    }
+    class Theatre {
+      <<class>>
+      +String id
+      +String city
+      +List~Screen~ screens
     }
     Theatre *-- Screen
     Screen *-- Seat
@@ -101,36 +141,14 @@ classDiagram
     ShowSeat --> Seat
     Booking --> SeatHold
     BookingService --> PricingStrategy
-    class Theatre {
-      <<class>>
-    }
-    class Screen {
-      <<class>>
-    }
-    class Show {
-      <<class>>
-    }
-    class ShowSeat {
-      <<class>>
-    }
-    class Seat {
-      <<record>>
-    }
-    class Booking {
-      <<record>>
-    }
-    class SeatHold {
-      <<record>>
-    }
-    class Movie {
-      <<record>>
-    }
-    class BookingService {
-      <<class>>
-    }
-    class PricingStrategy {
-      <<interface>>
-    }
+    PricingStrategy <|.. SeatTypePricing
+    Seat --> SeatType
+    ShowSeat --> SeatStatus
+    Booking --> BookingStatus
+    SeatTypePricing --> "*" SeatType
+    BookingService --> "*" Show
+    BookingService --> "*" SeatHold
+    BookingService --> "*" Booking
 ```
 
 ## APIs

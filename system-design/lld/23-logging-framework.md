@@ -42,7 +42,12 @@ Local library. For centralized logging (ELK/CloudWatch), shipping is **AP** — 
 classDiagram
     class LogLevel {
       <<enumeration>>
-      TRACE DEBUG INFO WARN ERROR FATAL
+      TRACE
+      DEBUG
+      INFO
+      WARN
+      ERROR
+      FATAL
     }
     class LogEvent {
       <<record>>
@@ -52,19 +57,25 @@ classDiagram
       +String thread
       +String message
       +Throwable error
-      +Map mdc
+      +Map~String,String~ mdc
     }
-    class Logger {
-      -String name
-      -LogLevel level
-      -Logger parent
-      -List~Appender~ appenders
-      -boolean additive
-      +info(msg, args)
-      +isEnabled(level)
+    class MDC {
+      <<class>>
+      +put(String, String)$
+      +clear()$
+      +copy()$ Map~String,String~
     }
-    class LoggerFactory {
-      +getLogger(name) Logger
+    class Formatter {
+      <<interface>>
+      +format(LogEvent) String
+    }
+    class PatternFormatter {
+      <<class>>
+      +format(LogEvent) String
+    }
+    class JsonFormatter {
+      <<class>>
+      +format(LogEvent) String
     }
     class Appender {
       <<interface>>
@@ -73,23 +84,52 @@ classDiagram
     }
     class ConsoleAppender {
       <<class>>
+      -Formatter f
+      -LogLevel threshold
+      +append(LogEvent)
     }
     class RollingFileAppender {
       <<class>>
+      -Path file
+      -long maxBytes
+      -int maxFiles
+      -Formatter f
+      -Writer out
+      -long written
+      +RollingFileAppender(Path file,long maxBytes,int maxFiles,Formatter f) throws IOException
+      +append(LogEvent)
+      +close()
     }
     class AsyncAppender {
+      <<class>>
       -BlockingQueue~LogEvent~ queue
       -Appender delegate
+      -Thread worker
+      -AtomicLong dropped
+      -boolean running
+      +append(LogEvent)
+      +close()
     }
-    class Formatter {
-      <<interface>>
-      +format(LogEvent) String
-    }
-    class PatternFormatter {
+    class Logger {
       <<class>>
+      -String name
+      -Logger parent
+      -LogLevel level
+      -List~Appender~ appenders
+      -boolean additive
+      +setLevel(LogLevel)
+      +addAppender(Appender)
+      +setAdditive(boolean)
+      +effectiveLevel() LogLevel
+      +isEnabled(LogLevel) boolean
+      +trace(String, Object[])
+      +debug(String, Object[])
     }
-    class JsonFormatter {
+    class LoggerFactory {
       <<class>>
+      +root()$ Logger
+      +getLogger(Class~?~)$ Logger
+      +getLogger(String)$ Logger
     }
     Logger --> Logger : parent
     Logger o-- Appender
@@ -102,21 +142,10 @@ classDiagram
     Formatter <|.. PatternFormatter
     Formatter <|.. JsonFormatter
     LoggerFactory ..> Logger
-    class LoggerFactory {
-      <<class>>
-    }
-    class Logger {
-      <<class>>
-    }
-    class Formatter {
-      <<interface>>
-    }
-    class Appender {
-      <<interface>>
-    }
-    class AsyncAppender {
-      <<class>>
-    }
+    LogEvent --> LogLevel
+    ConsoleAppender --> LogLevel
+    AsyncAppender --> "*" LogEvent
+    Logger --> LogLevel
 ```
 
 ## APIs

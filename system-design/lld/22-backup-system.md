@@ -39,37 +39,30 @@ Design a backup system with three backup types: **full**, **differential**, and 
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class BackupStrategy {
-      <<interface>>
-      +type() BackupType
-      +run(DataSource, BackupCatalog, StorageTarget) BackupRecord
+    class BackupType {
+      <<enumeration>>
+      FULL
+      DIFF
+      LOG
     }
-    class AbstractBackup {
-      <<abstract>>
-      +run()
-      #selectData()*
-      #baseFullId()*
+    class Change {
+      <<record>>
+      +long lsn
+      +String key
+      +String value
+      +Instant at
     }
-    class FullBackup {
+    class KvDataSource {
       <<class>>
-    }
-    class DifferentialBackup {
-      <<class>>
-    }
-    class LogBackup {
-      <<class>>
-    }
-    class DataSource {
-      <<interface>>
+      -Map~String,String~ data
+      -List~Change~ log
+      -AtomicLong lsn
+      -Clock clock
+      +put(String, String)
       +currentLsn() long
-      +readAll()
-      +readChangedSince(lsn)
-      +readLog(fromLsn, toLsn)
-    }
-    class StorageTarget {
-      <<interface>>
-      +write(key, bytes) String
-      +read(key) bytes
+      +readAll() Map~String,String~
+      +changedSince(long) Map~String,String~
+      +logBetween(long, long) List~Change~
     }
     class BackupRecord {
       <<record>>
@@ -80,15 +73,85 @@ classDiagram
       +long toLsn
       +Instant time
       +String location
-      +String checksum
+    }
+    class StorageTarget {
+      <<interface>>
+      +write(String, Object)
+      +read(String) Object
+    }
+    class InMemoryStorage {
+      <<class>>
+      -Map~String,Object~ blobs
+      +write(String, Object)
+      +read(String) Object
     }
     class BackupCatalog {
+      <<class>>
+      -List~BackupRecord~ records
       +add(BackupRecord)
-      +latest(type)
-      +chainFor(Instant) List~BackupRecord~
+      +latest(BackupType) Optional~BackupRecord~
+      +latestLogOrFull() Optional~BackupRecord~
+      +all() List~BackupRecord~
+    }
+    class AbstractBackup {
+      <<abstract>>
+      #KvDataSource source
+      #BackupCatalog catalog
+      #StorageTarget storage
+      #Clock clock
+      +type()* BackupType
+      #baseFullId(long, String)* String
+      #fromLsn()* long
+      #selectData(long, long)* Object
+      +run() BackupRecord
+      #requireFull() BackupRecord
+    }
+    class FullBackup {
+      <<class>>
+      +type() BackupType
+      #baseFullId(long, String) String
+      #fromLsn() long
+      #selectData(long, long) Object
+    }
+    class DifferentialBackup {
+      <<class>>
+      +type() BackupType
+      #baseFullId(long, String) String
+      #fromLsn() long
+      #selectData(long, long) Object
+    }
+    class LogBackup {
+      <<class>>
+      +type() BackupType
+      #baseFullId(long, String) String
+      #fromLsn() long
+      #selectData(long, long) Object
     }
     class RestorePlanner {
-      +plan(Instant target) List~BackupRecord~
+      <<class>>
+      -BackupCatalog catalog
+      +plan(Instant) List~BackupRecord~
+      +restore(Instant, StorageTarget) Map~String,String~
+    }
+    class MutableClock {
+      <<class>>
+      -Instant now
+      +plus(long)
+      +getZone() ZoneId
+      +withZone(ZoneId) Clock
+      +instant() Instant
+    }
+    class BackupStrategy {
+      <<interface>>
+      +type() BackupType
+      +run(DataSource, BackupCatalog, StorageTarget) BackupRecord
+    }
+    class DataSource {
+      <<interface>>
+      +currentLsn() long
+      +readAll()
+      +readChangedSince(lsn)
+      +readLog(fromLsn, toLsn)
     }
     class RetentionPolicy {
       <<interface>>
@@ -102,24 +165,12 @@ classDiagram
     AbstractBackup --> StorageTarget
     AbstractBackup --> BackupCatalog
     RestorePlanner --> BackupCatalog
-    class RestorePlanner {
-      <<class>>
-    }
-    class BackupCatalog {
-      <<class>>
-    }
-    class AbstractBackup {
-      <<abstract>>
-    }
-    class StorageTarget {
-      <<interface>>
-    }
-    class BackupStrategy {
-      <<class>>
-    }
-    class DataSource {
-      <<class>>
-    }
+    StorageTarget <|.. InMemoryStorage
+    KvDataSource --> "*" Change
+    BackupRecord --> BackupType
+    BackupCatalog --> "*" BackupRecord
+    AbstractBackup --> KvDataSource
+    BackupDemo *-- MutableClock : nested
 ```
 
 ## APIs

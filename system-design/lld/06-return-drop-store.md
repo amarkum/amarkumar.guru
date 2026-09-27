@@ -37,51 +37,81 @@ Customer wants to return a package. Instead of pickup, the customer books a **sl
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
+    class PackageSize {
+      <<enumeration>>
+      SMALL
+      MEDIUM
+      LARGE
+    }
+    class BookingStatus {
+      <<enumeration>>
+      CONFIRMED
+      DROPPED
+      CANCELLED
+      NO_SHOW
+    }
     class Location {
+      <<record>>
       +double lat
       +double lng
       +distanceKm(Location) double
     }
     class DropStore {
+      <<record>>
       +String id
       +Location loc
       +Set~PackageSize~ sizes
-      +LocalTime open
-      +LocalTime close
     }
     class Slot {
+      <<class>>
       +String id
       +String storeId
       +Instant start
+      +Instant end
       +int capacity
       -AtomicInteger booked
       +tryBook() boolean
-      +cancel()
+      +release()
+      +free() int
     }
     class Booking {
+      <<class>>
       +String id
       +String returnId
       +Slot slot
-      +BookingStatus status
       +String otp
+      -BookingStatus status
+      +move(BookingStatus, BookingStatus) boolean
     }
     class GeoIndex {
       <<interface>>
       +add(DropStore)
-      +nearby(Location, radiusKm) List~DropStore~
+      +nearby(Location, double) List~DropStore~
     }
     class GeohashIndex {
       <<class>>
+      -int precision
+      -Map~String,List~ cells
+      +encode(double, double, int)$ String
+      +add(DropStore)
+      +nearby(Location, double) List~DropStore~
+    }
+    class BookingService {
+      <<class>>
+      -GeoIndex geo
+      -Map~String,List~ slotsByStore
+      -Map~String,Slot~ slots
+      -Map~String,Booking~ activeByReturn
+      -Map~String,Booking~ byOtp
+      +addStore(DropStore, List~Slot~)
+      +findStores(Location, PackageSize, double) List~DropStore~
+      +book(String, String) Booking
+      +cancel(String)
+      +markDropped(String, String)
     }
     class StoreRankingStrategy {
       <<interface>>
       +rank(Location, List~DropStore~) List~DropStore~
-    }
-    class BookingService {
-      +findStores(returnId, Location)
-      +book(returnId, slotId) Booking
-      +cancel(bookingId)
-      +markDropped(otp)
     }
     GeoIndex <|.. GeohashIndex
     BookingService --> GeoIndex
@@ -89,27 +119,11 @@ classDiagram
     DropStore *-- Slot
     Booking --> Slot
     DropStore --> Location
-    class Booking {
-      <<class>>
-    }
-    class Slot {
-      <<class>>
-    }
-    class DropStore {
-      <<record>>
-    }
-    class BookingService {
-      <<class>>
-    }
-    class GeoIndex {
-      <<interface>>
-    }
-    class StoreRankingStrategy {
-      <<class>>
-    }
-    class Location {
-      <<record>>
-    }
+    DropStore --> "*" PackageSize
+    Booking --> BookingStatus
+    GeohashIndex --> "*" DropStore
+    BookingService --> "*" Slot
+    BookingService --> "*" Booking
 ```
 
 ## APIs

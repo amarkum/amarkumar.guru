@@ -52,73 +52,86 @@ classDiagram
     class Operation {
       <<interface>>
       +apply(StringBuilder)
-      +transform(Operation other) Operation
+    }
+    class NoOp {
+      <<record>>
+      +apply(StringBuilder)
+      +transformAgainst(Operation, boolean) Operation
     }
     class InsertOp {
+      <<record>>
       +int pos
       +String text
+      +apply(StringBuilder)
+      +transformAgainst(Operation, boolean) Operation
     }
     class DeleteOp {
+      <<record>>
       +int pos
       +int len
+      +apply(StringBuilder)
+      +transformAgainst(Operation, boolean) Operation
     }
     class ClientOp {
+      <<record>>
       +String clientId
+      +int clientSeq
       +int baseRevision
       +Operation op
     }
+    class Broadcast {
+      <<record>>
+      +int revision
+      +String author
+      +Operation op
+    }
+    class ClientConnection {
+      <<interface>>
+      +clientId() String
+      +send(Broadcast)
+    }
     class DocumentSession {
+      <<class>>
       -String docId
       -StringBuilder text
       -List~Operation~ log
-      +submit(ClientOp) int
-      +join(conn)
-      +leave(conn)
+      -List~ClientConnection~ clients
+      -Map~String,Integer~ lastSeq
+      -ExecutorService actor
+      +join(ClientConnection)
+      +leave(ClientConnection)
+      +submit(ClientOp) Future~Integer~
+      +revision() int
+      +close()
     }
     class OpStore {
       <<interface>>
       +append(docId, rev, op)
       +since(docId, rev)
     }
-    class SnapshotStore {
-      <<interface>>
-      +latest(docId) Snapshot
-      +save(Snapshot)
+    class PermissionService {
+      <<class>>
+      +check(userId, docId, Action) boolean
     }
     class PresenceService {
       <<class>>
       +update(docId, userId, cursor)
     }
-    class PermissionService {
-      <<class>>
-      +check(userId, docId, Action) boolean
+    class SnapshotStore {
+      <<interface>>
+      +latest(docId) Snapshot
+      +save(Snapshot)
     }
     Operation <|.. InsertOp
     Operation <|.. DeleteOp
     DocumentSession --> OpStore
     DocumentSession --> SnapshotStore
     DocumentSession ..> ClientOp
-    class DocumentSession {
-      <<class>>
-    }
-    class ClientOp {
-      <<record>>
-    }
-    class SnapshotStore {
-      <<class>>
-    }
-    class OpStore {
-      <<class>>
-    }
-    class Operation {
-      <<interface>>
-    }
-    class DeleteOp {
-      <<record>>
-    }
-    class InsertOp {
-      <<record>>
-    }
+    Operation <|.. NoOp
+    ClientOp --> Operation
+    Broadcast --> Operation
+    DocumentSession --> "*" Operation
+    DocumentSession --> "*" ClientConnection
 ```
 
 ## APIs

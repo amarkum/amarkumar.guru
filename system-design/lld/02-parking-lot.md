@@ -40,38 +40,62 @@ Design a parking lot with ticket issue at entry and receipt/payment at exit. Fol
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class ParkingLot {
+    class VehicleType {
+      <<enumeration>>
+      BIKE
+      CAR
+      TRUCK
+    }
+    class SpotType {
+      <<enumeration>>
+      SMALL
+      MEDIUM
+      LARGE
+    }
+    class PaymentMode {
+      <<enumeration>>
+      CASH
+      CARD
+      UPI
+    }
+    class Vehicle {
+      <<record>>
+      +String plate
+      +VehicleType type
+    }
+    class ParkingSpot {
       <<class>>
-      -List~Floor~ floors
-      +issueTicket(Vehicle) Ticket
-      +exit(ticketId, PaymentMode) Receipt
+      -String id
+      -SpotType type
+      -AtomicBoolean free
+      +tryOccupy() boolean
+      +release()
+      +isFree() boolean
     }
     class Floor {
+      <<class>>
       -int number
       -List~ParkingSpot~ spots
     }
-    class ParkingSpot {
-      -String id
-      -SpotType type
-      -boolean free
-      +tryOccupy() boolean
-      +release()
-    }
-    class Vehicle {
-      -String plate
-      -VehicleType type
-    }
     class Ticket {
-      -String id
-      -Vehicle vehicle
-      -ParkingSpot spot
-      -Instant entryTime
+      <<record>>
+      +String id
+      +Vehicle vehicle
+      +ParkingSpot spot
+      +Instant entryTime
+    }
+    class Payment {
+      <<record>>
+      +String txnId
+      +BigDecimal amount
+      +PaymentMode mode
     }
     class Receipt {
-      -Ticket ticket
-      -Instant exitTime
-      -Money amount
-      -Payment payment
+      <<record>>
+      +Ticket ticket
+      +Instant exitTime
+      +BigDecimal amount
+      +Payment payment
     }
     class SpotAllocationStrategy {
       <<interface>>
@@ -79,20 +103,47 @@ classDiagram
     }
     class NearestFirstStrategy {
       <<class>>
+      +allocate(List~Floor~, VehicleType) Optional~ParkingSpot~
     }
     class PricingStrategy {
       <<interface>>
-      +price(Ticket, Instant exit) Money
+      +price(Ticket, Instant) BigDecimal
     }
     class HourlyPricing {
       <<class>>
+      -Map~VehicleType,BigDecimal~ ratePerHour
+      +rate(VehicleType) BigDecimal
+      +price(Ticket, Instant) BigDecimal
     }
     class PeakHourPricing {
       <<class>>
+      -HourlyPricing base
+      -List~PeakWindow~ windows
+      -ZoneId zone
+      +price(Ticket, Instant) BigDecimal
+    }
+    class PeakWindow {
+      <<record>>
+      +LocalTime start
+      +LocalTime end
+      +BigDecimal multiplier
+      +contains(LocalTime) boolean
     }
     class PaymentProcessor {
       <<interface>>
-      +pay(Money, PaymentMode) Payment
+      +pay(BigDecimal, PaymentMode) Payment
+    }
+    class ParkingLot {
+      <<class>>
+      -List~Floor~ floors
+      -SpotAllocationStrategy allocator
+      -PricingStrategy pricing
+      -PaymentProcessor payments
+      -Clock clock
+      -Map~String,Ticket~ active
+      -Set~String~ platesInside
+      +issueTicket(Vehicle) Ticket
+      +exit(String, PaymentMode) Receipt
     }
     ParkingLot "1" *-- "many" Floor
     Floor "1" *-- "many" ParkingSpot
@@ -105,37 +156,15 @@ classDiagram
     SpotAllocationStrategy <|.. NearestFirstStrategy
     PricingStrategy <|.. HourlyPricing
     PricingStrategy <|.. PeakHourPricing
-    class SpotAllocationStrategy {
-      <<interface>>
-    }
-    class Ticket {
-      <<record>>
-    }
-    class ParkingSpot {
-      <<class>>
-    }
-    class Receipt {
-      <<record>>
-    }
-    class PricingStrategy {
-      <<interface>>
-    }
-    class PaymentProcessor {
-      <<interface>>
-    }
-    class Vehicle {
-      <<record>>
-    }
-    class Floor {
-      <<class>>
-    }
-    class PaymentMode {
-      <<enumeration>>
-      CASH
-      CARD
-      UPI
-    }
     ParkingLot --> PaymentMode
+    Vehicle --> VehicleType
+    ParkingSpot --> SpotType
+    Payment --> PaymentMode
+    Receipt --> Payment
+    HourlyPricing --> "*" VehicleType
+    PeakHourPricing --> HourlyPricing
+    PeakHourPricing --> "*" PeakWindow
+    ParkingLot --> "*" Ticket
 ```
 
 ## APIs

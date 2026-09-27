@@ -41,60 +41,130 @@ Design Uber: class design (Rider, Driver, Trip, Payment, Location), trip state m
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
+    class RideType {
+      <<enumeration>>
+      AUTO
+      MINI
+      SEDAN
+      SUV
+    }
+    class DriverStatus {
+      <<enumeration>>
+      OFFLINE
+      AVAILABLE
+      ASSIGNED
+    }
+    class TripStatus {
+      <<enumeration>>
+      REQUESTED
+      ACCEPTED
+      ARRIVED
+      IN_PROGRESS
+      COMPLETED
+      CANCELLED
+      +canMoveTo(TripStatus) boolean
+    }
+    class Location {
+      <<record>>
+      +double lat
+      +double lng
+      +km(Location) double
+    }
+    class Driver {
+      <<class>>
+      +String id
+      +RideType type
+      +AtomicReference~DriverStatus~ status
+      +Location location
+      +tryAssign() boolean
+      +free()
+    }
+    class Fare {
+      <<record>>
+      +BigDecimal amount
+      +double surge
+      +Instant expiresAt
+    }
+    class Trip {
+      <<class>>
+      +String id
+      +String riderId
+      +Location pickup
+      +Location drop
+      +RideType type
+      +Fare fare
+      -AtomicReference~TripStatus~ status
+      +transition(TripStatus, TripStatus) boolean
+    }
+    class LocationIndex {
+      <<interface>>
+      +update(Driver)
+      +nearby(Location, double, RideType) List~Driver~
+    }
+    class GridLocationIndex {
+      <<class>>
+      -double cellDeg
+      -Map~Long,Set~ cells
+      -Map~String,Long~ driverCell
+      +update(Driver)
+      +nearby(Location, double, RideType) List~Driver~
+    }
+    class SurgeCalculator {
+      <<interface>>
+      +multiplier(Location) double
+    }
+    class PricingService {
+      <<class>>
+      -Map~RideType,BigDecimal[]~ rates
+      -SurgeCalculator surge
+      -Clock clock
+      +estimate(Location, Location, RideType) Fare
+    }
+    class PaymentGateway {
+      <<interface>>
+      +charge(String, String, BigDecimal) String
+    }
+    class PaymentService {
+      <<class>>
+      -PaymentGateway psp
+      -Map~String,String~ done
+      +charge(Trip) String
+    }
+    class DriverOfferChannel {
+      <<interface>>
+      +offer(Driver, Trip) boolean
+    }
+    class TripService {
+      <<class>>
+      -LocationIndex index
+      -PricingService pricing
+      -PaymentService payments
+      -DriverOfferChannel offers
+      -Clock clock
+      -Map~String,Trip~ trips
+      +request(String, Location, Location, RideType, Fare) Trip
+      +arrive(String)
+      +start(String)
+      +complete(String) String
+      +cancel(String)
+    }
+    class MatchingStrategy {
+      <<interface>>
+      +candidates(Trip) List~Driver~
+    }
+    class Rider {
+      <<class>>
+    }
     class User {
       <<abstract>>
       +String id
       +String name
       +String phone
     }
-    class Rider {
-      <<class>>
-    }
-    class Driver {
-      +DriverStatus status
-      +Vehicle vehicle
-      +Location location
-    }
     class Vehicle {
+      <<class>>
       +String plate
       +RideType type
-    }
-    class Trip {
-      +String id
-      +TripStatus status
-      +Location pickup
-      +Location drop
-      +Fare fare
-      +transition(TripStatus)
-    }
-    class TripStatus {
-      <<enumeration>>
-      REQUESTED ACCEPTED ARRIVED IN_PROGRESS COMPLETED CANCELLED
-    }
-    class LocationIndex {
-      <<interface>>
-      +update(driverId, Location)
-      +nearby(Location, radiusKm, RideType) List~Driver~
-    }
-    class MatchingStrategy {
-      <<interface>>
-      +candidates(Trip) List~Driver~
-    }
-    class PricingService {
-      +estimate(pickup, drop, RideType) Fare
-    }
-    class SurgeCalculator {
-      +multiplier(geohash) double
-    }
-    class PaymentService {
-      +charge(tripId, amount, method, idempotencyKey) Payment
-    }
-    class TripService {
-      +request()
-      +accept()
-      +start()
-      +complete()
-      +cancel()
     }
     User <|-- Rider
     User <|-- Driver
@@ -106,36 +176,20 @@ classDiagram
     TripService --> PaymentService
     MatchingStrategy --> LocationIndex
     PricingService --> SurgeCalculator
-    class Trip {
-      <<class>>
-    }
-    class TripService {
-      <<class>>
-    }
-    class PaymentService {
-      <<class>>
-    }
-    class PricingService {
-      <<class>>
-    }
-    class MatchingStrategy {
-      <<class>>
-    }
-    class LocationIndex {
-      <<interface>>
-    }
-    class Driver {
-      <<class>>
-    }
-    class Vehicle {
-      <<class>>
-    }
-    class User {
-      <<class>>
-    }
-    class SurgeCalculator {
-      <<interface>>
-    }
+    LocationIndex <|.. GridLocationIndex
+    Driver --> RideType
+    Driver --> DriverStatus
+    Driver --> Location
+    Trip --> Location
+    Trip --> RideType
+    Trip --> Fare
+    Trip --> TripStatus
+    GridLocationIndex --> "*" Driver
+    PricingService --> "*" RideType
+    PaymentService --> PaymentGateway
+    TripService --> LocationIndex
+    TripService --> DriverOfferChannel
+    TripService --> "*" Trip
 ```
 
 ## Trip state machine

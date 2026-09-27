@@ -36,41 +36,68 @@ Design a task scheduler: schedule tasks to run once at a time/after a delay, or 
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
+    class TaskStatus {
+      <<enumeration>>
+      SCHEDULED
+      RUNNING
+      COMPLETED
+      FAILED
+      CANCELLED
+    }
     class Task {
       <<interface>>
       +execute()
     }
     class Schedule {
       <<interface>>
-      +next(Instant lastRun) Optional~Instant~
+      +next(Instant) Optional~Instant~
+      +first(Instant) Instant
     }
     class OneTimeSchedule {
       <<record>>
+      +Duration delay
+      +first(Instant) Instant
+      +next(Instant) Optional~Instant~
     }
     class FixedRateSchedule {
       <<record>>
+      +Duration initialDelay
+      +Duration period
+      +first(Instant) Instant
+      +next(Instant) Optional~Instant~
+    }
+    class RetryPolicy {
+      <<record>>
+      +int maxAttempts
+      +Duration baseBackoff
+      +delay(int) Duration
+    }
+    class ScheduledTask {
+      <<class>>
+      +String id
+      +Task task
+      +Schedule schedule
+      +RetryPolicy retry
+      +int priority
+      +long seq
+      +AtomicReference~TaskStatus~ status
+      +getDelay(TimeUnit) long
+      +compareTo(Delayed) int
+    }
+    class TaskScheduler {
+      <<class>>
+      -DelayQueue~ScheduledTask~ queue
+      -Map~String,ScheduledTask~ tasks
+      -ExecutorService workers
+      -Thread dispatcher
+      -boolean running
+      +schedule(Task, Schedule, int) String
+      +cancel(String) boolean
+      +status(String) TaskStatus
+      +shutdown()
     }
     class CronSchedule {
       <<class>>
-    }
-    class RetryPolicy {
-      +int maxAttempts
-      +Duration baseBackoff
-      +delay(attempt) Duration
-    }
-    class ScheduledTask {
-      +String id
-      +Instant nextRunAt
-      +int priority
-      +TaskStatus status
-      +int attempts
-    }
-    class TaskScheduler {
-      -DelayQueue~ScheduledTask~ queue
-      -ExecutorService workers
-      +schedule(Task, Schedule, priority) String
-      +cancel(id) boolean
-      +shutdown()
     }
     Schedule <|.. OneTimeSchedule
     Schedule <|.. FixedRateSchedule
@@ -79,21 +106,7 @@ classDiagram
     ScheduledTask --> Schedule
     ScheduledTask --> RetryPolicy
     TaskScheduler o-- ScheduledTask
-    class ScheduledTask {
-      <<class>>
-    }
-    class RetryPolicy {
-      <<record>>
-    }
-    class TaskScheduler {
-      <<class>>
-    }
-    class Schedule {
-      <<interface>>
-    }
-    class Task {
-      <<class>>
-    }
+    ScheduledTask --> TaskStatus
 ```
 
 ## APIs
