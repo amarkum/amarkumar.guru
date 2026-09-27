@@ -80,9 +80,12 @@ CLI: fsearch /home -ext log -and -size +5M -not -name "*tmp*"
 - **D**: searcher depends on `FileNode` interface → works on real FS or in-memory tree.
 
 ## High-level flow
-```
-CLI args → QueryParser → FileFilter tree
-root → TraversalStrategy (DFS) → stream of FileNode → filter.matches → print
+```mermaid
+flowchart TD
+  A[CLI args] --> Q[QueryParser] --> FT[FileFilter tree]
+  R[root] --> T["TraversalStrategy (DFS)"] --> N[stream of FileNode] --> M{filter.matches}
+  FT --> M
+  M -->|yes| P[print]
 ```
 
 ## Concurrency

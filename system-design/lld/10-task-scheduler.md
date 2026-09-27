@@ -76,12 +76,18 @@ REST (distributed): POST /tasks {callbackUrl|queueArn, cron|runAt, payload}, DEL
 - **D**: scheduler depends on `Schedule`/`Task` abstractions and injected `Clock`.
 
 ## High-level flow
-```
-schedule() → compute nextRunAt → put into DelayQueue (ordered by time, then priority)
-dispatcher thread: queue.take() (blocks until due) → skip if cancelled → submit to worker pool
-worker: RUNNING → execute with timeout
-   success → next = schedule.next(now) → re-enqueue or COMPLETED
-   failure → attempts < max → re-enqueue at now + backoff ; else FAILED
+```mermaid
+flowchart TD
+  S["schedule()"] --> N[compute nextRunAt] --> Q[(DelayQueue<br/>by time, then priority)]
+  Q --> D["dispatcher: queue.take()<br/>blocks until due"] --> C{cancelled?}
+  C -->|yes| SK[skip]
+  C -->|no| W[worker pool: RUNNING<br/>execute with timeout]
+  W -->|success| NX{"schedule.next(now)?"}
+  NX -->|yes| Q
+  NX -->|no| DONE[COMPLETED]
+  W -->|failure| AT{attempts < max?}
+  AT -->|yes, now + backoff| Q
+  AT -->|no| FL[FAILED]
 ```
 
 ## Concurrency

@@ -80,11 +80,17 @@ PUT  /v1/users/{id}/preferences {preferred: "PUSH", optOut: ["SMS"], quietHours:
 - **D**: router depends on `PreferenceService` interface.
 
 ## High-level flow
-```
-Order svc → event "ORDER_SHIPPED" → Notification svc (dedupe by key)
-   → load prefs (cache) → router.route → channels
-   → per channel: enqueue to channel queue (SQS: urgent queue, normal queue)
-   → channel workers: render template → provider (SES/Twilio/FCM) → status → retry w/ backoff → DLQ
+```mermaid
+flowchart TD
+  O[Order svc] -->|ORDER_SHIPPED| N[Notification svc<br/>dedupe by key]
+  N --> P[load prefs cache] --> R[router.route]
+  R --> UQ[[SQS urgent]]
+  R --> NQ[[SQS normal]]
+  UQ --> W[Channel workers]
+  NQ --> W
+  W --> T[render template] --> PR[Provider<br/>SES / Twilio / FCM] --> ST{status}
+  ST -->|fail| RB[retry with backoff] --> PR
+  RB -->|exhausted| DLQ[(DLQ)]
 ```
 
 ## Concurrency

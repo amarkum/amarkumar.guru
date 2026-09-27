@@ -85,11 +85,13 @@ Stores are **static** ⇒ much easier than Uber drivers (which update every 4 s)
 - **D**: `BookingService` depends on abstractions.
 
 ## High-level flow
-```
-Customer → ReturnService (eligible?) → StoreSearch: geoIndex.nearby → filter (size, open, has free slot) → rank
-Customer picks slot → BookingService.book → slot.tryBook (conditional) → Booking CONFIRMED + OTP → notify
-At store: scan OTP → markDropped → ReturnService → Refund
-Scheduler: slot end + grace → NO_SHOW → release capacity, notify to rebook
+```mermaid
+flowchart TD
+  C[Customer] --> RS{ReturnService<br/>eligible?}
+  RS --> SS[StoreSearch: geoIndex.nearby] --> FL[Filter: size, open, free slot] --> RK[Rank]
+  RK --> PK[Customer picks slot] --> BK[BookingService.book] --> TB["slot.tryBook (conditional)"] --> CF[Booking CONFIRMED + OTP] --> NT[Notify]
+  CF --> ST[At store: scan OTP] --> MD[markDropped] --> RF[ReturnService → Refund]
+  SCH[Scheduler: slot end + grace] --> NS[NO_SHOW] --> RC[Release capacity, notify to rebook]
 ```
 
 ## Concurrency

@@ -78,10 +78,15 @@ GET /users/{id}/playlist?size=30&ratio=dj:2,reco:1
 - **D**: generator depends on abstractions; remote clients hidden behind adapters.
 
 ## High-level flow
-```
-prefs → build filter (explicit AND genre AND duration AND not-blocked AND no-dup)
-sources + weights → MixStrategy.mix → lazy iterator
-loop: next song → filter.test → add until size reached or all sources exhausted
+```mermaid
+flowchart TD
+  P[prefs] --> F[build filter<br/>explicit ∧ genre ∧ duration ∧ not-blocked ∧ no-dup]
+  S[sources + weights] --> M[MixStrategy.mix] --> IT[lazy iterator]
+  IT --> N[next song] --> T{filter.test}
+  F --> T
+  T -->|pass| AD[add to playlist]
+  T -->|fail| N
+  AD -->|size not reached & sources left| N
 ```
 
 ## Concurrency

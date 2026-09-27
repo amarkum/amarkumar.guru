@@ -72,11 +72,13 @@ REST (distributed): POST /topics/{t}/messages, POST /topics/{t}/subscriptions {e
 - **D**: publishers depend on `Broker` interface, not subscribers.
 
 ## High-level flow
-```
-publisher.publish(topic, payload)
-  → Broker finds Topic → Topic iterates subscriptions (CopyOnWrite / ConcurrentHashMap)
-  → each Subscription.submit(message) to its own single-thread lane
-  → lane calls subscriber.onMessage with retry → on exhaustion → DLQ
+```mermaid
+flowchart TD
+  P["publisher.publish(topic, payload)"] --> B[Broker finds Topic]
+  B --> T[Topic iterates subscriptions<br/>CopyOnWrite / ConcurrentHashMap]
+  T --> S["Subscription.submit(message)<br/>own single-thread lane"]
+  S --> O[subscriber.onMessage<br/>with retry]
+  O -->|retries exhausted| DLQ[(DLQ)]
 ```
 
 ## Concurrency

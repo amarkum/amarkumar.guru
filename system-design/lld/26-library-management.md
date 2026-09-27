@@ -84,11 +84,16 @@ POST /members/{id}/fines/pay {amount}
 - **D**: service depends on policies/interfaces.
 
 ## High-level flow
-```
-checkout: member active & fines ≤ limit & loans < max → item AVAILABLE (or ON_HOLD for this member) → CAS to LOANED → Loan(due = today + days)
-return:   Loan closed → fine = policy.fine → member.fineDue += fine
-          → reservation queue for ISBN non-empty? item ON_HOLD for first member (holdUntil = +2 days), notify : AVAILABLE
-renew:    no pending reservations and not overdue → due += days
+```mermaid
+flowchart TD
+  CO[checkout] --> CK{member active,<br/>fines ≤ limit, loans < max}
+  CK -->|ok| IA{"item AVAILABLE<br/>or ON_HOLD for member"}
+  IA --> LN["CAS → LOANED<br/>Loan(due = today + days)"]
+  RT[return] --> CL[close Loan] --> FN[fine = policy.fine<br/>member.fineDue += fine]
+  FN --> RQ{reservation queue<br/>non-empty?}
+  RQ -->|yes| OH[ON_HOLD for first member<br/>holdUntil +2 days, notify]
+  RQ -->|no| AV[AVAILABLE]
+  RN[renew] --> RC{no reservations<br/>and not overdue} -->|ok| DU[due += days]
 ```
 
 ## Concurrency

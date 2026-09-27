@@ -86,13 +86,13 @@ PUT  /v1/policies/{sourceId} {fullCron, diffCron, logEvery, retention}
 - **D**: service depends on interfaces.
 
 ## High-level flow
-```
-Scheduler fires (FULL Sun 1am, DIFF daily 1am, LOG every 15 min)
-  → BackupService.backup(type) → strategy.run:
-       FULL: read all at LSN X → store → record(base=self, 0..X)
-       DIFF: need last FULL F → changed pages since F.toLsn → record(base=F, F.toLsn..now)
-       LOG : need a FULL existing → log from lastLog.toLsn (or F.toLsn) → now → record
-Restore(T): full F (time ≤ T, latest) → latest diff D with base F and time ≤ T → logs covering (D or F).toLsn .. T in order → replay logs stopping at T
+```mermaid
+flowchart TD
+  SC[Scheduler<br/>FULL Sun 1am · DIFF daily 1am · LOG every 15 min] --> BS["BackupService.backup(type)"]
+  BS --> FU["FULL: read all at LSN X<br/>record(base=self, 0..X)"]
+  BS --> DF["DIFF: pages changed since last FULL F<br/>record(base=F, F.toLsn..now)"]
+  BS --> LG["LOG: from lastLog.toLsn → now<br/>(needs a FULL)"]
+  RS["Restore(T)"] --> R1[latest FULL F ≤ T] --> R2[latest DIFF D on F ≤ T] --> R3[logs from D/F.toLsn .. T] --> R4[replay, stop at T]
 ```
 
 ## Concurrency

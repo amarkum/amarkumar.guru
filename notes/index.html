@@ -54,7 +54,7 @@ let monacoP=new Promise(res=>require(["vs/editor/editor.main"],res));
 const LANGMAP={js:"javascript",ts:"typescript",py:"python",sh:"shell",bash:"shell",yml:"yaml",md:"markdown"};
 const BASE="/system-design/lld/";let LIST=[];
 function slugOf(f){return f.replace(/\.md$/,"")}
-async function loadList(){const t=await (await fetch(BASE+"README.md")).text();
+async function loadList(){const t=await (await fetch(BASE+"README.md",{cache:"no-cache"})).text();
  const re=/\|\s*(\d+)\s*\|\s*\[([^\]]+)\]\(([^)]+\.md)\)\s*\|\s*([^|]*)\|/g;let m;LIST=[];
  while((m=re.exec(t)))LIST.push({n:m[1],t:m[2],f:m[3],k:m[4].trim()});drawList()}
 function drawList(){const q=(nq.value||"").toLowerCase(),cur=location.hash.slice(1);
@@ -63,7 +63,7 @@ nq.oninput=drawList;
 let rn=0;
 async function show(){const cur=location.hash.slice(1);const file=cur?cur+".md":"README.md";
  doc.innerHTML="Loading…";let md;
- try{const r=await fetch(BASE+file);if(!r.ok)throw 0;md=await r.text()}catch(e){doc.innerHTML="<p>Couldn't load this note. Check your connection and try again.</p>";return}
+ try{const r=await fetch(BASE+file,{cache:"no-cache"});if(!r.ok)throw 0;md=await r.text()}catch(e){doc.innerHTML="<p>Couldn't load this note. Check your connection and try again.</p>";return}
  doc.innerHTML=marked.parse(md);
  doc.querySelectorAll("a[href$='.md']").forEach(a=>{const h=a.getAttribute("href");if(!/^https?:/.test(h))a.setAttribute("href","#"+h.split("/").pop().replace(/\.md$/,""))});
  doc.querySelectorAll("table").forEach(t=>{const w=document.createElement("div");w.className="tbl";t.parentNode.insertBefore(w,t);w.appendChild(t)});

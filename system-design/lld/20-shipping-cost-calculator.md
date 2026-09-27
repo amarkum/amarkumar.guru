@@ -81,10 +81,11 @@ PUT  /v1/admin/rate-cards/{version}  (rules config JSON)
 - **D**: calculator depends on `PricingRule` abstraction.
 
 ## High-level flow
-```
-Shipment → validate → ZoneResolver(from,to) → chargeable weight
-  → rules sorted by order(): base → delivery type → priority → region → handling → discounts → min/max caps → rounding
-  → Quote(total, breakdown, version)
+```mermaid
+flowchart TD
+  S[Shipment] --> V[validate] --> Z["ZoneResolver(from, to)"] --> W[chargeable weight]
+  W --> R1[base] --> R2[delivery type] --> R3[priority] --> R4[region] --> R5[handling] --> R6[discounts] --> R7[min/max caps] --> R8[rounding]
+  R8 --> Q["Quote(total, breakdown, version)"]
 ```
 
 ## Concurrency

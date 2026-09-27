@@ -119,10 +119,18 @@ Clients ─► DNS/GeoLB ─► API Gateway (auth, rate limit)
 - **D**: services talk through APIs/events, not shared DBs.
 
 ## High-level flow (press play)
-```
-tap play → Playback svc: auth + entitlement (cached) → returns signed manifest URL (≈20 ms)
-client → CDN edge: manifest + first segment (edge hit ≈ 20–50 ms) → audio starts
-client prefetches next segments, and next track; reports listen events in batches
+```mermaid
+sequenceDiagram
+  participant C as Client
+  participant P as Playback svc
+  participant E as CDN edge
+  C->>P: tap play
+  P->>P: auth + entitlement (cached)
+  P-->>C: signed manifest URL (~20 ms)
+  C->>E: manifest + first segment
+  E-->>C: edge hit ~20–50 ms → audio starts
+  C->>E: prefetch next segments & next track
+  C-)P: listen events (batched)
 ```
 
 ## Concurrency

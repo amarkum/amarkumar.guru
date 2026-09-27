@@ -76,15 +76,18 @@ WS/SSE /v1/realtime  (count updates for posts on screen)
 **Hybrid (what FB/Twitter/Instagram do):** push for normal users into followers' feed caches; **don't** fan out celebrities — at read time merge the precomputed feed with recent posts from the (few) celebrities the user follows. Skip fan-out to inactive users (they pull when they return).
 
 ## High-level architecture
-```
-Client ─► CDN (media, static) 
-       ─► API GW (auth, rate limit) ─► Post Service ─► Posts DB (Cassandra/DynamoDB, PK postId)
-                                              └► Kafka "post-created"
-         Fan-out workers ◄── Kafka: fetch followers (Graph svc) → append postId to each follower's feed list (Redis sorted set / Cassandra)
-       ─► Feed Service: read feed cache → merge celebrity posts → rank → hydrate posts (post cache) + counts + author → page
-       ─► Like Service: write like row (idempotent) → Kafka → counter aggregator (batch per second) → Counter store + Redis
-       ─► Media Service: presigned S3 upload → transcoder (video) → CDN URLs
-Graph Service (follows): sharded MySQL/TAO-style cache
+```mermaid
+flowchart TD
+  C[Client] --> CDN[CDN media/static]
+  C --> G[API GW<br/>auth, rate limit]
+  G --> PS[Post Service] --> PDB[(Posts DB<br/>Cassandra/DynamoDB)]
+  PS --> K[[Kafka post-created]]
+  K --> FW[Fan-out workers] --> GS[Graph Service<br/>followers]
+  FW --> FC[(Feed lists<br/>Redis ZSET / Cassandra)]
+  G --> FS[Feed Service] --> FC
+  FS --> RK[merge celebrity posts → rank → hydrate]
+  G --> LS[Like Service] --> K2[[Kafka]] --> AG[Counter aggregator] --> CS[(Counters + Redis)]
+  G --> MS[Media Service] --> S3[(S3 presigned)] --> TR[Transcoder] --> CDN
 ```
 
 ## Cold start ("cleared cache, feed instant")

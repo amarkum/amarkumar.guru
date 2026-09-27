@@ -102,11 +102,12 @@ Apps (customer, restaurant, DP) → API GW / BFFs
 - **D**: OrderService depends on `PaymentGateway`, `DispatchService` interfaces.
 
 ## High-level flow
-```
-search → menu → cart → POST /orders (idem key) → Order CREATED → payment intent → PSP → webhook success
-  → PLACED → restaurant tablet notified → ACCEPTED (prep 15 min)
-  → Dispatch schedules assignment at (readyTime − DP travel time) → nearest idle DP accepts (CAS)
-  → READY → PICKED_UP → live tracking → DELIVERED (OTP) → payouts & ratings
+```mermaid
+flowchart TD
+  S[search → menu → cart] --> PO["POST /orders (idem key)"] --> CR[CREATED] --> PI[payment intent → PSP]
+  PI -->|webhook success| PL[PLACED] --> RT[restaurant tablet notified] --> AC["ACCEPTED (prep 15 min)"]
+  AC --> DP["Dispatch at readyTime − DP travel<br/>nearest idle DP accepts (CAS)"]
+  DP --> RD[READY] --> PU[PICKED_UP] --> TR[live tracking] --> DL["DELIVERED (OTP)"] --> PAY[payouts & ratings]
 ```
 
 ## Concurrency

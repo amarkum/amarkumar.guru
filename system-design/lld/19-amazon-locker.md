@@ -97,12 +97,14 @@ otp_attempts(location_id, window_start, count)   -- or Redis counter with TTL
 - **D**: service depends on `AllocationStrategy`, `Notifier`, `Clock`.
 
 ## High-level flow
-```
-Checkout picks locker → Order svc → Locker svc.reserve (smallest fit, CAS) → assignment RESERVED
-Driver at kiosk scans package → deposit → door opens → door-closed sensor → DEPOSITED
-   → OTP generated, hash stored (+ pushed to kiosk cache) → customer notified (SMS/email/push)
-Customer enters OTP at kiosk → validate (hash compare, attempt limit) → door opens → PICKED_UP → compartment AVAILABLE
-Expiry job (every 5 min, index on expires_at) → EXPIRED → notify, driver retrieve → RETURNED
+```mermaid
+stateDiagram-v2
+  [*] --> RESERVED: checkout → Locker svc.reserve (smallest fit, CAS)
+  RESERVED --> DEPOSITED: driver scans, door closes → OTP hash stored, customer notified
+  DEPOSITED --> PICKED_UP: customer enters OTP (hash compare, attempt limit)
+  PICKED_UP --> [*]: compartment AVAILABLE
+  DEPOSITED --> EXPIRED: expiry job (every 5 min)
+  EXPIRED --> RETURNED: driver retrieves
 ```
 
 ## Concurrency & distributed locking

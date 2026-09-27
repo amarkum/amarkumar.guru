@@ -76,15 +76,18 @@ shifts       (employee_id, date, start, end, site_id)
 ```
 
 ## High-level flow / event flow
-```
-Kiosk (local SQLite queue) ──HTTPS──► API GW ─► PunchService ─► validate (employee active, geo-fence, dedupe)
-                                                   └─► EventStore (append, idempotent on punchId)
-                                                   └─► Kafka "punches" (partition by employeeId → ordered)
-Kafka ─► TimesheetProjector: rebuild day timesheet from events + policies → timesheets table
-      ─► AlertService: missing OUT after shift end + 1h, OT threshold
-      ─► Analytics (S3/Redshift)
-Manager approves corrections → Correction events → projector recomputes (version++)
-Pay period end → lock → PayrollExporter reads APPROVED timesheets → file/API to payroll
+```mermaid
+flowchart LR
+  K[Kiosk<br/>local SQLite queue] -->|HTTPS| G[API GW] --> P[PunchService]
+  P --> V[validate: active, geo-fence, dedupe]
+  P --> ES[(EventStore<br/>idempotent on punchId)]
+  P --> KF[[Kafka 'punches'<br/>partition by employeeId]]
+  KF --> TP[TimesheetProjector] --> TT[(timesheets)]
+  KF --> AS[AlertService<br/>missing OUT, OT threshold]
+  KF --> AN[(Analytics S3/Redshift)]
+  M[Manager corrections] --> KF
+  PE[Pay period end → lock] --> PX[PayrollExporter] --> PR[Payroll file/API]
+  TT --> PX
 ```
 
 ## Design patterns

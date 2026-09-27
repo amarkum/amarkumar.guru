@@ -94,11 +94,15 @@ Response headers: X-RateLimit-Limit, X-RateLimit-Remaining, Retry-After
 - **D**: service depends on `RuleProvider`/`RateLimitAlgorithm` interfaces, `Clock` injected for tests.
 
 ## High-level flow
-```
-Client → API Gateway → RateLimitFilter → RateLimiterService
-          → RuleProvider (cached rules) → Algorithm.tryAcquire(key)
-          → local map  OR  Redis (Lua, atomic)
-   allowed → backend service   |   rejected → 429 + Retry-After
+```mermaid
+flowchart TD
+  C[Client] --> G[API Gateway] --> F[RateLimitFilter] --> S[RateLimiterService]
+  S --> R[RuleProvider<br/>cached rules]
+  R --> A["Algorithm.tryAcquire(key)"]
+  A --> L[(Local map)]
+  A --> RD[(Redis<br/>Lua, atomic)]
+  A -->|allowed| B[Backend service]
+  A -->|rejected| X[429 + Retry-After]
 ```
 
 ## Algorithm trade-offs

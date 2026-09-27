@@ -77,11 +77,17 @@ void setMaintenance(int elevatorId, boolean on)
 - **D**: controller depends on `DispatchStrategy`.
 
 ## High-level flow
-```
-hallCall(5, UP) → strategy.select → elevator.addStop(5, UP)
-carCall(e1, 9) → e1.addStop(9)
-tick: each elevator → if at a stop → open doors (serve) → close → choose next:
-       moving UP: next higher stop in upStops; else reverse → downStops (LOOK); else IDLE
+```mermaid
+flowchart TD
+  HC["hallCall(5, UP)"] --> SS[strategy.select] --> AS["elevator.addStop(5, UP)"]
+  CC["carCall(e1, 9)"] --> AS2["e1.addStop(9)"]
+  T[tick: each elevator] --> AT{at a stop?}
+  AT -->|yes| OD[open doors → serve → close]
+  AT -->|no| NX
+  OD --> NX{choose next}
+  NX -->|moving UP| UP[next higher in upStops]
+  NX -->|none above| RV[reverse → downStops LOOK]
+  NX -->|no stops| ID[IDLE]
 ```
 
 ## LOOK scheduling

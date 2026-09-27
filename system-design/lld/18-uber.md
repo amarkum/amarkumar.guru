@@ -93,14 +93,19 @@ POST /v1/trips/{id}/accept | /arrive | /start {otp} | /complete
 ```
 
 ## High-level architecture
-```
-Rider app / Driver app ─► API GW ─► 
-   Location Service (driver pings) ─► in-memory geo index sharded by city/H3 cell (Redis GEO / custom), TTL 30 s
-   Dispatch/Matching Service ─► query index → rank by ETA (Maps/Routing svc) → offer to driver (push) → timeout → next
-   Trip Service ─► Trip DB (Postgres/DynamoDB), state machine, events to Kafka
-   Pricing Service ─► base fare + surge (Surge svc: demand/supply per H3 cell every 1–2 min via stream processing)
-   Payment Service ─► PSP (Stripe/Razorpay), ledger DB, idempotency, retries, reconciliation
-   Notification Service (push/SMS), Rating Service
+```mermaid
+flowchart TD
+  RA[Rider app] --> G[API GW]
+  DA[Driver app] --> G
+  G --> LS[Location Service] --> GI[(Geo index<br/>by H3 cell, TTL 30s)]
+  G --> DS[Dispatch / Matching] --> GI
+  DS --> MP[Maps / Routing ETA]
+  DS -->|offer, timeout → next| DA
+  G --> TS[Trip Service] --> TDB[(Trip DB)]
+  TS --> K[[Kafka events]]
+  G --> PR[Pricing Service] --> SG[Surge svc<br/>demand/supply per cell]
+  G --> PY[Payment Service] --> PSP[PSP + ledger]
+  K --> NS[Notification / Rating]
 ```
 
 ## Driver matching (geo)

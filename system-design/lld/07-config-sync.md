@@ -76,13 +76,20 @@ WS   /sync  (server → device: {version, changes[]})
 - **D**: `SyncService` depends on `PushGateway` interface (WS/APNs/FCM).
 
 ## High-level flow
-```
-Device edits offline → local outbox (entry with HLC)
-Online → POST changes(baseVersion) → SyncService
-   for each entry: current = doc[key]; winner = resolver.resolve(current, incoming)
-   if winner == incoming → append ChangeLog (seq++) → update doc
-→ respond new version + any server-side winners the device must apply
-→ push to other devices via WebSocket; offline ones pull `since=lastSeq` on reconnect
+```mermaid
+sequenceDiagram
+  participant D as Device
+  participant S as SyncService
+  participant O as Other devices
+  D->>D: Edit offline → local outbox (entry with HLC)
+  D->>S: POST changes(baseVersion)
+  loop each entry
+    S->>S: winner = resolver.resolve(doc[key], incoming)
+    S->>S: if incoming wins → append ChangeLog (seq++) → update doc
+  end
+  S-->>D: new version + server-side winners to apply
+  S-)O: push via WebSocket
+  O->>S: offline ones pull since=lastSeq on reconnect
 ```
 
 ## Concurrency

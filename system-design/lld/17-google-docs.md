@@ -109,10 +109,18 @@ Doc metadata + ACL service (Spanner/SQL, cached)
 - **D**: session depends on `OpStore`/`SnapshotStore` interfaces.
 
 ## High-level flow (one edit)
-```
-user types → client applies locally (optimistic) → sends {baseRev=41, op}
-server: ops 42..45 happened since → op' = transform(op, 42..45) → rev 46 → persist → ack to sender
-      → broadcast op' (rev 46) to others → they transform against their pending local ops and apply
+```mermaid
+sequenceDiagram
+  participant U as User A (client)
+  participant S as Server
+  participant O as Other clients
+  U->>U: apply locally (optimistic)
+  U->>S: {baseRev=41, op}
+  S->>S: op' = transform(op, ops 42..45)
+  S->>S: assign rev 46, persist
+  S-->>U: ack rev 46
+  S-)O: broadcast op' (rev 46)
+  O->>O: transform against pending local ops, apply
 ```
 
 ## Concurrency

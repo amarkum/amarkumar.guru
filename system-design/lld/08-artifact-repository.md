@@ -99,12 +99,17 @@ Observability: metrics (downloads/s, p99 latency, cache hit ratio, scan backlog,
 - **D**: services depend on `StorageBackend`, not S3 SDK.
 
 ## High-level flow
-```
-PUBLISH: auth → check version not existing (immutable) → stream to blob store computing sha256
-         → verify checksum → insert metadata (status=QUARANTINED) → enqueue scan
-         → scanners → all pass → AVAILABLE; any fail → BLOCKED + alert
-FETCH:   auth → resolve coords via repo (virtual → members in order) → status AVAILABLE?
-         → 302 to CDN/pre-signed URL (or stream) → emit download metric
+```mermaid
+flowchart TD
+  subgraph PUBLISH
+    A1[auth] --> V{version exists?}
+    V -->|no, immutable| B[stream to blob store<br/>computing sha256] --> CK[verify checksum] --> M[insert metadata<br/>status=QUARANTINED] --> Q[enqueue scan] --> SC{scanners}
+    SC -->|all pass| AV[AVAILABLE]
+    SC -->|any fail| BL[BLOCKED + alert]
+  end
+  subgraph FETCH
+    A2[auth] --> RS[resolve coords<br/>virtual → members in order] --> AVC{AVAILABLE?} --> CDN[302 to CDN / pre-signed URL] --> MT[emit download metric]
+  end
 ```
 
 ## Concurrency

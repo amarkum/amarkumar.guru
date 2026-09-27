@@ -76,9 +76,9 @@ GET  /rooms/{id}/calendar?date=2026-09-28
 - **D**: service depends on strategy and listener interfaces.
 
 ## High-level flow
-```
-request → validate (start<end, granularity, horizon) → candidate rooms (capacity, amenities)
-       → filter free (calendar.isFree) → strategy.choose → lock room → re-check + add → notify
+```mermaid
+flowchart TD
+  R[request] --> V[validate<br/>start<end, granularity, horizon] --> C[candidate rooms<br/>capacity, amenities] --> F[filter free<br/>calendar.isFree] --> S[strategy.choose] --> L[lock room] --> RC[re-check + add] --> N[notify]
 ```
 
 ## Overlap check in O(log n)

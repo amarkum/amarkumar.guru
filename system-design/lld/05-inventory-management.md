@@ -75,12 +75,12 @@ POST /inventory/{sku}/replenish {warehouseId, qty}
 - **D**: service depends on interfaces.
 
 ## High-level flow
-```
-Checkout → Order Service → Inventory.reserve(orderId, sku, qty)   [conditional update]
-        → Payment Service
-             success → Inventory.commit(res)   (onHand -= qty, reserved -= qty)
-             failure → Inventory.release(res)  (reserved -= qty)
-Expiry job → releases PENDING reservations past expiresAt
+```mermaid
+flowchart TD
+  C[Checkout] --> O[Order Service] --> R["Inventory.reserve(orderId, sku, qty)<br/>conditional update"] --> P[Payment Service]
+  P -->|success| CM["Inventory.commit(res)<br/>onHand -= qty, reserved -= qty"]
+  P -->|failure| RL["Inventory.release(res)<br/>reserved -= qty"]
+  E[Expiry job] -->|PENDING past expiresAt| RL
 ```
 
 ## Concurrency — "last unit, two buyers"

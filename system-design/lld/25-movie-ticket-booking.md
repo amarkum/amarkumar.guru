@@ -82,11 +82,13 @@ POST /bookings/{id}/cancel
 - **D**: `BookingService` depends on `PricingStrategy`, `PaymentGateway`.
 
 ## High-level flow
-```
-select seats → hold(all-or-nothing, per-show lock) → HELD (10 min) → pay (gateway)
-  success → confirm: HELD(holdId matches, not expired) → BOOKED → ticket
-  failure / timeout → release → AVAILABLE
-Expiry sweeper (or lazy check on read) frees stale holds
+```mermaid
+stateDiagram-v2
+  [*] --> AVAILABLE
+  AVAILABLE --> HELD: hold (all-or-nothing, per-show lock), 10 min
+  HELD --> BOOKED: pay success, holdId matches, not expired
+  HELD --> AVAILABLE: payment failure / timeout / expiry sweeper
+  BOOKED --> [*]: ticket issued
 ```
 
 ## Concurrency

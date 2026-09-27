@@ -53,11 +53,14 @@ interface FirstUniqueStream { void add(char c); Optional<Character> firstUnique(
 - **S/O/L/I/D** trivially: one interface, swappable implementations, caller depends on the interface.
 
 ## High-level flow
-```
-add(c): if c in repeated → ignore
-        else if c in uniques → remove from uniques (O(1) via DLL node / LinkedHashSet), add to repeated
-        else → append to tail of uniques
-firstUnique(): head of uniques
+```mermaid
+flowchart TD
+  A["add(c)"] --> R{c in repeated?}
+  R -->|yes| I[ignore]
+  R -->|no| U{c in uniques?}
+  U -->|yes| RM[remove from uniques O&#40;1&#41;<br/>add to repeated]
+  U -->|no| T[append to tail of uniques]
+  F["firstUnique()"] --> H[head of uniques]
 ```
 
 ## Concurrency

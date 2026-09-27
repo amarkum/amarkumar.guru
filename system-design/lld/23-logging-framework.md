@@ -90,10 +90,14 @@ LoggerFactory.configure(config);   // levels, appenders
 - **D**: logger depends on `Appender` interface.
 
 ## High-level flow
-```
-log.info(fmt, args) → isEnabled(INFO)? (cheap check; effective level from hierarchy) → build LogEvent (+MDC, thread, time)
-  → for logger and ancestors while additive: each appender (with its own threshold/filter)
-  → AsyncAppender enqueues → worker thread → formatter.format → write (console/file/network)
+```mermaid
+flowchart TD
+  L["log.info(fmt, args)"] --> E{"isEnabled(INFO)?<br/>effective level"}
+  E -->|no| X[drop]
+  E -->|yes| B[build LogEvent<br/>+MDC, thread, time]
+  B --> H[logger + ancestors<br/>while additive]
+  H --> AP[each appender<br/>threshold / filter]
+  AP --> AA[AsyncAppender enqueue] --> WT[worker thread] --> FM[formatter.format] --> OUT[console / file / network]
 ```
 
 ## Concurrency

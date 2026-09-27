@@ -93,11 +93,14 @@ PUT  /admin/pricing      { vehicleType, baseRate, peakWindows[] }
 - **D**: lot depends on interfaces, injected in constructor.
 
 ## High-level flow
-```
-ENTRY: vehicle → EntryGate → lot.issueTicket → strategy.allocate → spot.tryOccupy (CAS)
-       → Ticket saved → gate opens
-EXIT:  ticket scanned → pricing.price(ticket, now) → payment.pay → Receipt
-       → spot.release → observers notified → gate opens
+```mermaid
+flowchart TD
+  subgraph ENTRY
+    V[Vehicle] --> EG[EntryGate] --> IT[lot.issueTicket] --> AL[strategy.allocate] --> OC["spot.tryOccupy (CAS)"] --> TS[Ticket saved] --> GO1[Gate opens]
+  end
+  subgraph EXIT
+    SC[Ticket scanned] --> PR["pricing.price(ticket, now)"] --> PY[payment.pay] --> RC[Receipt] --> RL[spot.release] --> OB[Observers notified] --> GO2[Gate opens]
+  end
 ```
 
 ## Concurrency
