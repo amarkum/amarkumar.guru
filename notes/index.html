@@ -34,7 +34,7 @@ window.mmInit();
     <button id="themebtn" class="themebtn" type="button">Dark mode</button>
   </nav>
 </div></header>
-<div class="layout">
+<div class="layout" id="nlayout">
   <aside class="side">
     <div><h2>Design notes</h2><p class="sub">Full write-ups for each question: requirements, class diagram, patterns, Java code and follow-ups.</p></div>
     <div class="prog"><span id="npct">0 of 26 read</span><div class="bar"><i id="nbar"></i></div></div>
@@ -59,7 +59,7 @@ window.mmInit();
     </div>
   </aside>
   <div class="content">
-    <div class="crumbs"><a href="/notes/">Notes</a> <span id="ncrumb"></span></div>
+    <div class="crumbs"><button id="sideBtn" class="sidebtn" type="button" aria-controls="nlist" title="Hide sidebar">⟨ Hide sidebar</button><a href="/notes/">Notes</a> <span id="ncrumb"></span></div>
     <article id="doc" class="card md">Loading…</article>
     <div class="markrow" id="nmark" hidden><button id="nMarkBtn" type="button" class="pbtn"></button></div>
     <div class="foot" id="npager"></div>
@@ -212,6 +212,10 @@ async function renderCode(root){
 }
 window.addEventListener("hashchange",show);
 window.onTheme=show;
+function setSide(h){nlayout.classList.toggle("noside",h);sideBtn.textContent=h?"☰ Show sidebar":"⟨ Hide sidebar";sideBtn.title=h?"Show sidebar":"Hide sidebar";sideBtn.setAttribute("aria-expanded",!h);
+ try{localStorage.setItem("sd-notes-side",h?"1":"0")}catch(e){}setTimeout(()=>editors.forEach(e=>{try{e.layout()}catch(x){}}),50)}
+sideBtn.onclick=()=>setSide(!nlayout.classList.contains("noside"));
+try{setSide(localStorage.getItem("sd-notes-side")==="1")}catch(e){setSide(false)}
 loadList().then(()=>{if(!location.hash&&NS.last&&LIST.some(x=>slugOf(x.f)===NS.last))history.replaceState(null,"","#"+NS.last);show()});
 
 
