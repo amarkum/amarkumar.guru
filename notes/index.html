@@ -126,12 +126,18 @@ function umlTools(box){const svg=box.querySelector("svg");if(!svg)return;
  bar.innerHTML=`<div class="uml-legend">${KINDS.filter(([k])=>counts[k]).map(([k,l])=>`<span class="lg lg-${k}"><i></i>${l} <b>${counts[k]}</b></span>`).join("")}</div>
   <div class="uml-zoom" role="group" aria-label="Zoom diagram"><button type="button" data-z="-">−</button><button type="button" data-z="fit">Fit</button><button type="button" data-z="1">100%</button><button type="button" data-z="+">+</button><button type="button" data-z="full">Full screen</button></div>`;
  box.innerHTML="";box.appendChild(bar);wrap.appendChild(view);box.appendChild(wrap);
- let z=1;const fitZ=()=>Math.min(1,(wrap.clientWidth-40)/W);
- const apply=()=>{svg.style.width=Math.round(W*z)+"px";svg.style.maxWidth="none";svg.style.height="auto"};
- z=Math.max(fitZ(),.85);apply();
+ const ZK="sd-uml-zoom";let saved=null;try{saved=localStorage.getItem(ZK)}catch(e){}
+ const fitZ=()=>Math.min(1,(wrap.clientWidth-40)/W);
+ let mode=saved==="fit"||!saved?"fit":"num",z=mode==="fit"?fitZ():Math.min(3,Math.max(.1,+saved||1));
+ const pct=bar.querySelector('[data-z="1"]');
+ const apply=()=>{if(mode==="fit")z=fitZ();svg.style.width=Math.round(W*z)+"px";svg.style.maxWidth="none";svg.style.height="auto";
+  pct.textContent=Math.round(z*100)+"%";pct.title="Reset to 100%";bar.querySelector('[data-z="fit"]').setAttribute("aria-pressed",mode==="fit")};
+ const store=()=>{try{localStorage.setItem(ZK,mode==="fit"?"fit":String(+z.toFixed(3)))}catch(e){}};
+ apply();
  bar.querySelector(".uml-zoom").onclick=e=>{const b=e.target.closest("button");if(!b)return;const a=b.dataset.z;
-  if(a==="full"){box.classList.toggle("full");b.textContent=box.classList.contains("full")?"Close":"Full screen";document.body.classList.toggle("noscroll",box.classList.contains("full"));z=Math.max(fitZ(),z);apply();return}
-  z=a==="+"?Math.min(3,z*1.25):a==="-"?Math.max(.3,z/1.25):a==="fit"?fitZ():1;apply()};
+  if(a==="full"){box.classList.toggle("full");b.textContent=box.classList.contains("full")?"Close":"Full screen";document.body.classList.toggle("noscroll",box.classList.contains("full"));apply();return}
+  if(a==="fit")mode="fit";else{mode="num";z=a==="+"?Math.min(3,z*1.25):a==="-"?Math.max(.1,z/1.25):1}
+  apply();store()};
 }
 addEventListener("keydown",e=>{const f=e.key==="Escape"&&document.querySelector(".diagram.uml.full");if(f)f.querySelector('[data-z="full"]').click()});
 const API_RE=/^(GET|POST|PUT|PATCH|DELETE|HEAD|WS)\s+(\S+)\s*(.*)$/;

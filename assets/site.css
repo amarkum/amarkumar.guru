@@ -342,3 +342,5 @@ body.noscroll{overflow:hidden}
 .layout.noside .md p,.layout.noside .card p{max-width:none}
 .layout.noside .uml-wrap{max-height:85vh}
 .diagram.uml .classTitle, .diagram.uml g.label-group{font-weight:700}
+.uml-zoom [data-z="1"]{min-width:56px;font-variant-numeric:tabular-nums}
+.uml-zoom button[aria-pressed="true"]{background:var(--ink);color:var(--on-accent);border-color:var(--ink)}
