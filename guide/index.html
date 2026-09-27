@@ -127,7 +127,8 @@ body{padding:0}
     <a href="/interviewer/">Interviewer</a>
     <a href="/practice/">Practice</a>
     <a href="https://excalidraw.com" target="_blank" rel="noopener">Whiteboard ↗</a>
-    <button id="themebtn" class="themebtn" type="button">Dark mode</button
+    <button id="themebtn" class="themebtn" type="button">Dark mode</button>
+  </div></header>
 <div class="page">
   <header>
     <div class="meta">Guide</div>
@@ -197,15 +198,16 @@ body{padding:0}
     </section>
   </div>
 
-  <section class="card">
-    <h2>Best guess: what this interviewer may ask</h2>
-    <p>The interviewer is an SDE III (senior engineer), likely on or near the FinTech team. SDE IIIs usually run a hands-on round: a design problem close to their own work, a lot of follow-ups, and 1–2 Leadership Principles woven in. This is a guess, not inside information.</p>
+  <section class="card" id="best-guess">
+    <h2>What she is likely to ask</h2>
+    <p>She is an <b>SDE III at Amazon</b>. SDE IIIs run a hands-on round: a design problem close to their own work, sharp follow-ups, and 1–2 Leadership Principles. Below is what she is most likely to ask in that round — not a guess about her level. More on the <a href="/interviewer/">Know your interviewer</a> page.</p>
     <h3>Most likely design questions, in order</h3>
     <ol>
-      <li><b>Payments or wallet flow:</b> charge, refund, retry safely. Expect idempotency, a double-entry ledger, reconciliation, and “what if the bank times out?”</li>
-      <li><b>Something from her own team (custom problem):</b> for example billing, invoicing, payouts to sellers, or syncing data between services. Clarify requirements carefully; she'll know every edge case.</li>
-      <li><b>LLD with code:</b> rate limiter, notification router, parking lot with pricing, file search with filters, or a shipping cost calculator. Then “add this feature”.</li>
-      <li><b>Concurrency follow-up:</b> “Two requests at once, the last unit or the same payment. What happens?”</li>
+      <li><b>Payments or wallet flow:</b> charge, refund, retry safely. Expect idempotency, PENDING → SUCCESS/FAILED, a double-entry ledger, reconciliation, and “what if the bank times out?”</li>
+      <li><b>Something from her own team (custom problem):</b> billing, invoicing, seller payouts, or syncing money/status between services. Clarify requirements carefully; she'll know every edge case.</li>
+      <li><b>LLD with code:</b> rate limiter, notification router, parking lot with peak pricing, file search with filters, or a shipping cost calculator. Then “add this feature” — extend, don't rewrite.</li>
+      <li><b>AWS-shaped follow-up:</b> DynamoDB vs SQL? SQS vs SNS? How do you make a worker idempotent? What lives in S3 vs the DB?</li>
+      <li><b>Concurrency:</b> “Two requests at once — last unit or same payment. What happens?”</li>
       <li><b>Operations:</b> “How would you monitor this? What alarms? How do you roll back?”</li>
     </ol>
     <h3>Likely Leadership Principles questions</h3>
@@ -215,14 +217,15 @@ body{padding:0}
       <li><b>Customer Obsession:</b> “A time you changed a design because of customer impact.”</li>
       <li><b>Deliver Results / Bias for Action:</b> “A tight deadline, what did you cut and why?”</li>
       <li><b>Earn Trust / Have Backbone:</b> “A time you disagreed with a senior engineer.”</li>
+      <li><b>Learn and Be Curious:</b> “A time you leveled someone up, or learned a new domain fast.”</li>
     </ul>
     <h3>How to play it</h3>
     <ul>
       <li>Treat her as a teammate reviewing a design: ask “Is this close to what your team does?”</li>
       <li>For money, always say correctness before speed, and bring up idempotency before she does.</li>
-      <li>Keep code clean and runnable; name classes well. SDE IIIs notice naming and structure.</li>
+      <li>Name AWS services only with a reason. Keep code clean and runnable; SDE IIIs notice naming and structure.</li>
     </ul>
-    <div class="cta"><a class="primary" href="/practice/">Practice these →</a></div>
+    <div class="cta"><a class="primary" href="/practice/">Practice these →</a> <a href="/interviewer/">Know your interviewer →</a></div>
   </section>
 
   <section class="card">
@@ -247,7 +250,7 @@ body{padding:0}
   </section>
 
   <div class="cta">
-    <a class="primary" href="/practice/">Practice 52 real questions →</a>
+    <a class="primary" href="/practice/">Practice 62 questions (try FinTech filter) →</a>
     <a href="/">Back to the course</a>
   </div>
 </div>
