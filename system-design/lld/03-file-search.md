@@ -37,9 +37,15 @@ Local tool — not a distributed concern. Filesystem may change during traversal
 classDiagram
     class FileNode { <<interface>> +name() +size() +isDirectory() +children() }
     class FileFilter { <<interface>> +matches(FileNode) boolean +and(f) +or(f) +negate() }
-    class NameFilter
-    class ExtensionFilter
-    class SizeFilter
+    class NameFilter {
+      <<record>>
+    }
+    class ExtensionFilter {
+      <<record>>
+    }
+    class SizeFilter {
+      <<record>>
+    }
     class AndFilter { -List~FileFilter~ filters }
     class OrFilter { -List~FileFilter~ filters }
     class NotFilter { -FileFilter inner }
@@ -56,6 +62,24 @@ classDiagram
     NotFilter o-- FileFilter
     FileSearcher --> TraversalStrategy
     FileSearcher ..> FileFilter
+    class OrFilter {
+      <<record>>
+    }
+    class FileFilter {
+      <<interface>>
+    }
+    class FileSearcher {
+      <<class>>
+    }
+    class TraversalStrategy {
+      <<interface>>
+    }
+    class NotFilter {
+      <<record>>
+    }
+    class AndFilter {
+      <<record>>
+    }
 ```
 
 ## APIs
@@ -282,6 +306,27 @@ classDiagram
     FileNode <|.. NioFileNode
     TraversalStrategy <|.. ParallelTraversal
     class FileAction { <<interface>> +apply(FileNode) }
+    class FileFilter {
+      <<interface>>
+    }
+    class ContentFilter {
+      <<class>>
+    }
+    class FileNode {
+      <<interface>>
+    }
+    class NioFileNode {
+      <<class>>
+    }
+    class TraversalStrategy {
+      <<interface>>
+    }
+    class ParallelTraversal {
+      <<class>>
+    }
+    class ModifiedAfterFilter {
+      <<class>>
+    }
 ```
 
 ## Amazon follow-up questions

@@ -38,9 +38,15 @@ Design a task scheduler: schedule tasks to run once at a time/after a delay, or 
 classDiagram
     class Task { <<interface>> +execute() }
     class Schedule { <<interface>> +next(Instant lastRun) Optional~Instant~ }
-    class OneTimeSchedule
-    class FixedRateSchedule
-    class CronSchedule
+    class OneTimeSchedule {
+      <<record>>
+    }
+    class FixedRateSchedule {
+      <<record>>
+    }
+    class CronSchedule {
+      <<class>>
+    }
     class RetryPolicy { +int maxAttempts; +Duration baseBackoff; +delay(attempt) Duration }
     class ScheduledTask { +String id; +Instant nextRunAt; +int priority; +TaskStatus status; +int attempts }
     class TaskScheduler { -DelayQueue~ScheduledTask~ queue; -ExecutorService workers; +schedule(Task, Schedule, priority) String; +cancel(id) boolean; +shutdown() }
@@ -51,6 +57,21 @@ classDiagram
     ScheduledTask --> Schedule
     ScheduledTask --> RetryPolicy
     TaskScheduler o-- ScheduledTask
+    class ScheduledTask {
+      <<class>>
+    }
+    class RetryPolicy {
+      <<record>>
+    }
+    class TaskScheduler {
+      <<class>>
+    }
+    class Schedule {
+      <<interface>>
+    }
+    class Task {
+      <<class>>
+    }
 ```
 
 ## APIs

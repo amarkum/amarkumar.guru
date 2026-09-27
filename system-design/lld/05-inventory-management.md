@@ -49,6 +49,27 @@ classDiagram
     InventoryService --> WarehouseSelectionStrategy
     InventoryService --> StockListener
     InventoryRepository ..> InventoryItem
+    class Reservation {
+      <<class>>
+    }
+    class ReservationLine {
+      <<record>>
+    }
+    class InventoryService {
+      <<class>>
+    }
+    class StockListener {
+      <<class>>
+    }
+    class WarehouseSelectionStrategy {
+      <<interface>>
+    }
+    class InventoryRepository {
+      <<interface>>
+    }
+    class InventoryItem {
+      <<record>>
+    }
 ```
 
 ## APIs

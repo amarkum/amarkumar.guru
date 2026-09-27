@@ -63,6 +63,27 @@ classDiagram
     DocumentSession --> OpStore
     DocumentSession --> SnapshotStore
     DocumentSession ..> ClientOp
+    class DocumentSession {
+      <<class>>
+    }
+    class ClientOp {
+      <<record>>
+    }
+    class SnapshotStore {
+      <<class>>
+    }
+    class OpStore {
+      <<class>>
+    }
+    class Operation {
+      <<interface>>
+    }
+    class DeleteOp {
+      <<record>>
+    }
+    class InsertOp {
+      <<record>>
+    }
 ```
 
 ## APIs

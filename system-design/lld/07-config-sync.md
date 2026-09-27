@@ -43,8 +43,12 @@ classDiagram
     class ConfigDocument { +String userId; +long version; +Map~String,ConfigEntry~ entries }
     class Change { +long seq; +ConfigEntry entry }
     class ConflictResolver { <<interface>> +resolve(ConfigEntry current, ConfigEntry incoming) ConfigEntry }
-    class LastWriterWinsResolver
-    class SetUnionResolver
+    class LastWriterWinsResolver {
+      <<class>>
+    }
+    class SetUnionResolver {
+      <<class>>
+    }
     class ChangeLog { +append(userId, entry) long; +since(userId, seq) List~Change~ }
     class PushGateway { <<interface>> +notify(deviceId, List~Change~) }
     class SyncService { +snapshot(userId, deviceId); +push(userId, deviceId, baseSeq, List~ConfigEntry~) SyncResult; +pull(userId, sinceSeq) }
@@ -54,6 +58,24 @@ classDiagram
     SyncService --> ConflictResolver
     SyncService --> PushGateway
     ConfigDocument *-- ConfigEntry
+    class SyncService {
+      <<class>>
+    }
+    class ChangeLog {
+      <<class>>
+    }
+    class PushGateway {
+      <<interface>>
+    }
+    class ConflictResolver {
+      <<interface>>
+    }
+    class ConfigDocument {
+      <<class>>
+    }
+    class ConfigEntry {
+      <<record>>
+    }
 ```
 
 ## APIs

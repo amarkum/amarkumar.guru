@@ -43,7 +43,9 @@ classDiagram
     class Booking { +String id; +String roomId; +Interval interval; +String organizer; +Set~String~ attendees; +BookingStatus status }
     class RoomCalendar { -TreeMap~Instant,Booking~ byStart; +isFree(Interval) boolean; +add(Booking) boolean; +remove(Booking) }
     class RoomSelectionStrategy { <<interface>> +choose(List~Room~, BookingRequest) Optional~Room~ }
-    class SmallestFitStrategy
+    class SmallestFitStrategy {
+      <<class>>
+    }
     class BookingListener { <<interface>> +onBooked(Booking); +onCancelled(Booking) }
     class BookingService { +search(req) List~Room~; +book(req) Booking; +cancel(bookingId, user) }
     RoomSelectionStrategy <|.. SmallestFitStrategy
@@ -52,6 +54,24 @@ classDiagram
     BookingService --> BookingListener
     Booking --> Interval
     RoomCalendar o-- Booking
+    class Booking {
+      <<class>>
+    }
+    class Interval {
+      <<record>>
+    }
+    class BookingService {
+      <<class>>
+    }
+    class RoomCalendar {
+      <<class>>
+    }
+    class RoomSelectionStrategy {
+      <<interface>>
+    }
+    class BookingListener {
+      <<interface>>
+    }
 ```
 
 ## APIs

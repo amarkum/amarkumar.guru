@@ -55,6 +55,36 @@ classDiagram
     ShowSeat --> Seat
     Booking --> SeatHold
     BookingService --> PricingStrategy
+    class Theatre {
+      <<class>>
+    }
+    class Screen {
+      <<class>>
+    }
+    class Show {
+      <<class>>
+    }
+    class ShowSeat {
+      <<class>>
+    }
+    class Seat {
+      <<record>>
+    }
+    class Booking {
+      <<record>>
+    }
+    class SeatHold {
+      <<record>>
+    }
+    class Movie {
+      <<record>>
+    }
+    class BookingService {
+      <<class>>
+    }
+    class PricingStrategy {
+      <<interface>>
+    }
 ```
 
 ## APIs

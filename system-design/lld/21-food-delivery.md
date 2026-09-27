@@ -57,6 +57,36 @@ classDiagram
     OrderService --> DispatchService
     DispatchService --> DpAssignmentStrategy
     Delivery --> DeliveryPartner
+    class OrderService {
+      <<class>>
+    }
+    class PaymentService {
+      <<class>>
+    }
+    class Order {
+      <<class>>
+    }
+    class OrderItem {
+      <<record>>
+    }
+    class Restaurant {
+      <<record>>
+    }
+    class MenuItem {
+      <<record>>
+    }
+    class DispatchService {
+      <<class>>
+    }
+    class DpAssignmentStrategy {
+      <<interface>>
+    }
+    class Delivery {
+      <<class>>
+    }
+    class DeliveryPartner {
+      <<class>>
+    }
 ```
 
 ## Order state machine

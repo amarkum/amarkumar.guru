@@ -40,12 +40,24 @@ classDiagram
     class Shipment { +double weightKg; +Dimensions dims; +String fromPin; +String toPin; +DeliveryType type; +Set~HandlingFlag~ flags; +boolean prime }
     class PricingContext { +Shipment shipment; +Zone zone; +double chargeableKg; +BigDecimal running; +List~LineItem~ items; +add(label, amount) }
     class PricingRule { <<interface>> +order() int; +applies(PricingContext) boolean; +apply(PricingContext) }
-    class BaseWeightDistanceRule
-    class DeliveryTypeRule
-    class RegionSurchargeRule
-    class SpecialHandlingRule
-    class PrimeDiscountRule
-    class MinimumChargeRule
+    class BaseWeightDistanceRule {
+      <<record>>
+    }
+    class DeliveryTypeRule {
+      <<record>>
+    }
+    class RegionSurchargeRule {
+      <<record>>
+    }
+    class SpecialHandlingRule {
+      <<class>>
+    }
+    class PrimeDiscountRule {
+      <<class>>
+    }
+    class MinimumChargeRule {
+      <<record>>
+    }
     class ShippingCalculator { -List~PricingRule~ rules; +quote(Shipment) Quote }
     class Quote { +BigDecimal total; +List~LineItem~ lines; +String ruleSetVersion }
     PricingRule <|.. BaseWeightDistanceRule
@@ -56,6 +68,15 @@ classDiagram
     PricingRule <|.. MinimumChargeRule
     ShippingCalculator o-- PricingRule
     ShippingCalculator ..> Quote
+    class PricingRule {
+      <<interface>>
+    }
+    class ShippingCalculator {
+      <<class>>
+    }
+    class Quote {
+      <<record>>
+    }
 ```
 
 ## APIs

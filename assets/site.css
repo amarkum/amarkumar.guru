@@ -91,6 +91,14 @@ td code,th code{white-space:nowrap}
 /* diagrams */
 .diagram,pre.mermaid{margin:0;overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px;text-align:center;font-family:var(--mono);font-size:13px;color:var(--muted);box-shadow:var(--shadow)}
 .diagram svg,pre.mermaid svg{max-width:100%;height:auto}
+.diagram g[data-kind] :is(rect,path:first-child){stroke-width:1.5px!important}
+.diagram g[data-kind="interface"] :is(rect,path){stroke:#2563eb!important}
+.diagram g[data-kind="interface"] rect{fill:color-mix(in srgb,#2563eb 8%,var(--surface))!important}
+.diagram g[data-kind="enumeration"] :is(rect,path){stroke:#b45309!important}
+.diagram g[data-kind="enumeration"] rect{fill:color-mix(in srgb,#d97706 9%,var(--surface))!important}
+.diagram g[data-kind="abstract"] :is(rect,path){stroke:#7c3aed!important;stroke-dasharray:4 3}
+.diagram g[data-kind="record"] :is(rect,path){stroke:#15803d!important}
+.diagram g[data-kind="record"] rect{fill:color-mix(in srgb,#15803d 7%,var(--surface))!important}
 .diagram-label{font:600 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:-14px}
 
 /* quiz */

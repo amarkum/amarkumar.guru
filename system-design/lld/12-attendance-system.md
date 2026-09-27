@@ -55,6 +55,30 @@ classDiagram
     Timesheet *-- WorkSegment
     ApprovalService --> Timesheet
     PayrollExporter --> Timesheet
+    class Timesheet {
+      <<record>>
+    }
+    class WorkSegment {
+      <<record>>
+    }
+    class PayrollExporter {
+      <<class>>
+    }
+    class TimesheetCalculator {
+      <<class>>
+    }
+    class OvertimePolicy {
+      <<interface>>
+    }
+    class ApprovalService {
+      <<class>>
+    }
+    class PunchService {
+      <<class>>
+    }
+    class EventStore {
+      <<interface>>
+    }
 ```
 
 ## APIs

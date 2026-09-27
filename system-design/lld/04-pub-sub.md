@@ -47,6 +47,24 @@ classDiagram
     Subscription --> Subscriber
     Subscription --> RetryPolicy
     Subscription --> DeadLetterQueue
+    class Subscription {
+      <<class>>
+    }
+    class DeadLetterQueue {
+      <<class>>
+    }
+    class RetryPolicy {
+      <<record>>
+    }
+    class Broker {
+      <<class>>
+    }
+    class Topic {
+      <<class>>
+    }
+    class Subscriber {
+      <<interface>>
+    }
 ```
 
 ## APIs

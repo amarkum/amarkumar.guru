@@ -53,6 +53,30 @@ classDiagram
     FeedService --> Ranker
     FeedService --> FanoutStrategy
     FeedService --> CounterService
+    class FeedService {
+      <<class>>
+    }
+    class FanoutStrategy {
+      <<interface>>
+    }
+    class FeedCache {
+      <<class>>
+    }
+    class CounterService {
+      <<class>>
+    }
+    class Post {
+      <<record>>
+    }
+    class Media {
+      <<class>>
+    }
+    class Ranker {
+      <<class>>
+    }
+    class HybridFanout {
+      <<class>>
+    }
 ```
 
 ## APIs

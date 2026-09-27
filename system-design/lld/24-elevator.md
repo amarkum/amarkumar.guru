@@ -44,13 +44,33 @@ classDiagram
     class HallRequest { +int floor; +Direction dir }
     class CarRequest { +int elevatorId; +int floor }
     class DispatchStrategy { <<interface>> +select(List~Elevator~, HallRequest) Elevator }
-    class NearestCarStrategy
+    class NearestCarStrategy {
+      <<class>>
+    }
     class ElevatorController { -List~Elevator~ elevators; -DispatchStrategy strategy; +hallCall(HallRequest); +carCall(CarRequest); +tick() }
     Request <|.. HallRequest
     Request <|.. CarRequest
     DispatchStrategy <|.. NearestCarStrategy
     ElevatorController o-- Elevator
     ElevatorController --> DispatchStrategy
+    class Request {
+      <<class>>
+    }
+    class CarRequest {
+      <<class>>
+    }
+    class ElevatorController {
+      <<class>>
+    }
+    class DispatchStrategy {
+      <<interface>>
+    }
+    class HallRequest {
+      <<record>>
+    }
+    class Elevator {
+      <<class>>
+    }
 ```
 
 ## APIs

@@ -46,7 +46,9 @@ classDiagram
     class Package { +String id; +String orderId; +Size size; +String customerId }
     class Assignment { +String id; +Package pkg; +Compartment compartment; +String otpHash; +Instant expiresAt; +AssignmentStatus status }
     class AllocationStrategy { <<interface>> +allocate(LockerLocation, Size) Optional~Compartment~ }
-    class SmallestFitAllocation
+    class SmallestFitAllocation {
+      <<class>>
+    }
     class OtpService { +generate() String; +hash(String) String; +matches(String, String) boolean }
     class LockerService { +reserve(locationId, pkg) Assignment; +deposit(assignmentId) String; +pickup(locationId, otp) Compartment; +expire() }
     LockerLocation *-- Compartment
@@ -55,6 +57,27 @@ classDiagram
     AllocationStrategy <|.. SmallestFitAllocation
     LockerService --> AllocationStrategy
     LockerService --> OtpService
+    class LockerService {
+      <<class>>
+    }
+    class OtpService {
+      <<class>>
+    }
+    class Assignment {
+      <<class>>
+    }
+    class Compartment {
+      <<class>>
+    }
+    class AllocationStrategy {
+      <<interface>>
+    }
+    class LockerLocation {
+      <<record>>
+    }
+    class Package {
+      <<record>>
+    }
 ```
 
 ## State transitions

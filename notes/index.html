@@ -68,7 +68,8 @@ async function show(){const cur=location.hash.slice(1);const file=cur?cur+".md":
  doc.querySelectorAll("a[href$='.md']").forEach(a=>{const h=a.getAttribute("href");if(!/^https?:/.test(h))a.setAttribute("href","#"+h.split("/").pop().replace(/\.md$/,""))});
  doc.querySelectorAll("table").forEach(t=>{const w=document.createElement("div");w.className="tbl";t.parentNode.insertBefore(w,t);w.appendChild(t)});
  for(const c of doc.querySelectorAll("pre code.language-mermaid")){const pre=c.parentNode,src=c.textContent,box=document.createElement("div");box.className="diagram";pre.replaceWith(box);
-  try{const r=await mermaid.render("nm"+(rn++),src);box.innerHTML=r.svg}catch(e){box.innerHTML="<pre>"+src.replace(/</g,"&lt;")+"</pre>"}}
+  try{const r=await mermaid.render("nm"+(rn++),src);box.innerHTML=r.svg;
+   box.querySelectorAll("g.node").forEach(g=>{const k=(g.textContent.match(/«(\w+)»/)||[])[1];if(k)g.setAttribute("data-kind",k)})}catch(e){box.innerHTML="<pre>"+src.replace(/</g,"&lt;")+"</pre>"}}
  await renderCode(doc);
  const i=LIST.findIndex(x=>slugOf(x.f)===cur);const it=LIST[i];
  ncrumb.textContent=it?"/ "+it.t:"";document.title=(it?it.t+" | ":"")+"Notes | amarkumar.guru";

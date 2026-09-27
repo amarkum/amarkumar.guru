@@ -53,6 +53,24 @@ classDiagram
     Artist o-- Album
     Playlist *-- PlaylistItem
     PlaylistItem --> Track
+    class Artist {
+      <<class>>
+    }
+    class Album {
+      <<class>>
+    }
+    class Playlist {
+      <<class>>
+    }
+    class PlaylistItem {
+      <<class>>
+    }
+    class Track {
+      <<record>>
+    }
+    class AudioFile {
+      <<class>>
+    }
 ```
 
 ## APIs

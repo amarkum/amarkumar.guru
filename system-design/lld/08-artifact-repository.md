@@ -41,7 +41,9 @@ Design an artifact repository: upload (publish) an artifact and fetch an artifac
 ```mermaid
 classDiagram
     class Repository { <<interface>> +resolve(ArtifactCoordinates) Optional~ArtifactVersion~ }
-    class LocalRepository
+    class LocalRepository {
+      <<class>>
+    }
     class RemoteRepository { -String upstreamUrl }
     class VirtualRepository { -List~Repository~ members }
     class ArtifactCoordinates { +String repo; +String group; +String name; +String version }
@@ -58,6 +60,27 @@ classDiagram
     ArtifactService --> StorageBackend
     ArtifactService --> ScanPipeline
     ScanPipeline o-- Scanner
+    class Repository {
+      <<interface>>
+    }
+    class VirtualRepository {
+      <<class>>
+    }
+    class RemoteRepository {
+      <<class>>
+    }
+    class ArtifactService {
+      <<class>>
+    }
+    class ScanPipeline {
+      <<class>>
+    }
+    class Scanner {
+      <<interface>>
+    }
+    class StorageBackend {
+      <<interface>>
+    }
 ```
 
 ## APIs

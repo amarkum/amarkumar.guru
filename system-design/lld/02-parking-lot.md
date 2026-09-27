@@ -41,6 +41,7 @@ Design a parking lot with ticket issue at entry and receipt/payment at exit. Fol
 ```mermaid
 classDiagram
     class ParkingLot {
+      <<class>>
       -List~Floor~ floors
       +issueTicket(Vehicle) Ticket
       +exit(ticketId, PaymentMode) Receipt
@@ -51,10 +52,16 @@ classDiagram
     class Ticket { -String id; -Vehicle vehicle; -ParkingSpot spot; -Instant entryTime }
     class Receipt { -Ticket ticket; -Instant exitTime; -Money amount; -Payment payment }
     class SpotAllocationStrategy { <<interface>> +allocate(List~Floor~, VehicleType) Optional~ParkingSpot~ }
-    class NearestFirstStrategy
+    class NearestFirstStrategy {
+      <<class>>
+    }
     class PricingStrategy { <<interface>> +price(Ticket, Instant exit) Money }
-    class HourlyPricing
-    class PeakHourPricing
+    class HourlyPricing {
+      <<class>>
+    }
+    class PeakHourPricing {
+      <<class>>
+    }
     class PaymentProcessor { <<interface>> +pay(Money, PaymentMode) Payment }
     ParkingLot "1" *-- "many" Floor
     Floor "1" *-- "many" ParkingSpot
@@ -67,6 +74,37 @@ classDiagram
     SpotAllocationStrategy <|.. NearestFirstStrategy
     PricingStrategy <|.. HourlyPricing
     PricingStrategy <|.. PeakHourPricing
+    class SpotAllocationStrategy {
+      <<interface>>
+    }
+    class Ticket {
+      <<record>>
+    }
+    class ParkingSpot {
+      <<class>>
+    }
+    class Receipt {
+      <<record>>
+    }
+    class PricingStrategy {
+      <<interface>>
+    }
+    class PaymentProcessor {
+      <<interface>>
+    }
+    class Vehicle {
+      <<record>>
+    }
+    class Floor {
+      <<class>>
+    }
+    class PaymentMode {
+      <<enumeration>>
+      CASH
+      CARD
+      UPI
+    }
+    ParkingLot --> PaymentMode
 ```
 
 ## APIs
@@ -291,6 +329,21 @@ classDiagram
     PricingDecorator <|-- WeekendSurcharge
     PricingDecorator <|-- EvChargingPricing
     PricingDecorator o-- PricingStrategy : wraps
+    class PricingDecorator {
+      <<class>>
+    }
+    class PricingStrategy {
+      <<interface>>
+    }
+    class EvChargingPricing {
+      <<class>>
+    }
+    class WeekendSurcharge {
+      <<class>>
+    }
+    class PeakHourPricing {
+      <<class>>
+    }
 ```
 
 ## Amazon follow-up questions

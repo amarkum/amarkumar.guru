@@ -41,9 +41,15 @@ Design a backup system with three backup types: **full**, **differential**, and 
 classDiagram
     class BackupStrategy { <<interface>> +type() BackupType; +run(DataSource, BackupCatalog, StorageTarget) BackupRecord }
     class AbstractBackup { <<abstract>> +run() ; #selectData()* ; #baseFullId()* }
-    class FullBackup
-    class DifferentialBackup
-    class LogBackup
+    class FullBackup {
+      <<class>>
+    }
+    class DifferentialBackup {
+      <<class>>
+    }
+    class LogBackup {
+      <<class>>
+    }
     class DataSource { <<interface>> +currentLsn() long; +readAll() ; +readChangedSince(lsn) ; +readLog(fromLsn, toLsn) }
     class StorageTarget { <<interface>> +write(key, bytes) String; +read(key) bytes }
     class BackupRecord { +String id; +BackupType type; +String baseFullId; +long fromLsn; +long toLsn; +Instant time; +String location; +String checksum }
@@ -58,6 +64,24 @@ classDiagram
     AbstractBackup --> StorageTarget
     AbstractBackup --> BackupCatalog
     RestorePlanner --> BackupCatalog
+    class RestorePlanner {
+      <<class>>
+    }
+    class BackupCatalog {
+      <<class>>
+    }
+    class AbstractBackup {
+      <<abstract>>
+    }
+    class StorageTarget {
+      <<interface>>
+    }
+    class BackupStrategy {
+      <<class>>
+    }
+    class DataSource {
+      <<class>>
+    }
 ```
 
 ## APIs

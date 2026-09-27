@@ -37,6 +37,18 @@ classDiagram
     FirstUniqueStream <|.. DllFirstUniqueStream
     FirstUniqueStream <|.. LinkedHashSetStream
     DllFirstUniqueStream *-- Node
+    class DllFirstUniqueStream {
+      <<class>>
+    }
+    class Node {
+      <<class>>
+    }
+    class FirstUniqueStream {
+      <<interface>>
+    }
+    class LinkedHashSetStream {
+      <<class>>
+    }
 ```
 
 ## APIs

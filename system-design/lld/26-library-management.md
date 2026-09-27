@@ -55,6 +55,33 @@ classDiagram
     LibraryService --> FinePolicy
     LibraryService ..> LendingPolicy
     LibraryService ..> Reservation
+    class LibraryService {
+      <<class>>
+    }
+    class LendingPolicy {
+      <<interface>>
+    }
+    class Loan {
+      <<class>>
+    }
+    class BookItem {
+      <<class>>
+    }
+    class Catalog {
+      <<class>>
+    }
+    class Reservation {
+      <<class>>
+    }
+    class Book {
+      <<record>>
+    }
+    class FinePolicy {
+      <<interface>>
+    }
+    class Member {
+      <<class>>
+    }
 ```
 
 ## APIs

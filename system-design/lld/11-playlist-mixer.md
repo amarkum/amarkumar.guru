@@ -39,11 +39,17 @@ Stateless mixing — N/A. Source services are separate; tolerate partial failure
 classDiagram
     class Song { +String id; +String artist; +String genre; +int durationSec; +boolean explicit }
     class SongSource { <<interface>> +name() String; +songs(userId) Iterator~Song~ }
-    class DjServiceSource
-    class RecommendationSource
+    class DjServiceSource {
+      <<class>>
+    }
+    class RecommendationSource {
+      <<class>>
+    }
     class WeightedSource { +SongSource source; +int weight }
     class MixStrategy { <<interface>> +mix(List~WeightedIterator~) Iterator~Song~ }
-    class WeightedRoundRobinMix
+    class WeightedRoundRobinMix {
+      <<class>>
+    }
     class SongFilter { <<interface>> +test(Song) boolean; +and(SongFilter) }
     class PlaylistGenerator { +generate(userId, prefs, size) Playlist }
     class Playlist { +List~Song~ songs }
@@ -54,6 +60,21 @@ classDiagram
     PlaylistGenerator --> MixStrategy
     PlaylistGenerator ..> SongFilter
     WeightedSource --> SongSource
+    class SongSource {
+      <<interface>>
+    }
+    class PlaylistGenerator {
+      <<class>>
+    }
+    class SongFilter {
+      <<interface>>
+    }
+    class MixStrategy {
+      <<interface>>
+    }
+    class WeightedSource {
+      <<record>>
+    }
 ```
 
 ## APIs

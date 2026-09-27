@@ -42,7 +42,9 @@ Design Uber: class design (Rider, Driver, Trip, Payment, Location), trip state m
 ```mermaid
 classDiagram
     class User { <<abstract>> +String id; +String name; +String phone }
-    class Rider
+    class Rider {
+      <<class>>
+    }
     class Driver { +DriverStatus status; +Vehicle vehicle; +Location location }
     class Vehicle { +String plate; +RideType type }
     class Trip { +String id; +TripStatus status; +Location pickup; +Location drop; +Fare fare; +transition(TripStatus) }
@@ -63,6 +65,36 @@ classDiagram
     TripService --> PaymentService
     MatchingStrategy --> LocationIndex
     PricingService --> SurgeCalculator
+    class Trip {
+      <<class>>
+    }
+    class TripService {
+      <<class>>
+    }
+    class PaymentService {
+      <<class>>
+    }
+    class PricingService {
+      <<class>>
+    }
+    class MatchingStrategy {
+      <<class>>
+    }
+    class LocationIndex {
+      <<interface>>
+    }
+    class Driver {
+      <<class>>
+    }
+    class Vehicle {
+      <<class>>
+    }
+    class User {
+      <<class>>
+    }
+    class SurgeCalculator {
+      <<interface>>
+    }
 ```
 
 ## Trip state machine

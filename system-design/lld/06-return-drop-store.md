@@ -42,7 +42,9 @@ classDiagram
     class Slot { +String id; +String storeId; +Instant start; +int capacity; -AtomicInteger booked; +tryBook() boolean; +cancel() }
     class Booking { +String id; +String returnId; +Slot slot; +BookingStatus status; +String otp }
     class GeoIndex { <<interface>> +add(DropStore); +nearby(Location, radiusKm) List~DropStore~ }
-    class GeohashIndex
+    class GeohashIndex {
+      <<class>>
+    }
     class StoreRankingStrategy { <<interface>> +rank(Location, List~DropStore~) List~DropStore~ }
     class BookingService { +findStores(returnId, Location) ; +book(returnId, slotId) Booking; +cancel(bookingId); +markDropped(otp) }
     GeoIndex <|.. GeohashIndex
@@ -51,6 +53,27 @@ classDiagram
     DropStore *-- Slot
     Booking --> Slot
     DropStore --> Location
+    class Booking {
+      <<class>>
+    }
+    class Slot {
+      <<class>>
+    }
+    class DropStore {
+      <<record>>
+    }
+    class BookingService {
+      <<class>>
+    }
+    class GeoIndex {
+      <<interface>>
+    }
+    class StoreRankingStrategy {
+      <<class>>
+    }
+    class Location {
+      <<record>>
+    }
 ```
 
 ## APIs

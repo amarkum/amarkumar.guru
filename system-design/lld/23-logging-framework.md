@@ -45,12 +45,20 @@ classDiagram
     class Logger { -String name; -LogLevel level; -Logger parent; -List~Appender~ appenders; -boolean additive; +info(msg, args); +isEnabled(level) }
     class LoggerFactory { +getLogger(name) Logger }
     class Appender { <<interface>> +append(LogEvent); +close() }
-    class ConsoleAppender
-    class RollingFileAppender
+    class ConsoleAppender {
+      <<class>>
+    }
+    class RollingFileAppender {
+      <<class>>
+    }
     class AsyncAppender { -BlockingQueue~LogEvent~ queue; -Appender delegate }
     class Formatter { <<interface>> +format(LogEvent) String }
-    class PatternFormatter
-    class JsonFormatter
+    class PatternFormatter {
+      <<class>>
+    }
+    class JsonFormatter {
+      <<class>>
+    }
     Logger --> Logger : parent
     Logger o-- Appender
     Appender <|.. ConsoleAppender
@@ -62,6 +70,21 @@ classDiagram
     Formatter <|.. PatternFormatter
     Formatter <|.. JsonFormatter
     LoggerFactory ..> Logger
+    class LoggerFactory {
+      <<class>>
+    }
+    class Logger {
+      <<class>>
+    }
+    class Formatter {
+      <<interface>>
+    }
+    class Appender {
+      <<interface>>
+    }
+    class AsyncAppender {
+      <<class>>
+    }
 ```
 
 ## APIs

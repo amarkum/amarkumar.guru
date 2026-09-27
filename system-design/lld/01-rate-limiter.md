@@ -42,11 +42,20 @@ classDiagram
       <<interface>>
       +tryAcquire(key, rule) RateLimitResult
     }
-    class TokenBucketLimiter
-    class FixedWindowLimiter
-    class SlidingWindowLogLimiter
-    class RedisTokenBucketLimiter
+    class TokenBucketLimiter {
+      <<class>>
+    }
+    class FixedWindowLimiter {
+      <<class>>
+    }
+    class SlidingWindowLogLimiter {
+      <<class>>
+    }
+    class RedisTokenBucketLimiter {
+      <<class>>
+    }
     class RateLimitRule {
+      <<record>>
       +int capacity
       +Duration window
       +AlgorithmType type
@@ -56,9 +65,11 @@ classDiagram
       +ruleFor(clientId, route) RateLimitRule
     }
     class RateLimiterService {
+      <<class>>
       +allow(clientId, route) RateLimitResult
     }
     class RateLimitResult {
+      <<record>>
       +boolean allowed
       +long remaining
       +long retryAfterMs
@@ -70,6 +81,13 @@ classDiagram
     RateLimiterService --> RuleProvider
     RateLimiterService --> RateLimitAlgorithm
     RateLimiterService ..> RateLimitResult
+    class AlgorithmType {
+      <<enumeration>>
+      TOKEN_BUCKET
+      FIXED_WINDOW
+      SLIDING_LOG
+    }
+    RateLimitRule --> AlgorithmType
 ```
 
 ## APIs
@@ -313,6 +331,15 @@ classDiagram
     RateLimitAlgorithm <|.. MetricsLimiterDecorator
     CompositeLimiter o-- RateLimitAlgorithm
     MetricsLimiterDecorator o-- RateLimitAlgorithm
+    class CompositeLimiter {
+      <<class>>
+    }
+    class RateLimitAlgorithm {
+      <<interface>>
+    }
+    class MetricsLimiterDecorator {
+      <<class>>
+    }
 ```
 
 ## Amazon follow-up questions
