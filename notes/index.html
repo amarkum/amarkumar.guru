@@ -69,7 +69,7 @@ window.mmInit();
 <script>
 
 require.config({paths:{vs:"https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs"}});
-let monacoP=new Promise(res=>require(["vs/editor/editor.main"],res));
+let monacoP=Promise.all([new Promise(res=>require(["vs/editor/editor.main"],res)),document.fonts.load("13px 'Prima Sans Mono'").catch(()=>{})]);
 const LANGMAP={js:"javascript",ts:"typescript",py:"python",sh:"shell",bash:"shell",yml:"yaml",md:"markdown"};
 const BASE="/system-design/lld/";let LIST=[];
 const NK="sd-notes-v1";
@@ -261,7 +261,7 @@ function makeEditor(host,src,lang,minH){
  host.style.height=Math.min(560,Math.max(minH||40,lines*19+16))+"px";
  const ed=monaco.editor.create(host,{value:src,language:lang,readOnly:true,domReadOnly:true,
   theme:curTheme()==="dark"?"vs-dark":"vs",minimap:{enabled:false},scrollBeyondLastLine:false,fontSize:13,
-  fontFamily:"JetBrains Mono, ui-monospace, monospace",lineNumbers:lines>3?"on":"off",renderLineHighlight:"none",
+  fontFamily:"'Prima Sans Mono', JetBrains Mono, ui-monospace, monospace",lineNumbers:lines>3?"on":"off",renderLineHighlight:"none",
   automaticLayout:true,contextmenu:false,folding:lines>8,padding:{top:8,bottom:8},
   scrollbar:{alwaysConsumeMouseWheel:false,verticalScrollbarSize:8,horizontalScrollbarSize:8},overviewRulerLanes:0,
   guides:{indentation:false}});

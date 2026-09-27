@@ -1,9 +1,10 @@
+@font-face{font-family:"Prima Sans Mono";src:url("/assets/fonts/PrimaSansMono-Regular.otf") format("opentype");font-weight:100 900;font-style:normal;font-display:swap}
 :root{
   --bg:#f7f7f7;--surface:#fff;--soft:#efefef;--ink:#1a1a1a;--mid:#404040;--muted:#6b6b6b;
   --line:#e5e5e5;--accent:#1a1a1a;--on-accent:#fff;--accent-soft:#f1f1f1;
   --ok:#15803d;--ok-soft:#ecfdf3;--bad:#b91c1c;--bad-soft:#fef2f2;--say:#92400e;--say-soft:#fffbeb;
   --radius:6px;--radius-lg:8px;--shadow:0 1px 2px rgba(0,0,0,.04);
-  --font:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;--display:"Bricolage Grotesque","Plus Jakarta Sans",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  --font:"Plus Jakarta Sans",system-ui,-apple-system,sans-serif;--display:"Bricolage Grotesque","Plus Jakarta Sans",system-ui,sans-serif;--mono:"Prima Sans Mono","JetBrains Mono",ui-monospace,monospace;
   --head-h:56px;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
