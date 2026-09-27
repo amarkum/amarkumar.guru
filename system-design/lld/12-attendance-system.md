@@ -38,7 +38,7 @@ Design an attendance system for hourly employees. Interviewer gives almost no co
 - `Timesheet` **HAS-A** list of `WorkSegment`, list of `Correction`.
 - `Employee` **HAS-A** `Site`, list of `Shift`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class PunchType {

@@ -37,7 +37,7 @@ Design a parking lot with ticket issue at entry and receipt/payment at exit. Fol
 - `ParkingLot` **HAS-A** list of `Floor`; `Floor` **HAS-A** list of `ParkingSpot`.
 - `Ticket` **HAS-A** `Vehicle`, `ParkingSpot`; `Receipt` **HAS-A** `Ticket`, `Payment`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class VehicleType {

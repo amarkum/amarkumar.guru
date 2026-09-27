@@ -33,7 +33,7 @@ Design a task scheduler: schedule tasks to run once at a time/after a delay, or 
 - `ScheduledTask` **HAS-A** `Task`, `Schedule`, `RetryPolicy`.
 - `TaskScheduler` **HAS-A** `PriorityBlockingQueue<ScheduledTask>` / `DelayQueue`, worker `ExecutorService`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class TaskStatus {

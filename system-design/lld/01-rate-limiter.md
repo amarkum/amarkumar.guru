@@ -35,7 +35,7 @@ Design a rate limiter. Discuss Fixed Window, Sliding Window, Token Bucket; then 
 - `RateLimiterService` **HAS-A** `RuleProvider`, **HAS-A** map of `RateLimitAlgorithm`.
 - `TokenBucketLimiter` **HAS-A** `ConcurrentHashMap<String, Bucket>` and a `Clock`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class AlgorithmType {

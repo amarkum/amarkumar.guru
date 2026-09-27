@@ -38,7 +38,7 @@ Design Uber: class design (Rider, Driver, Trip, Payment, Location), trip state m
 - `CardPayment`, `WalletPayment`, `CashPayment` **IS-A** `PaymentMethod`.
 - `Trip` **HAS-A** `Rider`, `Driver`, `Fare`, `Payment`; `Driver` **HAS-A** `Vehicle`, `Location`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class RideType {

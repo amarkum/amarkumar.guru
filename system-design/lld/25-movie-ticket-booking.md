@@ -34,7 +34,7 @@ Design a movie ticket booking system: browse movies by city, theatres & shows, v
 - `SeatTypePricing`, `DynamicPricing` **IS-A** `PricingStrategy`.
 - `Theatre` **HAS-A** `Screen`s; `Screen` **HAS-A** `Seat`s; `Show` **HAS-A** `ShowSeat`s; `Booking` **HAS-A** `ShowSeat`s + `Payment`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class SeatType {

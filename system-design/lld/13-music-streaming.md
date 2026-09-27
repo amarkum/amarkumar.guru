@@ -37,7 +37,7 @@ Design a music streaming platform for millions of users to discover, search and 
 - `UserPlaylist`, `GeneratedPlaylist` (Discover Weekly) **IS-A** `Playlist`.
 - `Album` **HAS-A** tracks; `Playlist` **HAS-A** `PlaylistItem`s; `Track` **HAS-A** `AudioFile`s (per bitrate).
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class PlayerState {

@@ -35,7 +35,7 @@ Design and implement a meeting room scheduler: book rooms for time intervals, no
 - `EmailNotifier`, `SlackNotifier` **IS-A** `BookingListener`.
 - `RoomCalendar` **HAS-A** `TreeMap<Instant, Booking>`; `BookingService` **HAS-A** calendars, strategy, listeners.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class Amenity {

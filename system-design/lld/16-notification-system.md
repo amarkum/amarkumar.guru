@@ -34,7 +34,7 @@
 - `NotificationRouter` **HAS-A** ordered `RoutingRule`s and `PreferenceService`.
 - `NotificationService` **HAS-A** router, handler registry, retry policy.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class Channel {

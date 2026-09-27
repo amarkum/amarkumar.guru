@@ -34,7 +34,7 @@ Single controller (embedded); not distributed. Controller state is authoritative
 - `NearestCarStrategy`, `LeastLoadedStrategy`, `ZoneStrategy` **IS-A** `DispatchStrategy`.
 - `ElevatorController` **HAS-A** list of `Elevator`, a `DispatchStrategy`; `Elevator` **HAS-A** `Door`, `TreeSet` up stops, down stops.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class Direction {

@@ -37,7 +37,7 @@ Design an artifact repository: upload (publish) an artifact and fetch an artifac
 - `AntivirusScanner`, `CveScanner`, `LicenseScanner` **IS-A** `Scanner`.
 - `VirtualRepository` **HAS-A** list of `Repository` (Composite). `ArtifactVersion` **HAS-A** `Blob` ref (digest).
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class ArtifactStatus {

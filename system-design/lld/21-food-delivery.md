@@ -38,7 +38,7 @@ Design the core architecture for a food delivery platform: restaurant onboarding
 - `UpiPayment`, `CardPayment`, `CodPayment` **IS-A** `PaymentMethod`.
 - `Restaurant` **HAS-A** `Menu` → `MenuItem`s; `Order` **HAS-A** `OrderItem`s, `Payment`, `Delivery`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class OrderStatus {

@@ -36,7 +36,7 @@ Single library DB → **CP**. Search index can be eventually consistent.
 - `PerDayFinePolicy`, `SlabFinePolicy` **IS-A** `FinePolicy`.
 - `Book` **HAS-A** many `BookItem`; `Member` **HAS-A** `Loan`s; `Book` **HAS-A** reservation queue.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class MemberType {

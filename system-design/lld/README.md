@@ -9,7 +9,7 @@ Every problem is one self-contained `.md` file in the same format:
 5. CAP / consistency
 6. Core entities
 7. IS-A / HAS-A
-8. Mermaid UML class diagram
+8. UML diagram
 9. APIs
 10. Design patterns
 11. SOLID mapping

@@ -36,7 +36,7 @@ Custom team problem: syncing configurations (settings/preferences) across a user
 - `WebSocketPush`, `MobilePush` **IS-A** `PushGateway`.
 - `ConfigDocument` **HAS-A** map of `ConfigEntry`; `SyncService` **HAS-A** `ChangeLog`, resolvers, `PushGateway`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class Scope {

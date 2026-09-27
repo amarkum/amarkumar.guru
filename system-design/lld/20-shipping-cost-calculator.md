@@ -34,7 +34,7 @@ Quotes are computed from cached rule sets (**AP**; versioned). Store `ruleSetVer
 - `ShippingCalculator` **HAS-A** ordered list of `PricingRule`, `ZoneResolver`.
 - `Quote` **HAS-A** list of `LineItem`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class DeliveryType {

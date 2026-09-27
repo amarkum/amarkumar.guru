@@ -32,7 +32,7 @@ Local tool — not a distributed concern. Filesystem may change during traversal
 - `Directory` **IS-A** `FileNode` and **HAS-A** children `FileNode` (Composite for file tree).
 - `FileSearcher` **HAS-A** `TraversalStrategy`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class FileNode {

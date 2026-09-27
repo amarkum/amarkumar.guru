@@ -34,7 +34,7 @@ Customer wants to return a package. Instead of pickup, the customer books a **sl
 - `DistanceRanking`, `EtaRanking` **IS-A** `StoreRankingStrategy`.
 - `DropStore` **HAS-A** `Location`, many `Slot`s; `Booking` **HAS-A** `Slot`, `ReturnRequest`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class PackageSize {

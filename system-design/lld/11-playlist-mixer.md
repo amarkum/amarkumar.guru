@@ -34,7 +34,7 @@ Stateless mixing — N/A. Source services are separate; tolerate partial failure
 - `ExplicitFilter`, `GenreFilter`, `MaxDurationFilter`, `NoDuplicateFilter` **IS-A** `SongFilter`; `CompositeFilter` HAS-A filters.
 - `PlaylistGenerator` **HAS-A** list of `WeightedSource`, `MixStrategy`, `SongFilter`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class Song {

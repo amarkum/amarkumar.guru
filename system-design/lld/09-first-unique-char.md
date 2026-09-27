@@ -27,7 +27,7 @@ Not distributed. If sharded across machines, "first" needs a global order (seque
 - `LinkedHashMapStream`, `DllStream` **IS-A** `FirstUniqueStream`.
 - `DllStream` **HAS-A** `Map<Character, Node>` + doubly-linked list + `Set<Character>` repeated.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class FirstUnique {

@@ -35,7 +35,7 @@ Design a social feed: users post text/images/videos, view posts in a feed, like/
 - `PushFanout`, `PullFanout`, `HybridFanout` **IS-A** `FanoutStrategy`.
 - `FeedService` **HAS-A** `FeedCache`, `FanoutStrategy`, `Ranker`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class Post {

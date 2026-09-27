@@ -37,7 +37,7 @@ Local library. For centralized logging (ELK/CloudWatch), shipping is **AP** — 
 - `PatternFormatter`, `JsonFormatter` **IS-A** `Formatter`.
 - `Logger` **HAS-A** list of `Appender`s, parent `Logger`; `Appender` **HAS-A** `Formatter`; `AsyncAppender` **HAS-A** delegate `Appender` + queue.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class LogLevel {

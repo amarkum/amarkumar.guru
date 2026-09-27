@@ -46,7 +46,7 @@ Design Google Docs: real-time collaboration (OT vs CRDT), WebSockets, delta-base
 - `DocumentSession` **HAS-A** current text, op log since snapshot, set of `ClientConnection`s, presence map.
 - `Document` **HAS-A** snapshots, revisions, permissions.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class Operation {

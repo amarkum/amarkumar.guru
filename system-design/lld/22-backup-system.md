@@ -36,7 +36,7 @@ Design a backup system with three backup types: **full**, **differential**, and 
 - `CountBasedRetention`, `TimeBasedRetention` **IS-A** `RetentionPolicy`.
 - `BackupService` **HAS-A** strategies, catalog, storage; `BackupRecord` **HAS-A** reference to base full.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class BackupType {

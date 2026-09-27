@@ -38,7 +38,7 @@ Delivery driver deposits a package into a locker; customer receives a code; cust
 - `SmsNotifier`, `EmailNotifier`, `PushNotifier` **IS-A** `Notifier`.
 - `LockerLocation` **HAS-A** many `Compartment`; `Assignment` **HAS-A** `Package`, `Compartment`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class Size {

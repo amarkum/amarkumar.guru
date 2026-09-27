@@ -34,7 +34,7 @@ Design an inventory management system. Deep dive: only one unit left and two use
 - `InMemoryInventoryRepository`, `SqlInventoryRepository` **IS-A** `InventoryRepository`.
 - `Warehouse` **HAS-A** many `InventoryItem`; `Reservation` **HAS-A** list of `ReservationLine`.
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class ReservationStatus {

@@ -32,7 +32,7 @@ Design a pub-sub system where a publisher sends events for an event type (topic)
 - `Broker` **HAS-A** map `topic → Topic`; `Topic` **HAS-A** set of `Subscription`.
 - `Subscription` **HAS-A** `Subscriber` + its own single-thread executor (ordered, isolated).
 
-## Mermaid UML class diagram
+## UML diagram
 ```mermaid
 classDiagram
     class Message {
