@@ -327,3 +327,13 @@ body.noscroll{overflow:hidden}
 .layout.noside>.side{display:none}
 .sidebtn{font:600 12px var(--font);padding:5px 10px;margin-right:10px;border-radius:var(--radius);border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
 .sidebtn:hover{background:var(--soft)}
+/* Notes tracker colours */
+.tgrid.notes i{transition:background .2s,transform .15s}
+.tgrid.notes i:hover{transform:scale(1.15)}
+.tgrid.notes i.done{background:#16a34a;border-color:#15803d}
+.tgrid.notes i.cur{outline:2px solid #16a34a;outline-offset:1px}
+.tgrid.notes i.cur:not(.done){background:color-mix(in srgb,#16a34a 22%,var(--soft))}
+#nbar{background:#16a34a}
+#tRead{color:#16a34a}
+.nlist a.done::after{color:#16a34a;font-weight:700}
+.nlist a.done .num{color:#16a34a}
