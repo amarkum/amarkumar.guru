@@ -18,8 +18,7 @@ window.mmInit();
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="/assets/site.css">
 <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
 </head>
 <body>
 <header class="site-head"><div class="in">
@@ -50,6 +49,9 @@ window.mmInit();
 <footer class="site-foot">© <span id="yr"></span> amarkumar.guru</footer>
 <script>
 
+require.config({paths:{vs:"https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs"}});
+let monacoP=new Promise(res=>require(["vs/editor/editor.main"],res));
+const LANGMAP={js:"javascript",ts:"typescript",py:"python",sh:"shell",bash:"shell",yml:"yaml",md:"markdown"};
 const BASE="/system-design/lld/";let LIST=[];
 function slugOf(f){return f.replace(/\.md$/,"")}
 async function loadList(){const t=await (await fetch(BASE+"README.md")).text();
@@ -67,12 +69,53 @@ async function show(){const cur=location.hash.slice(1);const file=cur?cur+".md":
  doc.querySelectorAll("table").forEach(t=>{const w=document.createElement("div");w.className="tbl";t.parentNode.insertBefore(w,t);w.appendChild(t)});
  for(const c of doc.querySelectorAll("pre code.language-mermaid")){const pre=c.parentNode,src=c.textContent,box=document.createElement("div");box.className="diagram";pre.replaceWith(box);
   try{const r=await mermaid.render("nm"+(rn++),src);box.innerHTML=r.svg}catch(e){box.innerHTML="<pre>"+src.replace(/</g,"&lt;")+"</pre>"}}
- doc.querySelectorAll("pre code").forEach(c=>{try{hljs.highlightElement(c)}catch(e){}});
+ await renderCode(doc);
  const i=LIST.findIndex(x=>slugOf(x.f)===cur);const it=LIST[i];
  ncrumb.textContent=it?"/ "+it.t:"";document.title=(it?it.t+" | ":"")+"Notes | amarkumar.guru";
  const pv=i>0?LIST[i-1]:null,nx=i<LIST.length-1?LIST[i+1]:null;
  npager.innerHTML=(pv?`<a class="pbtn" href="#${slugOf(pv.f)}">← ${pv.t}</a>`:"<span></span>")+(nx?`<a class="pbtn primary" href="#${slugOf(nx.f)}">${nx.t} →</a>`:"");
  drawList();scrollTo(0,0)}
+const API_RE=/^(GET|POST|PUT|PATCH|DELETE|HEAD|WS)\s+(\S+)\s*(.*)$/;
+const esc=s=>s.replace(/[&<>]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[ch]));
+function apiCard(ls){const box=document.createElement("div");box.className="api";
+ box.innerHTML=ls.map(l=>{const t=l.trim(),m=t.match(API_RE);
+  if(m)return `<div class="api-row"><span class="verb v-${m[1].toLowerCase()}">${m[1]}</span><code class="path">${esc(m[2]).replace(/\{([^}]+)\}/g,'<i>{$1}</i>')}</code>${m[3]?`<span class="api-body">${esc(m[3])}</span>`:""}</div>`;
+  const h=t.match(/^([\w -]+):\s*(.+)$/);
+  if(h&&!/[({]/.test(h[1]))return `<div class="api-note"><b>${esc(h[1])}</b>${h[2].split(/,\s*/).map(x=>`<code>${esc(x)}</code>`).join("")}</div>`;
+  return `<div class="api-sig"><code>${esc(t)}</code></div>`}).join("");
+ return box}
+const editors=[];
+async function renderCode(root){
+ const blocks=[...root.querySelectorAll("pre code")].filter(c=>!c.classList.contains("language-mermaid"));
+ if(!blocks.length)return;
+ await monacoP;
+ for(const e of editors)try{e.dispose()}catch(err){}
+ editors.length=0;
+ for(const c of blocks){
+  const pre=c.parentNode,src=c.textContent.replace(/\n$/,"");
+  const ls=src.split("\n").filter(l=>l.trim());
+  if(ls.some(l=>API_RE.test(l.trim()))){pre.replaceWith(apiCard(ls));continue}
+  const m=[...c.classList].find(x=>x.startsWith("language-"));
+  const lang=m?m.slice(9):"plaintext";
+  const box=document.createElement("div");box.className="codebox";
+  const bar=document.createElement("div");bar.className="codebar";
+  bar.innerHTML=`<span>${(LANGMAP[lang]||lang)}</span>`;
+  const cbtn=document.createElement("button");cbtn.type="button";cbtn.textContent="Copy";
+  cbtn.onclick=()=>{navigator.clipboard.writeText(src).then(()=>{cbtn.textContent="Copied";setTimeout(()=>cbtn.textContent="Copy",1200)})};
+  bar.appendChild(cbtn);box.appendChild(bar);
+  const host=document.createElement("div");host.className="codehost";box.appendChild(host);
+  pre.replaceWith(box);
+  const lines=src.split("\n").length;
+  host.style.height=Math.min(560,Math.max(40,lines*19+16))+"px";
+  const ed=monaco.editor.create(host,{value:src,language:LANGMAP[lang]||lang,readOnly:true,domReadOnly:true,
+   theme:curTheme()==="dark"?"vs-dark":"vs",minimap:{enabled:false},scrollBeyondLastLine:false,fontSize:13,
+   fontFamily:"JetBrains Mono, ui-monospace, monospace",lineNumbers:lines>3?"on":"off",renderLineHighlight:"none",
+   automaticLayout:true,contextmenu:false,folding:lines>8,padding:{top:8,bottom:8},
+   scrollbar:{alwaysConsumeMouseWheel:false,verticalScrollbarSize:8,horizontalScrollbarSize:8},overviewRulerLanes:0,
+   guides:{indentation:false}});
+  editors.push(ed);
+ }
+}
 window.addEventListener("hashchange",show);
 window.onTheme=show;
 loadList().then(show);
