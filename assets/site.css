@@ -344,7 +344,6 @@ body.noscroll{overflow:hidden}
 .layout.noside .md{max-width:none}
 .layout.noside .md p,.layout.noside .card p{max-width:none}
 .layout.noside .uml-wrap{max-height:85vh}
-.diagram.uml .classTitle, .diagram.uml g.label-group{font-weight:700}
 .uml-zoom [data-z="1"]{min-width:56px;font-variant-numeric:tabular-nums}
 .uml-zoom button[aria-pressed="true"]{background:var(--ink);color:var(--on-accent);border-color:var(--ink)}
 /* Zoom toolbar: segmented pill */
@@ -358,9 +357,6 @@ body.noscroll{overflow:hidden}
 .uml-zoom [data-z="full"]::before{content:"⤢ "}
 /* UML text: readable sans, bold names, muted stereotypes */
 .diagram.uml g.node{font-family:"Plus Jakarta Sans",system-ui,sans-serif}
-.diagram.uml g.label-group .nodeLabel{font-weight:700;letter-spacing:.01em}
-.diagram.uml g.label-group g:first-child .nodeLabel:has(+*),.diagram.uml .nodeLabel:where(:not(:empty)){line-height:1.45}
-.diagram.uml g.members-group .nodeLabel,.diagram.uml g.methods-group .nodeLabel{font-weight:500}
 /* Zoom toolbar v3: separate round buttons */
 .uml-zoom{gap:6px;background:none;border:0;padding:0;border-radius:0}
 .uml-zoom button{width:auto;height:32px;min-width:32px;padding:0 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--ink);font:600 12.5px var(--font);display:inline-flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,.06);transition:background .15s,border-color .15s,transform .1s}
@@ -441,7 +437,7 @@ body.noscroll{overflow:hidden}
 .ax-err .ax-json{margin-top:10px!important}
 .ax-foot{margin-top:10px;font-size:11.5px;color:var(--muted);text-align:right}
 /* UML stereotypes («class», «record» …) in Prima Sans */
-.diagram .stereo{font-family:"Prima Sans","Plus Jakarta Sans",system-ui,sans-serif!important;font-weight:400!important;font-size:12.5px;letter-spacing:.02em;opacity:.75}
+.diagram .stereo{font-family:"Prima Sans","Plus Jakarta Sans",system-ui,sans-serif!important;opacity:.75}
 /* Sidebar toggle v2 */
 .crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
 .sidebtn{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 8px 0 7px;margin-right:12px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);font:500 12.5px var(--font);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
@@ -451,3 +447,6 @@ body.noscroll{overflow:hidden}
 .sidebtn kbd{font:500 10.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;line-height:15px;background:var(--surface);margin-left:2px}
 .layout.noside .sidebtn{color:var(--ink);border-color:var(--line);background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.06)}
 @media (max-width:700px){.sidebtn kbd{display:none}}
+/* never clip UML labels */
+.diagram.uml foreignObject{overflow:visible}
+.diagram.uml foreignObject>div{white-space:nowrap!important}
