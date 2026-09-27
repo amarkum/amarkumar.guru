@@ -142,12 +142,82 @@ function umlTools(box){const svg=box.querySelector("svg");if(!svg)return;
 addEventListener("keydown",e=>{const f=e.key==="Escape"&&document.querySelector(".diagram.uml.full");if(f)f.querySelector('[data-z="full"]').click()});
 const API_RE=/^(GET|POST|PUT|PATCH|DELETE|HEAD|WS)\s+(\S+)\s*(.*)$/;
 const esc=s=>s.replace(/[&<>]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[ch]));
-function apiCard(ls){const box=document.createElement("div");box.className="api";
+/* Example request/response for each endpoint, built from the note's own Java types */
+function javaModel(src){const T={};const cut=x=>x.replace(/\/\/.*$/gm,"").replace(/\/\*[\s\S]*?\*\//g,"");src=cut(src);
+ const splitTop=x=>{const o=[];let d=0,c="";for(const ch of x){if("<([{".includes(ch))d++;else if(">)]}".includes(ch))d--;if(ch===","&&!d){o.push(c);c=""}else c+=ch}if(c.trim())o.push(c);return o.map(y=>y.trim()).filter(Boolean)};
+ for(const m of src.matchAll(/\brecord\s+(\w+)\s*(?:<[^>]*>)?\s*\(([^)]*)\)/g))T[m[1]]={k:"record",f:splitTop(m[2]).map(c=>{const b=c.replace(/@\w+\s*/g,"").trim().split(/\s+(?=\w+$)/);return[b[0],b[1]]}).filter(x=>x[1])};
+ for(const m of src.matchAll(/\benum\s+(\w+)[^{]*\{([^;}]*)/g))T[m[1]]={k:"enum",c:splitTop(m[2]).map(x=>(x.match(/^\w+/)||[""])[0]).filter(Boolean)};
+ for(const m of src.matchAll(/\bclass\s+(\w+)[^{]*\{/g)){if(T[m[1]])continue;let i=m.index+m[0].length,d=1,body="";while(i<src.length&&d){const ch=src[i];if(ch==="{")d++;else if(ch==="}")d--;if(d===1&&ch!=="}")body+=ch;else if(d===1)body+=";";i++}
+  const f=[];for(const fm of body.matchAll(/(?<=^|[;{}])\s*(?:private|protected|public)?\s*(?:final\s+)?(?!return|static)([A-Z]\w*(?:<[^;=()]*>)?|int|long|double|boolean)\s+(\w+)\s*(?:=[^;]*)?;/g))f.push([fm[1],fm[2]]);
+  if(f.length)T[m[1]]={k:"class",f:f.slice(0,8)}}
+ return T}
+function sample(type,name,T,d){type=(type||"").trim();name=name||"";const n=name.toLowerCase();
+ const g=type.match(/^(\w+)\s*<(.+)>$/);
+ if(g){const inner=g[2].split(",").map(x=>x.trim());
+  if(/^(List|Set|Collection|Queue|Deque|SortedSet|Iterable)$/.test(g[1]))return d>2?[]:[sample(inner[0],name.replace(/s$/,""),T,d+1)];
+  if(/Map$/.test(g[1])){const k=T[inner[0]]&&T[inner[0]].k==="enum"?T[inner[0]].c[0]:"key";return{[k]:sample(inner.slice(1).join(","),"value",T,d+1)}}
+  if(g[1]==="Optional")return sample(inner[0],name,T,d)}
+ if(/\[\]$/.test(type))return[sample(type.slice(0,-2),name,T,d+1)];
+ const t=T[type];
+ if(t&&t.k==="enum")return t.c[0]||"VALUE";
+ if(t&&t.f){if(d>2)return n.endsWith("id")?"id_1":{};const o={};t.f.forEach(([ft,fn])=>o[fn]=fn==="id"?type.replace(/[aeiou]/gi,"").slice(0,3).toLowerCase()+"_"+(4100+type.length*37):sample(ft,fn,T,d+1));return o}
+ if(/^(int|Integer|long|Long|short)$/.test(type))return /floor|count|qty|quantity|number/.test(n)?2:/ms|millis|seconds|ttl/.test(n)?60000:1;
+ if(/^(double|Double|float|BigDecimal)$/.test(type))return /lat/.test(n)?12.9716:/lng|lon/.test(n)?77.5946:/mult|factor|ratio/.test(n)?1.5:/rate|pct|percent/.test(n)?0.18:120.5;
+ if(/^(boolean|Boolean|AtomicBoolean)$/.test(type))return true;if(/^Atomic(Integer|Long)$/.test(type))return 1;if(/^(UUID)$/.test(type))return"3f2b9c1e-7a4d-4e0b-9a51-2c6d8e1f0a7b";if(type==="Money")return 120.5;
+ if(/^(Instant|LocalDateTime|OffsetDateTime|ZonedDateTime)$/.test(type))return"2026-09-27T10:30:00Z";
+ if(type==="LocalDate")return"2026-09-27";if(type==="LocalTime")return /end|to|until/.test(n)?"11:00":"09:00";if(type==="Duration")return"PT1H";
+ return guess(name,T,d)}
+function guess(name,T,d){const n=name.toLowerCase(),cap=name.charAt(0).toUpperCase()+name.slice(1);
+ if(T[cap])return sample(cap,name,T,d);
+ const e=Object.keys(T).find(k=>T[k].k==="enum"&&(k.toLowerCase()===n||n.endsWith(k.toLowerCase())||k.toLowerCase().endsWith(n)));if(e)return T[e].c[0];
+ if(/\[\]$/.test(name))return[guess(name.slice(0,-2).replace(/s$/,""),T,d+1)];
+ if(/ids$/.test(n))return["id_1","id_2"];
+ if(/id$/.test(n))return n.replace(/id$/,"").slice(0,3)+"_7f3a"||"id_1";
+ if(/plate/.test(n))return"KA01AB1234";if(/email/.test(n))return"user@example.com";if(/name|title/.test(n))return"Sample "+cap;
+ if(/surge|mult|factor/.test(n))return 1.5;if(/rating|score/.test(n))return 4.8;if(/lat$/.test(n))return 12.9716;if(/lng$|lon$/.test(n))return 77.5946;if(/rate|price|amount|cost|fare|total|weight/.test(n))return 40.0;
+ if(/count|qty|quantity|floor|limit|size|capacity|priority|page/.test(n))return 2;
+ if(/time|at$|date|start|end|until|since/.test(n))return"2026-09-27T10:30:00Z";
+ if(/^(is|has|enabled|active)/.test(n))return true;
+ if(/url|link/.test(n))return"https://example.com/"+n;
+ return n.endsWith("s")?[]:"…"}
+function parseShape(str,T){str=(str||"").trim();if(!str)return undefined;
+ const obj=str.match(/^\{(.*)\}$/s);
+ if(obj){const inner=obj[1].trim();if(/^\.\.\.$/.test(inner))return{};const o={};
+  inner.split(/,(?![^{\[]*[}\]])/).map(x=>x.trim()).filter(x=>x&&x!=="..."&&x!=="…").forEach(x=>{const kv=x.match(/^["']?(\w+)["']?\s*:\s*(.+)$/);
+   if(kv){const v=kv[2].trim().replace(/\s*(\.\.\.|…)$/,"");o[kv[1]]=/^-?\d+(\.\d+)?$/.test(v)?+v:/^(true|false)$/.test(v)?v==="true":/^\{/.test(v)?parseShape(v,T):v.replace(/^["']|["']$/g,"")}
+   else{const nm=x.replace(/\?$/,"");const k=nm.replace(/\[\]$/,"");o[k]=/\[\]$/.test(nm)?[guess(k.replace(/s$/,""),T,1)]:guess(nm,T,1)}});return o}
+ const arr=str.match(/^(?:List<|\[)(\w+)[>\]]?$/);if(arr&&T[arr[1]])return[sample(arr[1],"",T,0)];
+ const ty=str.match(/^(\w+)(<.+>)?(\[\])?$/);if(ty){if(T[ty[1]]||ty[2]||ty[3])return sample(str,"",T,0);return{result:ty[1]}}
+ return{result:str}}
+function apiExample(verb,path,rest,T){
+ let req="",res=rest||"";const arrow=rest.split(/\s*(?:→|->|=>)\s*/);
+ if(arrow.length>1){req=arrow[0].trim();res=arrow.slice(1).join(" → ").trim()}else if(/^\{/.test(rest.trim())&&verb!=="GET"){req=rest.trim();res=""}
+ const body=verb==="GET"||verb==="DELETE"||verb==="HEAD"?undefined:parseShape(req,T);
+ let out=parseShape(res,T);
+ const code=verb==="POST"&&!/\/(exit|accept|reject|ready|complete|start|assign|cancel|confirm|pay|checkout|refund|retry|ack|release|return|pickup|approve|reject|publish|search|query|login)\b/i.test(path)?201:verb==="DELETE"?204:verb==="WS"?101:200;
+ if(out===undefined&&code!==204&&code!==101){const seg=path.split("?")[0].split("/").filter(x=>x&&!/^\{/.test(x)&&!/^v\d+$/.test(x));
+  for(const sg of seg.reverse()){const nm=sg.replace(/ies$/,"y").replace(/s$/,"").replace(/-(\w)/g,(_,c)=>c.toUpperCase());const k=Object.keys(T).find(x=>x.toLowerCase()===nm.toLowerCase()&&T[x].f);
+   if(k){out=/s$/.test(sg)&&verb==="GET"&&!/\{[^}]+\}$/.test(path.split("?")[0])?[sample(k,"",T,0)]:sample(k,"",T,0);break}}}
+ if(out===undefined&&code!==204&&code!==101)out=verb==="PUT"||verb==="PATCH"?Object.assign({updated:true},body||{}):{ok:true};
+ const url=path.replace(/\{(\w+)\}/g,(_,p)=>p.toLowerCase().endsWith("id")?p.replace(/id$/i,"").slice(0,3).toLowerCase()+"_7f3a":"value");
+ const hdr=`${verb==="WS"?"GET":verb} ${url} HTTP/1.1\nHost: api.example.com${verb==="WS"?"\nUpgrade: websocket\nConnection: Upgrade":""}${body!==undefined?"\nContent-Type: application/json":""}\nAuthorization: Bearer <token>`;
+ const reason={200:"OK",201:"Created",204:"No Content",101:"Switching Protocols"}[code];
+ return{req:hdr+(body!==undefined?"\n\n"+JSON.stringify(body,null,2):""),res:`HTTP/1.1 ${code} ${reason}${out!==undefined?"\nContent-Type: application/json\n\n"+JSON.stringify(out,null,2):""}`,
+  err:verb==="GET"||verb==="WS"?`HTTP/1.1 404 Not Found\n\n{\n  "error": "NOT_FOUND",\n  "message": "Resource not found"\n}`:`HTTP/1.1 ${/\{/.test(path)?"409 Conflict":"400 Bad Request"}\n\n{\n  "error": "${/\{/.test(path)?"CONFLICT":"VALIDATION_FAILED"}",\n  "message": "${/\{/.test(path)?"Request conflicts with current state":"One or more fields are invalid"}"\n}`}}
+const hl=s=>esc(s).replace(/^(HTTP\/1\.1 )(\d{3})(.*)$/m,(_,a,c,r)=>`${a}<b class="sc sc-${c[0]}">${c}${r}</b>`).replace(/^(GET|POST|PUT|PATCH|DELETE|HEAD) /m,'<b class="hm">$1</b> ').replace(/^([\w-]+):/gm,'<span class="hk">$1:</span>').replace(/(&quot;|")([^"\n]+)("\s*:)/g,'<span class="jk">"$2"</span>:').replace(/:\s(".*?")(,?)$/gm,': <span class="js">$1</span>$2').replace(/:\s(-?\d[\d.]*|true|false|null)(,?)$/gm,': <span class="jn">$1</span>$2')
+let apiN=0;
+function apiCard(ls,T){const box=document.createElement("div");box.className="api";T=T||{};
  box.innerHTML=ls.map(l=>{const t=l.trim(),m=t.match(API_RE);
-  if(m)return `<div class="api-row"><span class="verb v-${m[1].toLowerCase()}">${m[1]}</span><code class="path">${esc(m[2]).replace(/\{([^}]+)\}/g,'<i>{$1}</i>')}</code>${m[3]?`<span class="api-body">${esc(m[3])}</span>`:""}</div>`;
+  if(m){const ex=apiExample(m[1],m[2],m[3]||"",T),id="ax"+(apiN++);
+   return `<details class="api-item"><summary class="api-row"><span class="verb v-${m[1].toLowerCase()}">${m[1]}</span><code class="path">${esc(m[2]).replace(/\{([^}]+)\}/g,'<i>{$1}</i>')}</code>${m[3]?`<span class="api-body">${esc(m[3])}</span>`:""}<span class="api-chev" aria-hidden="true"></span></summary>
+    <div class="api-ex"><div class="api-tabs" role="tablist"><button type="button" role="tab" aria-selected="true" data-p="req">Request</button><button type="button" role="tab" data-p="res">Response</button><button type="button" role="tab" data-p="err">Error</button><span class="api-hint">Example · generated from the Java types above</span><button type="button" class="api-copy">Copy</button></div>
+    ${["req","res","err"].map((k,i)=>`<pre class="api-pre" data-p="${k}"${i?" hidden":""}>${hl(ex[k])}</pre>`).join("")}</div></details>`}
   const h=t.match(/^([\w -]+):\s*(.+)$/);
   if(h&&!/[({]/.test(h[1]))return `<div class="api-note"><b>${esc(h[1])}</b>${h[2].split(/,\s*/).map(x=>`<code>${esc(x)}</code>`).join("")}</div>`;
   return `<div class="api-sig"><code>${esc(t)}</code></div>`}).join("");
+ box.querySelectorAll(".api-ex").forEach(ex=>{const pres=[...ex.querySelectorAll(".api-pre")],tabs=[...ex.querySelectorAll("[role=tab]")];
+  tabs.forEach(b=>b.onclick=()=>{tabs.forEach(x=>x.setAttribute("aria-selected",x===b));pres.forEach(p=>p.hidden=p.dataset.p!==b.dataset.p)});
+  const cp=ex.querySelector(".api-copy");cp.onclick=()=>{const p=pres.find(x=>!x.hidden);navigator.clipboard.writeText(p.textContent).then(()=>{cp.textContent="Copied";setTimeout(()=>cp.textContent="Copy",1200)})}});
  return box}
 const editors=[];
 const TOP_RE=/^(?:@\w+(?:\([^)]*\))?\s+)*(?:(?:public|private|protected|static|final|sealed|non-sealed|abstract)\s+)*(class|interface|enum|record)\s+(\w+)/;
@@ -183,13 +253,14 @@ const KIND_LABEL={class:"C",interface:"I",enum:"E",record:"R",abstract:"A"};
 async function renderCode(root){
  const blocks=[...root.querySelectorAll("pre code")].filter(c=>!c.classList.contains("language-mermaid"));
  if(!blocks.length)return;
+ const JMODEL=javaModel(blocks.filter(c=>c.classList.contains("language-java")).map(c=>c.textContent).join("\n"));
  await monacoP;
  for(const e of editors)try{e.dispose()}catch(err){}
  editors.length=0;
  for(const c of blocks){
   const pre=c.parentNode,src=c.textContent.replace(/\n$/,"");
   const ls=src.split("\n").filter(l=>l.trim());
-  if(ls.some(l=>API_RE.test(l.trim()))){pre.replaceWith(apiCard(ls));continue}
+  if(ls.some(l=>API_RE.test(l.trim()))){pre.replaceWith(apiCard(ls,JMODEL));continue}
   const m=[...c.classList].find(x=>x.startsWith("language-"));
   const lang=LANGMAP[m?m.slice(9):""]||(m?m.slice(9):"plaintext");
   const box=document.createElement("div");box.className="codebox";
