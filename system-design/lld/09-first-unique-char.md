@@ -30,10 +30,26 @@ Not distributed. If sharded across machines, "first" needs a global order (seque
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class FirstUniqueStream { <<interface>> +add(char) ; +firstUnique() Optional~Character~ }
-    class DllFirstUniqueStream { -Map~Character,Node~ nodes; -Set~Character~ repeated; -Node head; -Node tail }
-    class LinkedHashSetStream { -LinkedHashSet~Character~ uniques; -Set~Character~ seen }
-    class Node { char c; Node prev; Node next }
+    class FirstUniqueStream {
+      <<interface>>
+      +add(char)
+      +firstUnique() Optional~Character~
+    }
+    class DllFirstUniqueStream {
+      -Map~Character,Node~ nodes
+      -Set~Character~ repeated
+      -Node head
+      -Node tail
+    }
+    class LinkedHashSetStream {
+      -LinkedHashSet~Character~ uniques
+      -Set~Character~ seen
+    }
+    class Node {
+      char c
+      Node prev
+      Node next
+    }
     FirstUniqueStream <|.. DllFirstUniqueStream
     FirstUniqueStream <|.. LinkedHashSetStream
     DllFirstUniqueStream *-- Node
@@ -172,8 +188,40 @@ Output for `aabcbd`: `a, #, b, b, c, c`.
 | Distributed stream | Partition by key for counts; aggregate min(first-seen seq) across partitions. |
 
 ## Amazon follow-up questions
-1. Complexity of each operation? Why not a queue + lazy pop? (Queue works amortised O(1); DLL is strict O(1).)
-2. Why `LinkedHashSet`? What does it do internally?
-3. How to make it generic and thread-safe?
-4. How would you handle a sliding window?
-5. Memory for full Unicode stream?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Complexity of each operation? Why not a queue + lazy pop? (Queue works amortised O(1); DLL is strict O(1).)</summary>
+
+Every operation is O(1): `add` does a hash lookup and a linked-list insert or removal, and `firstUnique` reads the head. A queue with lazy popping also works: you push each char and, when asked, pop from the front while the front is repeated. That's O(1) *on average*, but one call can pop many items. The doubly-linked list is O(1) every single time.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>Why <code>LinkedHashSet</code>? What does it do internally?</summary>
+
+`LinkedHashSet` is a hash set that also remembers insertion order. Inside, it's a `HashMap` whose entries are also joined in a doubly-linked list. Lookup and remove are O(1) through the hash map, and iteration follows the list, so the first element is the oldest still present. That's exactly 'first unique so far'.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How to make it generic and thread-safe?</summary>
+
+Make the class `FirstUnique<T>` so it works with any type, not just `char`. For thread safety, the easy fix is making `add` and `firstUnique` `synchronized` (or using a `ReentrantLock`), because both touch two structures that must change together. For heavy read traffic, a read-write lock lets many readers in at once.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How would you handle a sliding window?</summary>
+
+Keep a count for each char inside the window and a queue of the window's chars. When a char slides out, lower its count and, if it becomes 1 again, it's unique again and goes back into the ordered structure. Use counts instead of a 'seen' set, because chars can leave the window.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>Memory for full Unicode stream?</summary>
+
+For only ASCII, arrays of 128 cover it. Full Unicode has ~1.1 million code points, so use hash maps keyed by code point (not arrays) and memory grows only with the characters actually seen. Also read by code point, not by `char`, because emojis take two `char`s in Java.
+
+</details>

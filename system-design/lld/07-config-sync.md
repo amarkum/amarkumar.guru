@@ -39,19 +39,46 @@ Custom team problem: syncing configurations (settings/preferences) across a user
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class ConfigEntry { +String key; +String value; +Scope scope; +long hlc; +String deviceId }
-    class ConfigDocument { +String userId; +long version; +Map~String,ConfigEntry~ entries }
-    class Change { +long seq; +ConfigEntry entry }
-    class ConflictResolver { <<interface>> +resolve(ConfigEntry current, ConfigEntry incoming) ConfigEntry }
+    class ConfigEntry {
+      +String key
+      +String value
+      +Scope scope
+      +long hlc
+      +String deviceId
+    }
+    class ConfigDocument {
+      +String userId
+      +long version
+      +Map~String,ConfigEntry~ entries
+    }
+    class Change {
+      <<record>>
+      +long seq
+      +ConfigEntry entry
+    }
+    class ConflictResolver {
+      <<interface>>
+      +resolve(ConfigEntry current, ConfigEntry incoming) ConfigEntry
+    }
     class LastWriterWinsResolver {
       <<class>>
     }
     class SetUnionResolver {
       <<class>>
     }
-    class ChangeLog { +append(userId, entry) long; +since(userId, seq) List~Change~ }
-    class PushGateway { <<interface>> +notify(deviceId, List~Change~) }
-    class SyncService { +snapshot(userId, deviceId); +push(userId, deviceId, baseSeq, List~ConfigEntry~) SyncResult; +pull(userId, sinceSeq) }
+    class ChangeLog {
+      +append(userId, entry) long
+      +since(userId, seq) List~Change~
+    }
+    class PushGateway {
+      <<interface>>
+      +notify(deviceId, List~Change~)
+    }
+    class SyncService {
+      +snapshot(userId, deviceId)
+      +push(userId, deviceId, baseSeq, List~ConfigEntry~) SyncResult
+      +pull(userId, sinceSeq)
+    }
     ConflictResolver <|.. LastWriterWinsResolver
     ConflictResolver <|.. SetUnionResolver
     SyncService --> ChangeLog
@@ -246,9 +273,47 @@ public class ConfigSyncDemo {
 | Scale | Partition by userId; DynamoDB (doc) + DynamoDB Streams → push fan-out. |
 
 ## Amazon follow-up questions
-1. Two devices change the same key offline — who wins and why is it deterministic?
-2. Why not trust device timestamps? What is a hybrid logical clock / vector clock?
-3. How does a device that's been offline for 6 months catch up?
-4. How do you push to 5 devices of 100M users? (Connection service, WebSocket gateway, SNS/FCM/APNs fallback.)
-5. How to handle deletes (tombstones, GC)?
-6. When would you use CRDTs vs LWW?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Two devices change the same key offline — who wins and why is it deterministic?</summary>
+
+Each change carries a hybrid logical clock (HLC) timestamp plus the device id. The newer timestamp wins, and if two are exactly equal the higher device id wins. Every server and device applies the same rule to the same data, so they all pick the same winner, with no randomness.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>Why not trust device timestamps? What is a hybrid logical clock / vector clock?</summary>
+
+Phone clocks can be wrong by minutes or even days, so 'latest time' could pick an old edit. A **hybrid logical clock** mixes real time with a counter: it never goes backwards and always moves past any time it has seen from others. A **vector clock** keeps a counter per device, so it can tell 'happened after' from 'happened at the same time', which is more accurate but bigger.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How does a device that's been offline for 6 months catch up?</summary>
+
+The device sends its last known sequence number. If the change log still has everything since then, the server sends just those changes. If the log was trimmed and it's too old, the server sends a full snapshot of the current settings plus the latest version, and the device replaces its copy.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How do you push to 5 devices of 100M users? (Connection service, WebSocket gateway, SNS/FCM/APNs fallback.)</summary>
+
+Each device keeps a WebSocket open to a connection service. A registry maps user → the servers holding their devices' connections. On a change, the sync service looks up that user and pushes to those servers. Devices that aren't connected get a silent push (APNs or FCM) that wakes them to pull.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How to handle deletes (tombstones, GC)?</summary>
+
+You can't just remove a deleted key, because an offline device would sync it back. Instead, write a **tombstone** (key = deleted, with a timestamp). It syncs like any other change. After all devices have seen it (or after, say, 30 days), a clean-up job removes the tombstones.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>When would you use CRDTs vs LWW?</summary>
+
+**Last-writer-wins** is simple and fine for single values like 'theme = dark', where one side losing is OK. **CRDTs** are for data where both edits should be kept, like adding items to a list or set, or counters. They merge automatically with nothing lost, but they're more complex and larger.
+
+</details>

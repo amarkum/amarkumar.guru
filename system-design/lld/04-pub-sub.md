@@ -35,13 +35,41 @@ Design a pub-sub system where a publisher sends events for an event type (topic)
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Message { +String id; +String topic; +String payload; +Instant ts }
-    class Subscriber { <<interface>> +id() String; +onMessage(Message) }
-    class Subscription { -Subscriber subscriber; -ExecutorService lane; +deliver(Message) }
-    class Topic { -String name; -Map~String,Subscription~ subs; +publish(Message) }
-    class Broker { -Map~String,Topic~ topics; +publish(topic,payload); +subscribe(topic,sub); +unsubscribe(topic,subId) }
-    class RetryPolicy { +int maxAttempts; +Duration backoff }
-    class DeadLetterQueue { +add(Message, Subscriber, Exception) }
+    class Message {
+      <<record>>
+      +String id
+      +String topic
+      +String payload
+      +Instant ts
+    }
+    class Subscriber {
+      <<interface>>
+      +id() String
+      +onMessage(Message)
+    }
+    class Subscription {
+      -Subscriber subscriber
+      -ExecutorService lane
+      +deliver(Message)
+    }
+    class Topic {
+      -String name
+      -Map~String,Subscription~ subs
+      +publish(Message)
+    }
+    class Broker {
+      -Map~String,Topic~ topics
+      +publish(topic,payload)
+      +subscribe(topic,sub)
+      +unsubscribe(topic,subId)
+    }
+    class RetryPolicy {
+      +int maxAttempts
+      +Duration backoff
+    }
+    class DeadLetterQueue {
+      +add(Message, Subscriber, Exception)
+    }
     Broker *-- Topic
     Topic *-- Subscription
     Subscription --> Subscriber
@@ -237,9 +265,47 @@ public class PubSubDemo {
 | Distributed | Topic → partitions; consumer groups; broker cluster with replication. |
 
 ## Amazon follow-up questions
-1. How do you guarantee ordering? Per topic or per subscriber? What about with retries?
-2. A subscriber is 10× slower than others — what happens? (Isolation lanes, bounded queue, back-pressure, DLQ.)
-3. At-most-once vs at-least-once vs exactly-once — which do you give, and how would a consumer dedupe?
-4. How would you make this distributed and durable? (Kafka partitions, replication, offsets.)
-5. Push vs pull — trade-offs (SNS vs SQS/Kafka).
-6. How is this different from the Observer pattern?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>How do you guarantee ordering? Per topic or per subscriber? What about with retries?</summary>
+
+Order is guaranteed **per subscriber, per topic**: each subscription has one lane (a single thread) that delivers messages in the order they arrived. Retries happen inside that lane before moving on, so order is kept. The cost is that one failing message delays the ones behind it, which is why there's a retry limit and a DLQ.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>A subscriber is 10× slower than others — what happens? (Isolation lanes, bounded queue, back-pressure, DLQ.)</summary>
+
+Because every subscriber has its own lane and queue, the slow one only slows itself. Its queue is bounded, so when it fills up you either block the publisher (back-pressure), drop the oldest messages, or send the overflow to a DLQ. The fast subscribers are unaffected.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>At-most-once vs at-least-once vs exactly-once — which do you give, and how would a consumer dedupe?</summary>
+
+We give **at-least-once**: retry until success, so a message may arrive twice. The consumer dedupes by remembering message ids it has processed (a set or a DB table with a unique key) and skipping repeats. True exactly-once across systems is rare. At-least-once plus dedupe gives the same result.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How would you make this distributed and durable? (Kafka partitions, replication, offsets.)</summary>
+
+Store messages on disk in a log that's split into partitions and copied to other machines, which is how Kafka works. Consumers keep an *offset* (how far they've read), so after a crash they carry on from there. Replication means losing one machine loses no data.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>Push vs pull — trade-offs (SNS vs SQS/Kafka).</summary>
+
+**Push** (SNS, webhooks): low delay, but the broker has to handle slow or down consumers. **Pull** (SQS, Kafka): consumers read at their own pace and can batch, but add a little delay and need to poll. Pull is safer for heavy or bursty loads, push suits fast fan-out to many small listeners.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How is this different from the Observer pattern?</summary>
+
+Observer is in-process and synchronous: the subject calls its listeners directly and knows about them. Pub-sub puts a broker in the middle, so publishers and subscribers don't know each other, delivery can be async, can retry, and can cross machines. Pub-sub is Observer grown up for distributed systems.
+
+</details>

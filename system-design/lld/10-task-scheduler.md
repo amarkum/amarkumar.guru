@@ -36,8 +36,14 @@ Design a task scheduler: schedule tasks to run once at a time/after a delay, or 
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Task { <<interface>> +execute() }
-    class Schedule { <<interface>> +next(Instant lastRun) Optional~Instant~ }
+    class Task {
+      <<interface>>
+      +execute()
+    }
+    class Schedule {
+      <<interface>>
+      +next(Instant lastRun) Optional~Instant~
+    }
     class OneTimeSchedule {
       <<record>>
     }
@@ -47,9 +53,25 @@ classDiagram
     class CronSchedule {
       <<class>>
     }
-    class RetryPolicy { +int maxAttempts; +Duration baseBackoff; +delay(attempt) Duration }
-    class ScheduledTask { +String id; +Instant nextRunAt; +int priority; +TaskStatus status; +int attempts }
-    class TaskScheduler { -DelayQueue~ScheduledTask~ queue; -ExecutorService workers; +schedule(Task, Schedule, priority) String; +cancel(id) boolean; +shutdown() }
+    class RetryPolicy {
+      +int maxAttempts
+      +Duration baseBackoff
+      +delay(attempt) Duration
+    }
+    class ScheduledTask {
+      +String id
+      +Instant nextRunAt
+      +int priority
+      +TaskStatus status
+      +int attempts
+    }
+    class TaskScheduler {
+      -DelayQueue~ScheduledTask~ queue
+      -ExecutorService workers
+      +schedule(Task, Schedule, priority) String
+      +cancel(id) boolean
+      +shutdown()
+    }
     Schedule <|.. OneTimeSchedule
     Schedule <|.. FixedRateSchedule
     Schedule <|.. CronSchedule
@@ -262,9 +284,47 @@ public class SchedulerDemo {
 | Listeners / metrics | `TaskListener` observer (onStart, onSuccess, onFailure). |
 
 ## Amazon follow-up questions
-1. Why `DelayQueue` over polling every 100 ms?
-2. How do you make sure two scheduler nodes don't run the same job? (Lease with conditional update / `SKIP LOCKED`.)
-3. A node crashes mid-execution — what happens? (Lease expires → re-run → idempotency needed.)
-4. How would you schedule 100M one-time reminders? (Time-bucketed partitions, DynamoDB TTL/SQS delay ≤15 min + tiering, EventBridge Scheduler.)
-5. Fixed rate vs fixed delay?
-6. How do you handle a task that never finishes?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Why <code>DelayQueue</code> over polling every 100 ms?</summary>
+
+Polling wakes up every 100 ms whether or not anything is due, which wastes CPU and runs tasks up to 100 ms late. A `DelayQueue` sleeps the thread until exactly the moment the next task is due, and wakes early if an earlier task is added. It's more precise and does no busy work.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>How do you make sure two scheduler nodes don't run the same job? (Lease with conditional update / <code>SKIP LOCKED</code>.)</summary>
+
+Before running a job, a node must win a **lease**: `UPDATE jobs SET owner = me, lease_until = now + 30s WHERE id = ? AND (owner IS NULL OR lease_until < now)`. Only one node's update succeeds. In Postgres, `SELECT … FOR UPDATE SKIP LOCKED` lets many nodes each grab different jobs without blocking each other.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>A node crashes mid-execution — what happens? (Lease expires → re-run → idempotency needed.)</summary>
+
+The crashed node stops renewing its lease. When the lease runs out, another node picks up the job and runs it again. The job may have half-run, so it must be **idempotent**, meaning running it twice gives the same result (for example it checks 'already sent?' before sending).
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How would you schedule 100M one-time reminders? (Time-bucketed partitions, DynamoDB TTL/SQS delay ≤15 min + tiering, EventBridge Scheduler.)</summary>
+
+Don't keep 100M timers in memory. Store reminders in the database grouped by time bucket (for example one partition per minute). A worker reads the bucket that's due now and pushes those reminders to a queue. For near-term ones, SQS delay (up to 15 minutes) works. Managed services like EventBridge Scheduler do this for you.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>Fixed rate vs fixed delay?</summary>
+
+**Fixed rate**: start every 10 seconds on the clock, regardless of how long runs take, so runs can pile up if they're slow. **Fixed delay**: wait 10 seconds *after* the previous run finishes. Use fixed rate for things tied to time (metrics every minute), fixed delay when runs must never overlap.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How do you handle a task that never finishes?</summary>
+
+Run every task with a timeout. When it expires, cancel the task (interrupt the thread) and mark it failed or retry it. Also keep a watchdog that looks for tasks stuck in `RUNNING` too long, perhaps because their node died, and reschedules them.
+
+</details>

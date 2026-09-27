@@ -38,15 +38,48 @@ Design a social feed: users post text/images/videos, view posts in a feed, like/
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Post { +String id; +String authorId; +String text; +List~Media~ media; +Instant createdAt }
-    class Media { +String id; +MediaType type; +String cdnUrl }
-    class FeedItem { +String postId; +String authorId; +long ts; +double score }
-    class FanoutStrategy { <<interface>> +onPost(Post) }
-    class HybridFanout { -long celebrityThreshold }
-    class FeedCache { <<interface>> +push(userId, FeedItem); +range(userId, cursor, n) }
-    class Ranker { <<interface>> +rank(userId, List~FeedItem~) List~FeedItem~ }
-    class FeedService { +getFeed(userId, cursor, n) FeedPage }
-    class CounterService { +incrementLike(postId); +get(postId) Counts }
+    class Post {
+      +String id
+      +String authorId
+      +String text
+      +List~Media~ media
+      +Instant createdAt
+    }
+    class Media {
+      +String id
+      +MediaType type
+      +String cdnUrl
+    }
+    class FeedItem {
+      <<record>>
+      +String postId
+      +String authorId
+      +long ts
+      +double score
+    }
+    class FanoutStrategy {
+      <<interface>>
+      +onPost(Post)
+    }
+    class HybridFanout {
+      -long celebrityThreshold
+    }
+    class FeedCache {
+      <<interface>>
+      +push(userId, FeedItem)
+      +range(userId, cursor, n)
+    }
+    class Ranker {
+      <<interface>>
+      +rank(userId, List~FeedItem~) List~FeedItem~
+    }
+    class FeedService {
+      +getFeed(userId, cursor, n) FeedPage
+    }
+    class CounterService {
+      +incrementLike(postId)
+      +get(postId) Counts
+    }
     Post *-- Media
     FanoutStrategy <|.. HybridFanout
     FeedService --> FeedCache
@@ -291,10 +324,54 @@ public class NewsFeedDemo {
 | Close-friends visibility | `VisibilityPolicy` checked during hydration. |
 
 ## Amazon follow-up questions
-1. Push vs pull — which, and how do you handle a user with 100M followers?
-2. A post gets 5M likes in a minute — walk me through the write path.
-3. How does the feed load instantly after the user clears app cache?
-4. SQL or NoSQL for posts/likes/graph? Why a combination?
-5. What do you cache, and how do you invalidate when a post is edited or deleted?
-6. How do you shard the feed store? Hot shard for celebrities?
-7. Why microservices here — which boundaries, and what goes wrong across them?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Push vs pull — which, and how do you handle a user with 100M followers?</summary>
+
+Use both (hybrid). For normal users, **push**: when they post, add the post id to each follower's feed list, so reading is instant. For celebrities with huge follower counts, **pull**: don't copy the post to 100M lists. When a follower opens their feed, fetch the celebrity's recent posts and merge them in.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>A post gets 5M likes in a minute — walk me through the write path.</summary>
+
+Don't update one counter row 5M times. Each like is written as its own row (user + post, unique, so double-likes are ignored) and sent to Kafka. A counter service adds up likes in batches, for example every second, and updates the total once. The screen shows the cached count, which may be a second behind.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How does the feed load instantly after the user clears app cache?</summary>
+
+The feed is built and stored on the server (in Redis and the database), not on the phone. Clearing the app cache only clears the phone. On open, the app asks the server for the first page, a single fast read of a precomputed list, and images come from the CDN.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>SQL or NoSQL for posts/likes/graph? Why a combination?</summary>
+
+Use each for what it's good at. **Posts and likes**: huge volume, simple lookups by id, so NoSQL (Cassandra or DynamoDB). **Follow graph**: 'who follows whom' needs indexes both ways, so sharded MySQL with a cache (like Facebook's TAO) or a graph store. **Feed lists**: Redis sorted sets for speed.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>What do you cache, and how do you invalidate when a post is edited or deleted?</summary>
+
+Cache feed lists (post ids), post content, user profiles and like counts. Feed lists hold only ids, so editing a post just updates the post cache entry (delete the key and let it refill). Deleting a post marks it deleted, and the feed skips it when loading, so there's no need to scrub millions of feed lists.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How do you shard the feed store? Hot shard for celebrities?</summary>
+
+Split feed storage by the *follower's* user id, so each user's feed lives on one shard. Celebrities don't cause hot shards on write because we pull their posts instead of pushing. For reads, cache celebrity posts heavily and keep several copies.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">7</span>Why microservices here — which boundaries, and what goes wrong across them?</summary>
+
+Split into post, feed, graph, like and media services because they grow at very different rates and are owned by different teams. What goes wrong across services: network failures and slowness, data being briefly out of sync, harder debugging. So you need timeouts, retries, idempotency and request tracing.
+
+</details>

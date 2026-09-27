@@ -37,13 +37,45 @@ Design an inventory management system. Deep dive: only one unit left and two use
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class InventoryItem { -String sku; -String warehouseId; -int onHand; -int reserved; -long version; +available() int }
-    class Reservation { -String id; -String orderId; -List~ReservationLine~ lines; -ReservationStatus status; -Instant expiresAt }
-    class ReservationLine { +String sku; +String warehouseId; +int qty }
-    class InventoryRepository { <<interface>> +find(sku, wh) InventoryItem; +compareAndSet(old, new) boolean }
-    class WarehouseSelectionStrategy { <<interface>> +candidates(sku, qty, pincode) List~String~ }
-    class InventoryService { +reserve(orderId, sku, qty, pincode) Reservation; +commit(resId); +release(resId); +replenish(sku, wh, qty) }
-    class StockListener { <<interface>> +onLowStock(InventoryItem) }
+    class InventoryItem {
+      -String sku
+      -String warehouseId
+      -int onHand
+      -int reserved
+      -long version
+      +available() int
+    }
+    class Reservation {
+      -String id
+      -String orderId
+      -List~ReservationLine~ lines
+      -ReservationStatus status
+      -Instant expiresAt
+    }
+    class ReservationLine {
+      +String sku
+      +String warehouseId
+      +int qty
+    }
+    class InventoryRepository {
+      <<interface>>
+      +find(sku, wh) InventoryItem
+      +compareAndSet(old, new) boolean
+    }
+    class WarehouseSelectionStrategy {
+      <<interface>>
+      +candidates(sku, qty, pincode) List~String~
+    }
+    class InventoryService {
+      +reserve(orderId, sku, qty, pincode) Reservation
+      +commit(resId)
+      +release(resId)
+      +replenish(sku, wh, qty)
+    }
+    class StockListener {
+      <<interface>>
+      +onLowStock(InventoryItem)
+    }
     Reservation *-- ReservationLine
     InventoryService --> InventoryRepository
     InventoryService --> WarehouseSelectionStrategy
@@ -289,10 +321,54 @@ public class InventoryDemo {
 | Backorders / pre-orders | `ReservationStatus.BACKORDERED`, queue fulfilled on replenish. |
 
 ## Amazon follow-up questions
-1. Last unit, two users: walk through exactly what the DB does in your approach.
-2. Pessimistic vs optimistic locking — when would you pick each? (contention level.)
-3. How do you avoid holding stock forever for abandoned carts? (TTL + expiry job / DynamoDB TTL / Redis key expiry.)
-4. Payment succeeded but commit call failed — what now? (Retry with idempotency, outbox, reconciliation job.)
-5. How would you handle 1M requests/min for one SKU on Prime Day?
-6. How does the product page show stock cheaply? (Cache + events; tolerate staleness.)
-7. Why is distributed lock (Redis/ZooKeeper) worse than conditional write here?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Last unit, two users: walk through exactly what the DB does in your approach.</summary>
+
+Both requests run `UPDATE stock SET reserved = reserved + 1 WHERE sku = ? AND on_hand - reserved >= 1`. The database runs these one at a time on that row. The first sees 1 available and updates (1 row changed). The second now sees 0 available, so the `WHERE` fails and 0 rows change. The app sees 0 and tells that user it's sold out.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>Pessimistic vs optimistic locking — when would you pick each? (contention level.)</summary>
+
+**Optimistic** (version check or conditional update): no locks and fast, best when conflicts are rare, which covers most products. **Pessimistic** (`SELECT … FOR UPDATE`): locks the row while you work, best when conflicts are frequent and retries would waste effort. For hot flash-sale items, a conditional update is usually still best because it's one quick statement.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How do you avoid holding stock forever for abandoned carts? (TTL + expiry job / DynamoDB TTL / Redis key expiry.)</summary>
+
+Every reservation gets an expiry time (for example 15 minutes). A background job, or DynamoDB TTL or Redis key expiry, finds reservations past their time that are still `PENDING` and releases the stock. So abandoned carts free up stock automatically.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>Payment succeeded but commit call failed — what now? (Retry with idempotency, outbox, reconciliation job.)</summary>
+
+The payment is safe, so we must finish the commit. Retry the commit with the same idempotency key so doing it twice has no extra effect. Better still, record 'payment succeeded' in an outbox table in the same transaction, and a worker keeps retrying until the commit works. A nightly reconciliation job catches anything left.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How would you handle 1M requests/min for one SKU on Prime Day?</summary>
+
+Don't send every request to one database row. Split the SKU's stock into several buckets (for example 10 rows of 100 units each) and pick one at random. Put a queue in front to smooth spikes, and let a Redis counter do a quick pre-check to reject obvious sold-outs early.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How does the product page show stock cheaply? (Cache + events; tolerate staleness.)</summary>
+
+Don't hit the inventory DB for page views. Keep an approximate stock number in a cache, updated by events whenever stock changes. Show simple labels like 'In stock' or 'Only 3 left'. It may be a few seconds out of date, which is fine because the real check happens at checkout.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">7</span>Why is distributed lock (Redis/ZooKeeper) worse than conditional write here?</summary>
+
+A distributed lock needs extra network calls to take and release it, can expire while you're still working, and becomes a bottleneck. A conditional write does the check and the update in one atomic database step, with nothing extra to go wrong.
+
+</details>

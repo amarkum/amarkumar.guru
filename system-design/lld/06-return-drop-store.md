@@ -37,16 +37,52 @@ Customer wants to return a package. Instead of pickup, the customer books a **sl
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Location { +double lat; +double lng; +distanceKm(Location) double }
-    class DropStore { +String id; +Location loc; +Set~PackageSize~ sizes; +LocalTime open; +LocalTime close }
-    class Slot { +String id; +String storeId; +Instant start; +int capacity; -AtomicInteger booked; +tryBook() boolean; +cancel() }
-    class Booking { +String id; +String returnId; +Slot slot; +BookingStatus status; +String otp }
-    class GeoIndex { <<interface>> +add(DropStore); +nearby(Location, radiusKm) List~DropStore~ }
+    class Location {
+      +double lat
+      +double lng
+      +distanceKm(Location) double
+    }
+    class DropStore {
+      +String id
+      +Location loc
+      +Set~PackageSize~ sizes
+      +LocalTime open
+      +LocalTime close
+    }
+    class Slot {
+      +String id
+      +String storeId
+      +Instant start
+      +int capacity
+      -AtomicInteger booked
+      +tryBook() boolean
+      +cancel()
+    }
+    class Booking {
+      +String id
+      +String returnId
+      +Slot slot
+      +BookingStatus status
+      +String otp
+    }
+    class GeoIndex {
+      <<interface>>
+      +add(DropStore)
+      +nearby(Location, radiusKm) List~DropStore~
+    }
     class GeohashIndex {
       <<class>>
     }
-    class StoreRankingStrategy { <<interface>> +rank(Location, List~DropStore~) List~DropStore~ }
-    class BookingService { +findStores(returnId, Location) ; +book(returnId, slotId) Booking; +cancel(bookingId); +markDropped(otp) }
+    class StoreRankingStrategy {
+      <<interface>>
+      +rank(Location, List~DropStore~) List~DropStore~
+    }
+    class BookingService {
+      +findStores(returnId, Location)
+      +book(returnId, slotId) Booking
+      +cancel(bookingId)
+      +markDropped(otp)
+    }
     GeoIndex <|.. GeohashIndex
     BookingService --> GeoIndex
     BookingService --> StoreRankingStrategy
@@ -289,9 +325,47 @@ public class DropStoreDemo {
 | Pickup as fallback | `ReturnMethod` strategy (DROP_OFF, PICKUP, LOCKER). |
 
 ## Amazon follow-up questions
-1. How does geohash work? Why search neighbouring cells? What precision?
-2. How does Uber find nearby drivers (moving points)? (H3 cells, in-memory index updated every few seconds, sharded by city/cell.)
-3. QuadTree vs geohash vs H3 — trade-offs.
-4. Two customers book the last spot in a slot — what happens?
-5. How do you scale store search to all of India? (Precomputed cell → stores cache, CDN-able.)
-6. Customer doesn't show up — how and when is capacity released?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>How does geohash work? Why search neighbouring cells? What precision?</summary>
+
+A geohash turns latitude and longitude into a short string. Nearby places share the same starting characters, so a search for 'nearby' becomes a search for 'same prefix'. A point near the edge of its cell can be closer to places in the next cell, so you also search the 8 neighbouring cells. Choose precision by radius: 6 characters ≈ 1.2 km cells, 5 ≈ 5 km.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>How does Uber find nearby drivers (moving points)? (H3 cells, in-memory index updated every few seconds, sharded by city/cell.)</summary>
+
+Drivers move every few seconds, so a database index would be updated constantly. Instead, Uber keeps an in-memory map of cell → drivers, using H3 hexagon cells. Each driver's phone sends a location every ~4 seconds, which moves them to the right cell. The map is split across servers by city or cell, and searches look up the rider's cell plus its neighbours.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>QuadTree vs geohash vs H3 — trade-offs.</summary>
+
+**QuadTree**: splits space into 4 squares again and again, adapts to dense areas, but is harder to shard and update. **Geohash**: simple strings that work in any key-value store, but cells are uneven and edge cases need neighbour lookups. **H3**: hexagons, so all neighbours are the same distance away, good for movement and pricing areas, but needs a library.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>Two customers book the last spot in a slot — what happens?</summary>
+
+Each slot has a capacity counter. Booking runs `UPDATE slot SET booked = booked + 1 WHERE id = ? AND booked < capacity`. Only one of the two updates succeeds. The other sees 0 rows changed and gets 'slot full, pick another'.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How do you scale store search to all of India? (Precomputed cell → stores cache, CDN-able.)</summary>
+
+Store locations barely change. Precompute for each geohash cell the list of nearby stores and cache it (Redis, or even a CDN because it's the same for everyone). A search becomes one cache read plus a quick live check of slot availability.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>Customer doesn't show up — how and when is capacity released?</summary>
+
+A scheduler runs at slot end plus a grace period (say 30 minutes). Bookings still `CONFIRMED` but not dropped are marked `NO_SHOW`. The space goes back to the store and the customer gets a message to rebook.
+
+</details>

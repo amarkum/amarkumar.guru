@@ -41,15 +41,49 @@ Design an attendance system for hourly employees. Interviewer gives almost no co
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class PunchEvent { +String id; +String employeeId; +PunchType type; +Instant at; +String source }
-    class PunchService { +punch(PunchEvent) PunchAck }
-    class EventStore { <<interface>> +append(PunchEvent) boolean; +events(empId, from, to) List~PunchEvent~ }
-    class TimesheetCalculator { +compute(empId, LocalDate, List~PunchEvent~) Timesheet }
-    class Timesheet { +String employeeId; +LocalDate date; +List~WorkSegment~ segments; +Duration regular; +Duration overtime; +TimesheetStatus status }
-    class WorkSegment { +Instant start; +Instant end; +SegmentType type }
-    class OvertimePolicy { <<interface>> +split(Duration day, Duration weekSoFar) Hours }
-    class ApprovalService { +requestCorrection(...); +approve(...) }
-    class PayrollExporter { +export(PayPeriod) }
+    class PunchEvent {
+      <<record>>
+      +String id
+      +String employeeId
+      +PunchType type
+      +Instant at
+      +String source
+    }
+    class PunchService {
+      +punch(PunchEvent) PunchAck
+    }
+    class EventStore {
+      <<interface>>
+      +append(PunchEvent) boolean
+      +events(empId, from, to) List~PunchEvent~
+    }
+    class TimesheetCalculator {
+      +compute(empId, LocalDate, List~PunchEvent~) Timesheet
+    }
+    class Timesheet {
+      +String employeeId
+      +LocalDate date
+      +List~WorkSegment~ segments
+      +Duration regular
+      +Duration overtime
+      +TimesheetStatus status
+    }
+    class WorkSegment {
+      +Instant start
+      +Instant end
+      +SegmentType type
+    }
+    class OvertimePolicy {
+      <<interface>>
+      +split(Duration day, Duration weekSoFar) Hours
+    }
+    class ApprovalService {
+      +requestCorrection(...)
+      +approve(...)
+    }
+    class PayrollExporter {
+      +export(PayPeriod)
+    }
     PunchService --> EventStore
     TimesheetCalculator --> OvertimePolicy
     Timesheet *-- WorkSegment
@@ -263,9 +297,47 @@ public class AttendanceDemo {
 | Real-time dashboard for managers | Stream aggregation (Kinesis/Flink) → Redis counts of who is on floor. |
 
 ## Amazon follow-up questions
-1. Kiosk loses internet for 2 hours at shift change — what happens? How do you avoid losing or duplicating punches?
-2. Why event sourcing here? What if overtime rules change retroactively?
-3. How do you ensure payroll never pays twice for the same period?
-4. How do you scale for 50k punches in 10 minutes? (Stateless API, partitioned writes, queue buffer.)
-5. What would you monitor and alarm on?
-6. Employee disputes hours — how do you prove what happened? (Immutable events + audit of corrections.)
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Kiosk loses internet for 2 hours at shift change — what happens? How do you avoid losing or duplicating punches?</summary>
+
+The kiosk keeps saving punches in its local database, each with a unique `punchId` (a UUID) and the time it happened. When the internet returns, it uploads everything in order. The server stores punches keyed by `punchId`, so a re-sent punch is recognised and ignored. Nothing is lost and nothing is doubled.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>Why event sourcing here? What if overtime rules change retroactively?</summary>
+
+Every punch and correction is kept as an unchangeable event, and timesheets are *calculated* from them. If overtime rules change for past weeks, you just recalculate from the original events with the new rules. There's also a full history for audits and disputes.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How do you ensure payroll never pays twice for the same period?</summary>
+
+When a pay period is paid, lock it (status `EXPORTED`) and give the export a unique id. Payroll rejects an export id it has already seen. Any later correction to a locked period becomes an adjustment in the *next* period, never a second payment.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How do you scale for 50k punches in 10 minutes? (Stateless API, partitioned writes, queue buffer.)</summary>
+
+Keep the punch API stateless and run many copies behind a load balancer. Punches go into a queue (Kafka) right away and are processed a moment later, so the queue absorbs the spike. Split data by employee so writes spread across partitions.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>What would you monitor and alarm on?</summary>
+
+Monitor punches per minute (a sudden drop means kiosks are offline), kiosks that haven't checked in, queue lag, failed validations (like geo-fence errors), missing clock-outs, and whether payroll exports finished. Alarm on kiosks silent for more than 15 minutes during shifts and on export failures.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>Employee disputes hours — how do you prove what happened? (Immutable events + audit of corrections.)</summary>
+
+Show the event history: every punch with its time, kiosk and photo or badge id, plus every correction with who made it, when and why. None of these can be edited, so you can rebuild exactly how the hours were calculated.
+
+</details>

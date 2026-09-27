@@ -39,8 +39,17 @@ Design a backup system with three backup types: **full**, **differential**, and 
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class BackupStrategy { <<interface>> +type() BackupType; +run(DataSource, BackupCatalog, StorageTarget) BackupRecord }
-    class AbstractBackup { <<abstract>> +run() ; #selectData()* ; #baseFullId()* }
+    class BackupStrategy {
+      <<interface>>
+      +type() BackupType
+      +run(DataSource, BackupCatalog, StorageTarget) BackupRecord
+    }
+    class AbstractBackup {
+      <<abstract>>
+      +run()
+      #selectData()*
+      #baseFullId()*
+    }
     class FullBackup {
       <<class>>
     }
@@ -50,12 +59,41 @@ classDiagram
     class LogBackup {
       <<class>>
     }
-    class DataSource { <<interface>> +currentLsn() long; +readAll() ; +readChangedSince(lsn) ; +readLog(fromLsn, toLsn) }
-    class StorageTarget { <<interface>> +write(key, bytes) String; +read(key) bytes }
-    class BackupRecord { +String id; +BackupType type; +String baseFullId; +long fromLsn; +long toLsn; +Instant time; +String location; +String checksum }
-    class BackupCatalog { +add(BackupRecord); +latest(type); +chainFor(Instant) List~BackupRecord~ }
-    class RestorePlanner { +plan(Instant target) List~BackupRecord~ }
-    class RetentionPolicy { <<interface>> +expired(BackupCatalog) List~BackupRecord~ }
+    class DataSource {
+      <<interface>>
+      +currentLsn() long
+      +readAll()
+      +readChangedSince(lsn)
+      +readLog(fromLsn, toLsn)
+    }
+    class StorageTarget {
+      <<interface>>
+      +write(key, bytes) String
+      +read(key) bytes
+    }
+    class BackupRecord {
+      <<record>>
+      +String id
+      +BackupType type
+      +String baseFullId
+      +long fromLsn
+      +long toLsn
+      +Instant time
+      +String location
+      +String checksum
+    }
+    class BackupCatalog {
+      +add(BackupRecord)
+      +latest(type)
+      +chainFor(Instant) List~BackupRecord~
+    }
+    class RestorePlanner {
+      +plan(Instant target) List~BackupRecord~
+    }
+    class RetentionPolicy {
+      <<interface>>
+      +expired(BackupCatalog) List~BackupRecord~
+    }
     BackupStrategy <|.. AbstractBackup
     AbstractBackup <|-- FullBackup
     AbstractBackup <|-- DifferentialBackup
@@ -319,9 +357,47 @@ Expected restore: `{a=2, b=2, c=1}` — the mistaken write `a=DROPPED!` is after
 | Multiple sources (fleet) | `BackupPolicy` per source; scheduler shards jobs across workers with leases (see #10). |
 
 ## Amazon follow-up questions
-1. Differential vs incremental vs log — restore cost vs backup cost trade-offs?
-2. What's the restore chain for T = Wednesday 10:07?
-3. How do you ensure retention never breaks a restore chain?
-4. How do you detect a gap in log backups?
-5. How do you back up a 10 TB database without hurting production? (Snapshots, replicas, throttling.)
-6. RPO vs RTO — how does your schedule map to them?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Differential vs incremental vs log — restore cost vs backup cost trade-offs?</summary>
+
+**Differential**: everything changed since the last full backup. It grows each day, but a restore needs only full + one diff. **Incremental**: changes since the *last backup of any kind*. Small and fast to take, but a restore needs full + every incremental in order. **Log**: every transaction, allowing restore to any exact second, but you replay many files. You trade faster backups against faster restores.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>What's the restore chain for T = Wednesday 10:07?</summary>
+
+Take Sunday's full backup, then Tuesday night's differential (the latest one before Wednesday 10:07), then every log backup from Tuesday night up to 10:07 Wednesday, replaying the last one only up to 10:07.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How do you ensure retention never breaks a restore chain?</summary>
+
+Never delete a backup that something newer still needs. Before deleting a full backup, check that no kept differential or log depends on it. Simplest rule: delete whole chains (a full plus everything built on it) at once, and only once a newer full exists.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How do you detect a gap in log backups?</summary>
+
+Each log backup records its start and end position (LSN). The next one must start exactly where the last one ended. A check after every backup compares them, and any gap raises an alarm and triggers a new full backup.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How do you back up a 10 TB database without hurting production? (Snapshots, replicas, throttling.)</summary>
+
+Back up from a read replica, not the main database. Or use storage snapshots, which are nearly instant copy-on-write. Limit the speed of the backup copy, and run full backups at quiet times like Sunday night.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>RPO vs RTO — how does your schedule map to them?</summary>
+
+**RPO** (how much data you can lose) is set by how often you back up logs: every 15 minutes means at most 15 minutes lost. **RTO** (how long a restore takes) depends on chain length: a full plus one diff plus a few logs restores fast. Daily diffs keep RTO short.
+
+</details>

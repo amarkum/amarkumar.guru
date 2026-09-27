@@ -86,6 +86,36 @@ function apiCard(ls){const box=document.createElement("div");box.className="api"
   return `<div class="api-sig"><code>${esc(t)}</code></div>`}).join("");
  return box}
 const editors=[];
+const TOP_RE=/^(?:@\w+(?:\([^)]*\))?\s+)*(?:(?:public|private|protected|static|final|sealed|non-sealed|abstract)\s+)*(class|interface|enum|record)\s+(\w+)/;
+function splitJava(src){
+ const L=src.split("\n"),parts=[];let depth=0,cur=null,pend=[],imports=[];
+ for(const line of L){
+  const t=line.trim(),m=depth===0&&t.match(TOP_RE);
+  if(m){cur={name:m[2],kind:/abstract\s+class/.test(t)?"abstract":m[1],lines:[...pend,line]};parts.push(cur);pend=[]}
+  else if(depth===0&&(/^(\/\/|\/\*|\*|@)/.test(t)||!t)&&!(cur&&cur.open)){if(t||pend.length)pend.push(line)}
+  else if(depth===0&&/^(import|package)\b/.test(t))imports.push(line);
+  else if(cur)cur.lines.push(line);else imports.push(line);
+  for(const ch of line.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\/\/.*$/g,""))depth+=ch==="{"?1:ch==="}"?-1:0;
+  if(cur)cur.open=depth>0;
+ }
+ parts.forEach(p=>{while(p.lines.length&&!p.lines.at(-1).trim())p.lines.pop();p.src=p.lines.join("\n")});
+ const im=imports.filter(l=>l.trim()).join("\n");
+ return {parts,imports:im};
+}
+function makeEditor(host,src,lang){
+ const lines=src.split("\n").length;
+ host.style.height=Math.min(560,Math.max(40,lines*19+16))+"px";
+ const ed=monaco.editor.create(host,{value:src,language:lang,readOnly:true,domReadOnly:true,
+  theme:curTheme()==="dark"?"vs-dark":"vs",minimap:{enabled:false},scrollBeyondLastLine:false,fontSize:13,
+  fontFamily:"JetBrains Mono, ui-monospace, monospace",lineNumbers:lines>3?"on":"off",renderLineHighlight:"none",
+  automaticLayout:true,contextmenu:false,folding:lines>8,padding:{top:8,bottom:8},
+  scrollbar:{alwaysConsumeMouseWheel:false,verticalScrollbarSize:8,horizontalScrollbarSize:8},overviewRulerLanes:0,
+  guides:{indentation:false}});
+ editors.push(ed);
+}
+function copyBtn(get){const b=document.createElement("button");b.type="button";b.className="copy";b.textContent="Copy";
+ b.onclick=()=>navigator.clipboard.writeText(get()).then(()=>{b.textContent="Copied";setTimeout(()=>b.textContent="Copy",1200)});return b}
+const KIND_LABEL={class:"C",interface:"I",enum:"E",record:"R",abstract:"A"};
 async function renderCode(root){
  const blocks=[...root.querySelectorAll("pre code")].filter(c=>!c.classList.contains("language-mermaid"));
  if(!blocks.length)return;
@@ -97,24 +127,30 @@ async function renderCode(root){
   const ls=src.split("\n").filter(l=>l.trim());
   if(ls.some(l=>API_RE.test(l.trim()))){pre.replaceWith(apiCard(ls));continue}
   const m=[...c.classList].find(x=>x.startsWith("language-"));
-  const lang=m?m.slice(9):"plaintext";
+  const lang=LANGMAP[m?m.slice(9):""]||(m?m.slice(9):"plaintext");
   const box=document.createElement("div");box.className="codebox";
-  const bar=document.createElement("div");bar.className="codebar";
-  bar.innerHTML=`<span>${(LANGMAP[lang]||lang)}</span>`;
-  const cbtn=document.createElement("button");cbtn.type="button";cbtn.textContent="Copy";
-  cbtn.onclick=()=>{navigator.clipboard.writeText(src).then(()=>{cbtn.textContent="Copied";setTimeout(()=>cbtn.textContent="Copy",1200)})};
-  bar.appendChild(cbtn);box.appendChild(bar);
-  const host=document.createElement("div");host.className="codehost";box.appendChild(host);
+  const bar=document.createElement("div");bar.className="codebar";box.appendChild(bar);
   pre.replaceWith(box);
-  const lines=src.split("\n").length;
-  host.style.height=Math.min(560,Math.max(40,lines*19+16))+"px";
-  const ed=monaco.editor.create(host,{value:src,language:LANGMAP[lang]||lang,readOnly:true,domReadOnly:true,
-   theme:curTheme()==="dark"?"vs-dark":"vs",minimap:{enabled:false},scrollBeyondLastLine:false,fontSize:13,
-   fontFamily:"JetBrains Mono, ui-monospace, monospace",lineNumbers:lines>3?"on":"off",renderLineHighlight:"none",
-   automaticLayout:true,contextmenu:false,folding:lines>8,padding:{top:8,bottom:8},
-   scrollbar:{alwaysConsumeMouseWheel:false,verticalScrollbarSize:8,horizontalScrollbarSize:8},overviewRulerLanes:0,
-   guides:{indentation:false}});
-  editors.push(ed);
+  const sp=lang==="java"?splitJava(src):null;
+  if(!sp||sp.parts.length<2){
+   bar.innerHTML=`<span>${esc(lang)}</span>`;bar.appendChild(copyBtn(()=>src));
+   const host=document.createElement("div");host.className="codehost";box.appendChild(host);makeEditor(host,src,lang);continue}
+  const tabs=[...sp.parts.map(p=>({label:p.name,kind:p.kind,src:p.src}))];
+  if(sp.imports)tabs.unshift({label:"imports",kind:"",src:sp.imports});
+  tabs.push({label:"Full file",kind:"",src});
+  box.classList.add("split");
+  let active=tabs.findIndex(t=>t.kind);
+  bar.innerHTML=`<span>${esc(lang)} · ${sp.parts.length} types</span><span class="cur"></span>`;bar.appendChild(copyBtn(()=>tabs[active].src));
+  const body=document.createElement("div");body.className="codebody";box.appendChild(body);
+  const tl=document.createElement("div");tl.className="codetabs";tl.setAttribute("role","tablist");body.appendChild(tl);
+  const stack=document.createElement("div");stack.className="codestack";body.appendChild(stack);
+  const panes=tabs.map(()=>{const h=document.createElement("div");h.className="codehost";h.hidden=true;stack.appendChild(h);return h});
+  const btns=tabs.map((t,i)=>{const b=document.createElement("button");b.type="button";b.setAttribute("role","tab");
+   b.innerHTML=(t.kind?`<i class="k k-${t.kind}">${KIND_LABEL[t.kind]}</i>`:"")+esc(t.label);
+   b.onclick=()=>sel(i);tl.appendChild(b);return b});
+  function sel(i){active=i;bar.querySelector(".cur").textContent=tabs[i].label;btns.forEach((b,j)=>b.setAttribute("aria-selected",j===i));panes.forEach((p,j)=>p.hidden=j!==i);
+   if(!panes[i].dataset.ready){panes[i].dataset.ready=1;makeEditor(panes[i],tabs[i].src,lang)}}
+  sel(active);
  }
 }
 window.addEventListener("hashchange",show);

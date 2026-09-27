@@ -40,18 +40,51 @@ Design an artifact repository: upload (publish) an artifact and fetch an artifac
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Repository { <<interface>> +resolve(ArtifactCoordinates) Optional~ArtifactVersion~ }
+    class Repository {
+      <<interface>>
+      +resolve(ArtifactCoordinates) Optional~ArtifactVersion~
+    }
     class LocalRepository {
       <<class>>
     }
-    class RemoteRepository { -String upstreamUrl }
-    class VirtualRepository { -List~Repository~ members }
-    class ArtifactCoordinates { +String repo; +String group; +String name; +String version }
-    class ArtifactVersion { +ArtifactCoordinates coords; +String sha256; +long size; +ArtifactStatus status }
-    class StorageBackend { <<interface>> +put(InputStream) String digest; +get(digest) InputStream; +exists(digest) }
-    class Scanner { <<interface>> +scan(digest) ScanResult }
-    class ScanPipeline { -List~Scanner~ scanners; +run(ArtifactVersion) }
-    class ArtifactService { +publish(coords, InputStream, token); +fetch(coords, token) InputStream }
+    class RemoteRepository {
+      -String upstreamUrl
+    }
+    class VirtualRepository {
+      -List~Repository~ members
+    }
+    class ArtifactCoordinates {
+      <<record>>
+      +String repo
+      +String group
+      +String name
+      +String version
+    }
+    class ArtifactVersion {
+      <<class>>
+      +ArtifactCoordinates coords
+      +String sha256
+      +long size
+      +ArtifactStatus status
+    }
+    class StorageBackend {
+      <<interface>>
+      +put(InputStream) String digest
+      +get(digest) InputStream
+      +exists(digest)
+    }
+    class Scanner {
+      <<interface>>
+      +scan(digest) ScanResult
+    }
+    class ScanPipeline {
+      -List~Scanner~ scanners
+      +run(ArtifactVersion)
+    }
+    class ArtifactService {
+      +publish(coords, InputStream, token)
+      +fetch(coords, token) InputStream
+    }
     Repository <|.. LocalRepository
     Repository <|.. RemoteRepository
     Repository <|.. VirtualRepository
@@ -299,9 +332,47 @@ public class ArtifactRepoDemo {
 | Re-scan when new CVE disclosed | Periodic job re-queues AVAILABLE artifacts; may flip to BLOCKED. |
 
 ## Amazon follow-up questions
-1. How do you handle a 5 GB upload? (Multipart pre-signed S3, resumable, never proxy bytes through API.)
-2. A malicious artifact was downloaded 10k times before detection — what now? (Block, audit log of consumers, notify, SBOM search.)
-3. What metrics and alarms? (p99 download latency, 5xx rate, cache hit ratio, scan queue age, storage growth, upstream error rate.)
-4. How do you make downloads fast globally? (CDN on content-addressed immutable URLs, regional replicas.)
-5. Why content addressing? (Dedup, integrity, immutable caching.)
-6. How to keep metadata and blob consistent if the service dies between the two writes? (Write blob first; metadata commit is the "publish"; GC orphans.)
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>How do you handle a 5 GB upload? (Multipart pre-signed S3, resumable, never proxy bytes through API.)</summary>
+
+Never push the 5 GB through your API servers. The API hands out pre-signed S3 URLs for a multipart upload: the client uploads parts (say 100 MB each) straight to S3, in parallel and resumable, so a failed part is simply retried. When all parts are done, the client calls 'complete' and the API records the metadata.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>A malicious artifact was downloaded 10k times before detection — what now? (Block, audit log of consumers, notify, SBOM search.)</summary>
+
+Mark the artifact `BLOCKED` right away so no one can download it. Use the download logs to list every user, build or service that fetched it. Notify those teams and search SBOMs (software bills of materials) to find anything that bundled it. Keep the file itself for investigation, and publish a fixed version.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>What metrics and alarms? (p99 download latency, 5xx rate, cache hit ratio, scan queue age, storage growth, upstream error rate.)</summary>
+
+Watch download speed (p99 latency), error rate (5xx), CDN cache hit ratio, how long items wait in the scan queue, storage growth, and failures reaching upstream sources like Maven Central. Alarm when errors spike, the scan queue gets old (new versions stuck), or cache hits drop sharply.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How do you make downloads fast globally? (CDN on content-addressed immutable URLs, regional replicas.)</summary>
+
+Artifacts never change once published, so they're perfect for a CDN: cache them at edges worldwide with long expiry. Use content-addressed URLs (based on the file's hash) so the cache never serves a stale file. Replicate the blob storage to a few regions for fast origin fetches.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>Why content addressing? (Dedup, integrity, immutable caching.)</summary>
+
+Content addressing means the file's name *is* its SHA-256 hash. The same file uploaded twice is stored once (dedup). The download can be verified against the name (integrity). And the content behind a hash can never change, so it can be cached forever.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How to keep metadata and blob consistent if the service dies between the two writes? (Write blob first; metadata commit is the "publish"; GC orphans.)</summary>
+
+Write the file first, then the metadata row. The metadata write is the moment it's 'published', so if the service dies before it, no one can see the file. A clean-up job later deletes blobs that have no metadata after a while. The reverse order would be dangerous, because metadata would point at a missing file.
+
+</details>

@@ -40,14 +40,53 @@ Design a music streaming platform for millions of users to discover, search and 
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Track { +String id; +String title; +int durationMs; +List~String~ artistIds; +String albumId }
-    class AudioFile { +String trackId; +int bitrateKbps; +String codec; +String manifestUrl }
-    class Album { +String id; +String title; +List~String~ trackIds }
-    class Artist { +String id; +String name }
-    class Playlist { +String id; +String ownerId; +String name; +long version }
-    class PlaylistItem { +String trackId; +String addedBy; +Instant addedAt; +String position }
-    class Like { +String userId; +String trackId; +Instant at }
-    class ListenEvent { +String userId; +String trackId; +int msPlayed; +Instant at }
+    class Track {
+      +String id
+      +String title
+      +int durationMs
+      +List~String~ artistIds
+      +String albumId
+    }
+    class AudioFile {
+      +String trackId
+      +int bitrateKbps
+      +String codec
+      +String manifestUrl
+    }
+    class Album {
+      +String id
+      +String title
+      +List~String~ trackIds
+    }
+    class Artist {
+      +String id
+      +String name
+    }
+    class Playlist {
+      +String id
+      +String ownerId
+      +String name
+      +long version
+    }
+    class PlaylistItem {
+      +String trackId
+      +String addedBy
+      +Instant addedAt
+      +String position
+    }
+    class Like {
+      <<class>>
+      +String userId
+      +String trackId
+      +Instant at
+    }
+    class ListenEvent {
+      <<class>>
+      +String userId
+      +String trackId
+      +int msPlayed
+      +Instant at
+    }
     Track *-- AudioFile
     Album o-- Track
     Artist o-- Album
@@ -276,10 +315,54 @@ public class MusicDemo {
 | Ads for free tier | `AdInsertionStrategy` in player queue. |
 
 ## Amazon follow-up questions
-1. How do you get playback to start in < 200 ms globally?
-2. Monolith vs microservices — where do you draw boundaries, and what do you lose (transactions)?
-3. Which DB for playlists and why not SQL?
-4. How is search kept up to date with the catalog?
-5. A new album drops and 10M users press play in the same minute — what breaks?
-6. How do you store listening history for recommendations at 1B events/day?
-7. How do you do 99.99%? (Multi-AZ, multi-region active-active for playback, multi-CDN, graceful degradation — search down shouldn't stop playback.)
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>How do you get playback to start in &lt; 200 ms globally?</summary>
+
+Keep everything close to the user. Serve audio from a CDN edge near them, cache login and licence checks so starting is one fast call, start with a small, low-bitrate first segment, and preload the next track before the current one ends.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>Monolith vs microservices — where do you draw boundaries, and what do you lose (transactions)?</summary>
+
+Split by business area: playback, catalog, search, playlists, users, recommendations. Each owns its data and scales on its own (playback is huge, playlists small). You lose easy cross-area transactions, so you use events and design for 'eventually consistent', for example a new song shows in search a few seconds later.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>Which DB for playlists and why not SQL?</summary>
+
+Playlists are read by id, can be very long, and need to scale to billions, so a key-value or wide-column store (DynamoDB, Cassandra) with key = playlist id fits well. SQL works but sharding and huge playlists are harder, and we don't need joins here.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How is search kept up to date with the catalog?</summary>
+
+The catalog publishes an event on every change (new song, edit, removal). A worker reads these events and updates the search index (Elasticsearch). Search is a few seconds behind, which is fine. A nightly full re-index fixes any drift.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>A new album drops and 10M users press play in the same minute — what breaks?</summary>
+
+Audio files are cached on the CDN, so it absorbs the play load. The weak points are the metadata and licence services, hit 10M times at once. Warm the caches before the release, cache album data aggressively, rate-limit or queue non-essential calls, and pre-scale servers for the launch time.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How do you store listening history for recommendations at 1B events/day?</summary>
+
+Write events to Kafka, then to cheap storage like S3 in columnar files. Batch jobs build daily features for recommendations, and a small store (Cassandra or DynamoDB) keeps each user's recent history for quick lookups. Never write to a normal database per event at that scale.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">7</span>How do you do 99.99%? (Multi-AZ, multi-region active-active for playback, multi-CDN, graceful degradation — search down shouldn't stop playback.)</summary>
+
+Run in several availability zones and at least two regions, both serving traffic, and use more than one CDN. Most importantly, degrade gracefully: if search or recommendations fail, playback keeps working. Each part fails on its own without taking playback down.
+
+</details>

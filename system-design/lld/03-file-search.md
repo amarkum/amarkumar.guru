@@ -35,8 +35,20 @@ Local tool — not a distributed concern. Filesystem may change during traversal
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class FileNode { <<interface>> +name() +size() +isDirectory() +children() }
-    class FileFilter { <<interface>> +matches(FileNode) boolean +and(f) +or(f) +negate() }
+    class FileNode {
+      <<interface>>
+      +name()
+      +size()
+      +isDirectory()
+      +children()
+    }
+    class FileFilter {
+      <<interface>>
+      +matches(FileNode) boolean
+      +and(f)
+      +or(f)
+      +negate()
+    }
     class NameFilter {
       <<record>>
     }
@@ -46,11 +58,22 @@ classDiagram
     class SizeFilter {
       <<record>>
     }
-    class AndFilter { -List~FileFilter~ filters }
-    class OrFilter { -List~FileFilter~ filters }
-    class NotFilter { -FileFilter inner }
-    class FileSearcher { +search(FileNode root, FileFilter f) Stream~FileNode~ }
-    class TraversalStrategy { <<interface>> +traverse(FileNode) Stream~FileNode~ }
+    class AndFilter {
+      -List~FileFilter~ filters
+    }
+    class OrFilter {
+      -List~FileFilter~ filters
+    }
+    class NotFilter {
+      -FileFilter inner
+    }
+    class FileSearcher {
+      +search(FileNode root, FileFilter f) Stream~FileNode~
+    }
+    class TraversalStrategy {
+      <<interface>>
+      +traverse(FileNode) Stream~FileNode~
+    }
     FileFilter <|.. NameFilter
     FileFilter <|.. ExtensionFilter
     FileFilter <|.. SizeFilter
@@ -305,7 +328,10 @@ classDiagram
     FileFilter <|.. ModifiedAfterFilter
     FileNode <|.. NioFileNode
     TraversalStrategy <|.. ParallelTraversal
-    class FileAction { <<interface>> +apply(FileNode) }
+    class FileAction {
+      <<interface>>
+      +apply(FileNode)
+    }
     class FileFilter {
       <<interface>>
     }
@@ -330,9 +356,47 @@ classDiagram
 ```
 
 ## Amazon follow-up questions
-1. Why Specification/Composite instead of a big `if` with flags? (open/closed, arbitrary nesting.)
-2. How do you evaluate cheap filters first? (`cost()` hint, order children.)
-3. How would you scale to 100M files? Parallel walk, streaming, build an index (like `locate`).
-4. How to avoid symlink cycles?
-5. How would you unit test without a real disk? (`FileNode` interface + in-memory tree.)
-6. Precedence of AND vs OR in your parser?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Why Specification/Composite instead of a big <code>if</code> with flags? (open/closed, arbitrary nesting.)</summary>
+
+A big `if` with flags grows every time someone adds a filter, and can't express things like `(size > 1MB AND ext = .log) OR name starts with tmp`. With the Composite pattern, each filter is a small object and `And`, `Or`, `Not` combine them into any tree. New filters are new classes, with no edits to old code.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>How do you evaluate cheap filters first? (<code>cost()</code> hint, order children.)</summary>
+
+Give each filter a `cost()` value: name and extension checks are cheap, reading file contents is expensive. When building an `And` or `Or`, sort its children by cost so cheap checks run first. With AND, a cheap check that fails means the expensive one never runs.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How would you scale to 100M files? Parallel walk, streaming, build an index (like <code>locate</code>).</summary>
+
+Walk directories in parallel (one task per folder, using a thread pool or `ForkJoin`). Stream results instead of collecting them in a list. For repeated searches, build an index ahead of time like `locate` does: a database of file paths, refreshed on a schedule or by file-system change events.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How to avoid symlink cycles?</summary>
+
+A symlink can point back to a parent folder and make the walk loop forever. Either don't follow symlinks by default, or keep a set of folders already visited, keyed by their real path or inode, and skip any you've seen.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How would you unit test without a real disk? (<code>FileNode</code> interface + in-memory tree.)</summary>
+
+Put the file system behind a `FileNode` interface (name, size, children…). The real version wraps `java.nio.file`, and the test version is a small in-memory tree you build in the test. The search code never knows the difference.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>Precedence of AND vs OR in your parser?</summary>
+
+Same as normal logic: NOT first, then AND, then OR. So `a OR b AND c` means `a OR (b AND c)`. The parser handles this by parsing OR at the top level, which calls AND parsing, which calls NOT/atom parsing. Brackets override it.
+
+</details>

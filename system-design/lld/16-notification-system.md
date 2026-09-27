@@ -37,9 +37,23 @@
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Notification { +String id; +String userId; +Priority priority; +String type; +Map payload }
-    class UserPreference { +Channel preferred; +Set~Channel~ enabled }
-    class RoutingRule { <<interface>> +apply(Notification, UserPreference, Set~Channel~ current) Set~Channel~ }
+    class Notification {
+      <<record>>
+      +String id
+      +String userId
+      +Priority priority
+      +String type
+      +Map payload
+    }
+    class UserPreference {
+      <<record>>
+      +Channel preferred
+      +Set~Channel~ enabled
+    }
+    class RoutingRule {
+      <<interface>>
+      +apply(Notification, UserPreference, Set~Channel~ current) Set~Channel~
+    }
     class UrgentAllChannelsRule {
       <<class>>
     }
@@ -49,10 +63,22 @@ classDiagram
     class OptOutFilterRule {
       <<class>>
     }
-    class NotificationRouter { -List~RoutingRule~ rules; +route(Notification) Set~Channel~ }
-    class ChannelHandler { <<interface>> +channel() Channel; +send(Notification, UserPreference) }
-    class HandlerRegistry { -Map~Channel,ChannelHandler~ handlers; +get(Channel) }
-    class NotificationService { +notify(Notification) }
+    class NotificationRouter {
+      -List~RoutingRule~ rules
+      +route(Notification) Set~Channel~
+    }
+    class ChannelHandler {
+      <<interface>>
+      +channel() Channel
+      +send(Notification, UserPreference)
+    }
+    class HandlerRegistry {
+      -Map~Channel,ChannelHandler~ handlers
+      +get(Channel)
+    }
+    class NotificationService {
+      +notify(Notification)
+    }
     RoutingRule <|.. UrgentAllChannelsRule
     RoutingRule <|.. PreferredChannelRule
     RoutingRule <|.. OptOutFilterRule
@@ -246,9 +272,47 @@ public class NotificationDemo {
 | Delivery tracking | `DeliveryStatusRepository`, provider webhooks. |
 
 ## Amazon follow-up questions
-1. How do you add a new channel without touching routing code?
-2. How do you make sure an URGENT OTP isn't delayed behind 10M marketing emails? (Separate queues/priorities.)
-3. Provider (Twilio) is down — what happens? (Retry with backoff, failover provider, DLQ.)
-4. How do you avoid sending duplicates? (Idempotency key at ingestion, provider-level dedupe.)
-5. How to support user timezone quiet hours?
-6. Scale to 100M/day — architecture? (Event bus → router → per-channel queues → workers → providers; prefs cached.)
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>How do you add a new channel without touching routing code?</summary>
+
+Each channel (email, SMS, push, WhatsApp) implements the same `Channel` interface and registers itself by name. The router just looks up channels by name based on user preferences. Adding a channel means writing one new class and registering it. The routing code doesn't change.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>How do you make sure an URGENT OTP isn't delayed behind 10M marketing emails? (Separate queues/priorities.)</summary>
+
+Give urgent messages their own queue and workers, separate from bulk marketing. OTPs go to the 'urgent' queue, which always has spare capacity, so they're never stuck behind millions of emails.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>Provider (Twilio) is down — what happens? (Retry with backoff, failover provider, DLQ.)</summary>
+
+Retry with growing waits (1s, 2s, 4s…). If it keeps failing, switch to a backup provider (for example Twilio to MessageBird). If everything fails, the message goes to a dead-letter queue for later retry or investigation. A circuit breaker stops us hammering a provider that's clearly down.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How do you avoid sending duplicates? (Idempotency key at ingestion, provider-level dedupe.)</summary>
+
+Every request carries an idempotency key, like `orderId + eventType + channel`. We record which keys have been sent, and a repeat is skipped. Many providers also accept a dedupe id. That covers retries and duplicate events.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How to support user timezone quiet hours?</summary>
+
+Store each user's timezone and quiet hours (for example 22:00–08:00). Before sending non-urgent messages, check the user's local time. If it's quiet time, schedule the message for when quiet hours end. Urgent ones like OTPs or security alerts ignore quiet hours.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>Scale to 100M/day — architecture? (Event bus → router → per-channel queues → workers → providers; prefs cached.)</summary>
+
+Events go on a bus (Kafka or SNS). A router service reads them, checks preferences (cached) and puts one message per channel on that channel's queue. Workers per channel render the template and call the provider. Every stage scales by adding workers, and 100M a day is only about 1,200 a second on average.
+
+</details>

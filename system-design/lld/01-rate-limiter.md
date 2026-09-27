@@ -343,11 +343,61 @@ classDiagram
 ```
 
 ## Amazon follow-up questions
-1. Why does fixed window allow 2× bursts at the boundary? How does sliding window counter fix it?
-2. How do you rate-limit across 50 app instances? What if Redis is the bottleneck? (shard by key, local pre-fetch of tokens, sticky routing)
-3. Redis is down — fail open or closed? Justify per use case (login = closed, catalog read = open).
-4. Why Lua script instead of `WATCH/MULTI`? Why not Redlock?
-5. How to handle a hot key (one huge customer)? (local bucket with share of the quota, split key)
-6. Where does the limiter live — client SDK, gateway, sidecar, service? Trade-offs.
-7. How do you test it? (inject `Clock`, deterministic time.)
-8. Consistency across regions?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Why does fixed window allow 2× bursts at the boundary? How does sliding window counter fix it?</summary>
+
+A fixed window resets its counter on the clock edge. With a limit of 100 per minute, a client can send 100 at 0:59 and 100 more at 1:00, so 200 requests land in about two seconds. A sliding window counter blends the two windows: it counts `previous × (how much of it still overlaps) + current`. The old burst still counts against you, so the edge trick stops working.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>How do you rate-limit across 50 app instances? What if Redis is the bottleneck? (shard by key, local pre-fetch of tokens, sticky routing)</summary>
+
+Keep the counters in one shared place, usually Redis, so every instance sees the same count. If Redis becomes the bottleneck, split keys across Redis shards (by client id). You can also let each instance grab a small batch of tokens at a time and spend them locally, or route the same client to the same instance so most checks stay local.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>Redis is down — fail open or closed? Justify per use case (login = closed, catalog read = open).</summary>
+
+It depends on what you're protecting. For login or payments, fail **closed** (reject) because letting attackers through is worse than a short outage. For reading the product catalog, fail **open** (allow) because blocking real customers costs more than a brief lack of limiting. Either way, alarm on it and use a small local limiter as a backup.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>Why Lua script instead of <code>WATCH/MULTI</code>? Why not Redlock?</summary>
+
+A Lua script runs inside Redis as one atomic step: read the bucket, refill it, take a token, save it. No other command can sneak in between. `WATCH/MULTI` is optimistic and retries when there's contention, which means extra round trips exactly when traffic is hottest. Redlock is a distributed lock. It's slow, has known safety issues, and is unnecessary when one atomic script already does the job.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How to handle a hot key (one huge customer)? (local bucket with share of the quota, split key)</summary>
+
+One giant customer can overload the single Redis key that holds their counter. Fix: split their key into N sub-keys (`client:1..N`), each holding 1/N of the quota, and pick one at random. Or give each app instance a local share of that customer's quota so most requests never touch Redis.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>Where does the limiter live — client SDK, gateway, sidecar, service? Trade-offs.</summary>
+
+**Gateway**: one place, protects everything, but can't see business details. **Sidecar**: close to each service, no code changes, but more moving parts. **Inside the service**: can use business rules (for example per-seller limits), but every team re-implements it. **Client SDK**: polite clients slow themselves down, but you can't trust clients. The usual answer is a coarse limit at the gateway and fine-grained limits in the service.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">7</span>How do you test it? (inject <code>Clock</code>, deterministic time.)</summary>
+
+Pass a `Clock` (or time supplier) in rather than calling `System.nanoTime()` directly. In tests, use a fake clock you move forward by hand: send 10 requests, check the 11th is rejected, advance time by 1 second, check it's allowed again. No `sleep`, no flaky tests.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">8</span>Consistency across regions?</summary>
+
+Keeping counters perfectly in sync across regions needs cross-region calls on every request, which is too slow. Instead, give each region its own share of the limit (for example 60% US, 40% EU) and enforce it locally. Optionally sync the usage numbers in the background every few seconds and adjust the shares. You accept a little over-admission in exchange for speed.
+
+</details>

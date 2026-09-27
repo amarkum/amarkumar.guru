@@ -39,15 +39,56 @@ Single library DB → **CP**. Search index can be eventually consistent.
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Book { +String isbn; +String title; +List~String~ authors; +String subject }
-    class BookItem { +String barcode; +String isbn; -ItemStatus status; +BigDecimal price }
-    class Member { +String id; +MemberType type; +BigDecimal fineDue; +List~Loan~ activeLoans }
-    class Loan { +BookItem item; +Member member; +LocalDate issued; +LocalDate due; +LocalDate returned }
-    class Reservation { +String isbn; +String memberId; +ReservationStatus status; +LocalDate holdUntil }
-    class LendingPolicy { <<interface>> +maxBooks() int; +loanDays() int; +finePerDay() BigDecimal }
-    class FinePolicy { <<interface>> +fine(Loan, LocalDate returnDate) BigDecimal }
-    class Catalog { +search(SearchCriteria) List~Book~ }
-    class LibraryService { +checkout(memberId, barcode) Loan; +returnItem(barcode) BigDecimal; +renew(barcode); +reserve(memberId, isbn) }
+    class Book {
+      +String isbn
+      +String title
+      +List~String~ authors
+      +String subject
+    }
+    class BookItem {
+      +String barcode
+      +String isbn
+      -ItemStatus status
+      +BigDecimal price
+    }
+    class Member {
+      +String id
+      +MemberType type
+      +BigDecimal fineDue
+      +List~Loan~ activeLoans
+    }
+    class Loan {
+      +BookItem item
+      +Member member
+      +LocalDate issued
+      +LocalDate due
+      +LocalDate returned
+    }
+    class Reservation {
+      +String isbn
+      +String memberId
+      +ReservationStatus status
+      +LocalDate holdUntil
+    }
+    class LendingPolicy {
+      <<interface>>
+      +maxBooks() int
+      +loanDays() int
+      +finePerDay() BigDecimal
+    }
+    class FinePolicy {
+      <<interface>>
+      +fine(Loan, LocalDate returnDate) BigDecimal
+    }
+    class Catalog {
+      +search(SearchCriteria) List~Book~
+    }
+    class LibraryService {
+      +checkout(memberId, barcode) Loan
+      +returnItem(barcode) BigDecimal
+      +renew(barcode)
+      +reserve(memberId, isbn)
+    }
     Book "1" *-- "many" BookItem
     Member "1" o-- "many" Loan
     Loan --> BookItem
@@ -313,9 +354,47 @@ public class LibraryDemo {
 | Recommendations | Loan history → "members who borrowed X also borrowed Y". |
 
 ## Amazon follow-up questions
-1. Why is Student/Faculty an enum + policy, not subclasses?
-2. Two librarians issue the same copy at the same time — what prevents it?
-3. How does the reservation queue interact with returns and renewals?
-4. How would you make fine rules configurable?
-5. Where would you use the Observer pattern here?
-6. How would you scale search for millions of titles? (Search index, see #03/#13.)
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Why is Student/Faculty an enum + policy, not subclasses?</summary>
+
+Students and faculty don't *behave* differently. They just have different numbers (loan limit, loan days, fine rate). An enum `MemberType` plus a `BorrowPolicy` object holding those numbers is simpler. A new member type is new data, not a new class.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>Two librarians issue the same copy at the same time — what prevents it?</summary>
+
+Issuing does an atomic check-and-change on the copy's status: `UPDATE copy SET status='LOANED' WHERE id=? AND status='AVAILABLE'`. The first librarian's update works. The second changes 0 rows and sees 'already issued'.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How does the reservation queue interact with returns and renewals?</summary>
+
+When a copy is returned and someone has reserved that title, it goes `ON_HOLD` for the first person in the queue for 2 days and they're notified, not back to the shelf. Renewal is refused if anyone is waiting for that title, so reservations always win.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How would you make fine rules configurable?</summary>
+
+Put the fine logic behind a `FinePolicy` interface (daily rate, grace days, max cap), and load the numbers from a config table per member type. Changing the fine rate becomes a data change, and a new style of fine is a new policy class.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>Where would you use the Observer pattern here?</summary>
+
+When a copy becomes available, observers react: a notification service tells the next person in the queue, and a stats service updates counts. The same applies when a loan becomes overdue, which triggers reminder emails.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How would you scale search for millions of titles? (Search index, see #03/#13.)</summary>
+
+Put titles, authors and subjects into a search engine like Elasticsearch, updated when the catalog changes. Search goes there, and the database only handles loans. It's the same idea as the file-search and music-streaming notes.
+
+</details>

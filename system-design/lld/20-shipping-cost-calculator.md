@@ -37,9 +37,31 @@ Quotes are computed from cached rule sets (**AP**; versioned). Store `ruleSetVer
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Shipment { +double weightKg; +Dimensions dims; +String fromPin; +String toPin; +DeliveryType type; +Set~HandlingFlag~ flags; +boolean prime }
-    class PricingContext { +Shipment shipment; +Zone zone; +double chargeableKg; +BigDecimal running; +List~LineItem~ items; +add(label, amount) }
-    class PricingRule { <<interface>> +order() int; +applies(PricingContext) boolean; +apply(PricingContext) }
+    class Shipment {
+      <<record>>
+      +double weightKg
+      +Dimensions dims
+      +String fromPin
+      +String toPin
+      +DeliveryType type
+      +Set~HandlingFlag~ flags
+      +boolean prime
+    }
+    class PricingContext {
+      <<class>>
+      +Shipment shipment
+      +Zone zone
+      +double chargeableKg
+      +BigDecimal running
+      +List~LineItem~ items
+      +add(label, amount)
+    }
+    class PricingRule {
+      <<interface>>
+      +order() int
+      +applies(PricingContext) boolean
+      +apply(PricingContext)
+    }
     class BaseWeightDistanceRule {
       <<record>>
     }
@@ -58,8 +80,15 @@ classDiagram
     class MinimumChargeRule {
       <<record>>
     }
-    class ShippingCalculator { -List~PricingRule~ rules; +quote(Shipment) Quote }
-    class Quote { +BigDecimal total; +List~LineItem~ lines; +String ruleSetVersion }
+    class ShippingCalculator {
+      -List~PricingRule~ rules
+      +quote(Shipment) Quote
+    }
+    class Quote {
+      +BigDecimal total
+      +List~LineItem~ lines
+      +String ruleSetVersion
+    }
     PricingRule <|.. BaseWeightDistanceRule
     PricingRule <|.. DeliveryTypeRule
     PricingRule <|.. RegionSurchargeRule
@@ -279,9 +308,47 @@ public class ShippingDemo {
 | Rules authored by business users | JSON/DSL → `RuleFactory` (Interpreter). |
 
 ## Amazon follow-up questions
-1. Decorator vs rule chain — which did you choose and why?
-2. How do you add a new surcharge without deploying?
-3. How to make sure the order is charged the price quoted 10 minutes ago? (Quote id + version + expiry.)
-4. Order of rules matters (discount before/after surcharge) — how do you make it explicit?
-5. How would you test 50 rule combinations? (Rule unit tests + golden quote snapshots.)
-6. How would you scale to 50k quotes/s? (Stateless, cached rules and zone map, horizontal.)
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Decorator vs rule chain — which did you choose and why?</summary>
+
+A **rule chain**: an ordered list of small rules, each adding its part (base, express, fragile…) to the quote. Decorators would work too, but the order is hidden in how you wrap objects, which is hard to see and to load from config. A list is easy to read, reorder, test and switch on or off.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>How do you add a new surcharge without deploying?</summary>
+
+Make rules data-driven: a rule 'type' such as percentage surcharge, flat fee or weight band is code, but its settings (which region, how much, from when) live in a database table. Adding a 'monsoon surcharge 5% in Kerala' is a new row, and servers reload rules every few minutes.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How to make sure the order is charged the price quoted 10 minutes ago? (Quote id + version + expiry.)</summary>
+
+When we quote, we save the quote with an id, the rule version used and an expiry (say 30 minutes). At checkout, the order passes the quote id. If it's still valid we charge exactly that amount, otherwise we re-quote and show the new price.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>Order of rules matters (discount before/after surcharge) — how do you make it explicit?</summary>
+
+Give each rule an explicit `order()` number (base = 100, surcharges = 200, discounts = 500, caps = 800, rounding = 900) and always sort by it. The order is then written down and visible in one place, not an accident of how the code was put together.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How would you test 50 rule combinations? (Rule unit tests + golden quote snapshots.)</summary>
+
+Unit-test each rule on its own. Then keep a set of 'golden' shipments with their expected quote (total and line-by-line breakdown) saved as files. Any change that alters a saved quote fails the test, and you either fix the bug or approve the new numbers on purpose.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How would you scale to 50k quotes/s? (Stateless, cached rules and zone map, horizontal.)</summary>
+
+The calculator is stateless and pure CPU. Keep rules and the zone map in memory (refreshed in the background), so a quote never hits a database. Then add more servers behind a load balancer: 50k a second is just many machines doing quick maths.
+
+</details>

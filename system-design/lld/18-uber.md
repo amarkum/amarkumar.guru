@@ -41,20 +41,61 @@ Design Uber: class design (Rider, Driver, Trip, Payment, Location), trip state m
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class User { <<abstract>> +String id; +String name; +String phone }
+    class User {
+      <<abstract>>
+      +String id
+      +String name
+      +String phone
+    }
     class Rider {
       <<class>>
     }
-    class Driver { +DriverStatus status; +Vehicle vehicle; +Location location }
-    class Vehicle { +String plate; +RideType type }
-    class Trip { +String id; +TripStatus status; +Location pickup; +Location drop; +Fare fare; +transition(TripStatus) }
-    class TripStatus { <<enumeration>> REQUESTED ACCEPTED ARRIVED IN_PROGRESS COMPLETED CANCELLED }
-    class LocationIndex { <<interface>> +update(driverId, Location); +nearby(Location, radiusKm, RideType) List~Driver~ }
-    class MatchingStrategy { <<interface>> +candidates(Trip) List~Driver~ }
-    class PricingService { +estimate(pickup, drop, RideType) Fare }
-    class SurgeCalculator { +multiplier(geohash) double }
-    class PaymentService { +charge(tripId, amount, method, idempotencyKey) Payment }
-    class TripService { +request(); +accept(); +start(); +complete(); +cancel() }
+    class Driver {
+      +DriverStatus status
+      +Vehicle vehicle
+      +Location location
+    }
+    class Vehicle {
+      +String plate
+      +RideType type
+    }
+    class Trip {
+      +String id
+      +TripStatus status
+      +Location pickup
+      +Location drop
+      +Fare fare
+      +transition(TripStatus)
+    }
+    class TripStatus {
+      <<enumeration>>
+      REQUESTED ACCEPTED ARRIVED IN_PROGRESS COMPLETED CANCELLED
+    }
+    class LocationIndex {
+      <<interface>>
+      +update(driverId, Location)
+      +nearby(Location, radiusKm, RideType) List~Driver~
+    }
+    class MatchingStrategy {
+      <<interface>>
+      +candidates(Trip) List~Driver~
+    }
+    class PricingService {
+      +estimate(pickup, drop, RideType) Fare
+    }
+    class SurgeCalculator {
+      +multiplier(geohash) double
+    }
+    class PaymentService {
+      +charge(tripId, amount, method, idempotencyKey) Payment
+    }
+    class TripService {
+      +request()
+      +accept()
+      +start()
+      +complete()
+      +cancel()
+    }
     User <|-- Rider
     User <|-- Driver
     Driver *-- Vehicle
@@ -368,10 +409,54 @@ public class UberDemo {
 | Split fare | `Payment` HAS-A many `PaymentShare`s. |
 
 ## Amazon follow-up questions
-1. How do you find nearby drivers quickly? Why is a SQL `WHERE distance < r` too slow?
-2. 1M drivers × every 4 s — where do location updates go? (In-memory sharded index, not DB; Kafka for history.)
-3. How do you guarantee a driver isn't matched to two riders?
-4. How is surge calculated and why lock it in the estimate?
-5. Payment call timed out — did we charge? (Idempotency key, query PSP, reconciliation.)
-6. Walk through every state transition and who is allowed to trigger it.
-7. How do you shard? (By city/region; cross-city trips are rare.)
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>How do you find nearby drivers quickly? Why is a SQL <code>WHERE distance &lt; r</code> too slow?</summary>
+
+Keep drivers in an in-memory grid of cells (geohash or H3). To find drivers near a rider, look in the rider's cell and the cells around it, which is only a few quick lookups. A SQL distance query has to calculate distance to every driver row, and the table changes constantly as drivers move, so it's far too slow.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>1M drivers × every 4 s — where do location updates go? (In-memory sharded index, not DB; Kafka for history.)</summary>
+
+1M drivers every 4 seconds is ~250k updates a second, too many for a normal database. Updates go to an in-memory geo index split across servers by city or cell, and old entries expire after ~30 seconds. A copy goes to Kafka for history and analytics.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How do you guarantee a driver isn't matched to two riders?</summary>
+
+When offering a trip, atomically flip the driver's status from `AVAILABLE` to `OFFERED` with a compare-and-set, only if they're still available. The second rider's attempt fails that check and tries the next driver.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How is surge calculated and why lock it in the estimate?</summary>
+
+Surge is demand ÷ supply for each area, recalculated every minute or two. When the rider asks for a price, we save that quote with its surge multiplier and an expiry. The trip uses the quoted price, so the rider pays what they agreed to even if surge changes a minute later.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>Payment call timed out — did we charge? (Idempotency key, query PSP, reconciliation.)</summary>
+
+We don't know yet, so never just retry blindly. Every charge has an idempotency key, and retrying with the same key can't charge twice. Or ask the payment provider for the status of that key. A daily reconciliation compares our records with the provider's to catch anything left.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>Walk through every state transition and who is allowed to trigger it.</summary>
+
+`REQUESTED` (rider) → `DRIVER_ASSIGNED` (matching service) → `ARRIVING` → `IN_PROGRESS` (driver starts after pickup) → `COMPLETED` (driver ends) → `PAID` (payment service). `CANCELLED` can come from the rider or driver before the trip starts, with a fee after a grace period. Each change checks both the current state and who's asking.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">7</span>How do you shard? (By city/region; cross-city trips are rare.)</summary>
+
+Split data and services by city or region, because almost all trips start and end in one city. That keeps matching local and fast. The rare trip between cities is handled by the region where it started.
+
+</details>

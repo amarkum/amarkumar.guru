@@ -37,22 +37,48 @@ Stateless mixing — N/A. Source services are separate; tolerate partial failure
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Song { +String id; +String artist; +String genre; +int durationSec; +boolean explicit }
-    class SongSource { <<interface>> +name() String; +songs(userId) Iterator~Song~ }
+    class Song {
+      <<record>>
+      +String id
+      +String artist
+      +String genre
+      +int durationSec
+      +boolean explicit
+    }
+    class SongSource {
+      <<interface>>
+      +name() String
+      +songs(userId) Iterator~Song~
+    }
     class DjServiceSource {
       <<class>>
     }
     class RecommendationSource {
       <<class>>
     }
-    class WeightedSource { +SongSource source; +int weight }
-    class MixStrategy { <<interface>> +mix(List~WeightedIterator~) Iterator~Song~ }
+    class WeightedSource {
+      +SongSource source
+      +int weight
+    }
+    class MixStrategy {
+      <<interface>>
+      +mix(List~WeightedIterator~) Iterator~Song~
+    }
     class WeightedRoundRobinMix {
       <<class>>
     }
-    class SongFilter { <<interface>> +test(Song) boolean; +and(SongFilter) }
-    class PlaylistGenerator { +generate(userId, prefs, size) Playlist }
-    class Playlist { +List~Song~ songs }
+    class SongFilter {
+      <<interface>>
+      +test(Song) boolean
+      +and(SongFilter)
+    }
+    class PlaylistGenerator {
+      +generate(userId, prefs, size) Playlist
+    }
+    class Playlist {
+      <<class>>
+      +List~Song~ songs
+    }
     SongSource <|.. DjServiceSource
     SongSource <|.. RecommendationSource
     MixStrategy <|.. WeightedRoundRobinMix
@@ -268,9 +294,47 @@ public class PlaylistDemo {
 | Remote sources slow | `TimeoutSource` / `CachingSource` decorators. |
 
 ## Amazon follow-up questions
-1. What if the DJ service is down? (Decorator degrades; playlist from reco only; emit metric.)
-2. How do you guarantee the 2:1 ratio when filters drop songs? (Filter per source before mixing if ratio must hold on output.)
-3. Infinite source + filter that matches nothing — how do you avoid an infinite loop?
-4. Why Iterator instead of fetching full lists?
-5. How would you unit test mixing? (Fake sources, deterministic order.)
-6. How to add a new filter from a config file? (Filter factory by name.)
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>What if the DJ service is down? (Decorator degrades; playlist from reco only; emit metric.)</summary>
+
+Wrap the DJ source in a Decorator that catches failures and returns an empty iterator. The mixer carries on with recommendations only, so the user still gets a playlist, and we log a metric so someone knows DJ is down. The playlist gets worse but never fails.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>How do you guarantee the 2:1 ratio when filters drop songs? (Filter per source before mixing if ratio must hold on output.)</summary>
+
+If filtering happens after mixing, dropped songs break the 2:1 ratio. Filter each source first, so the mixer only ever takes songs that already passed, then mix. That way it always takes exactly 2 from A then 1 from B.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>Infinite source + filter that matches nothing — how do you avoid an infinite loop?</summary>
+
+Set a limit on how many songs you'll look at, for example 1,000 attempts or 10× the requested size. When you hit it, stop and return what you have, even if the playlist is shorter than asked. Also watch a timeout.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>Why Iterator instead of fetching full lists?</summary>
+
+An iterator pulls songs only as needed. If the playlist needs 20 songs, you may read only 30 from the sources instead of downloading thousands. It also works for endless sources like radio, and uses little memory.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How would you unit test mixing? (Fake sources, deterministic order.)</summary>
+
+Use fake sources that return a fixed list, like A1, A2, A3… and B1, B2… Run the mixer and check the output is exactly `A1, A2, B1, A3, A4, B2…`. No network or randomness (or a fixed random seed), so the result is the same every run.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How to add a new filter from a config file? (Filter factory by name.)</summary>
+
+Keep a map from filter name to a small builder: `"explicit" → cfg -> new ExplicitFilter()`, `"maxDuration" → cfg -> new DurationFilter(cfg.get("seconds"))`. Read the config, look up each name, build the filters and combine them with AND. Adding a new filter means registering one new name.
+
+</details>

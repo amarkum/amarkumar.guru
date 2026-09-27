@@ -46,23 +46,54 @@ classDiagram
       +issueTicket(Vehicle) Ticket
       +exit(ticketId, PaymentMode) Receipt
     }
-    class Floor { -int number; -List~ParkingSpot~ spots }
-    class ParkingSpot { -String id; -SpotType type; -boolean free; +tryOccupy() boolean; +release() }
-    class Vehicle { -String plate; -VehicleType type }
-    class Ticket { -String id; -Vehicle vehicle; -ParkingSpot spot; -Instant entryTime }
-    class Receipt { -Ticket ticket; -Instant exitTime; -Money amount; -Payment payment }
-    class SpotAllocationStrategy { <<interface>> +allocate(List~Floor~, VehicleType) Optional~ParkingSpot~ }
+    class Floor {
+      -int number
+      -List~ParkingSpot~ spots
+    }
+    class ParkingSpot {
+      -String id
+      -SpotType type
+      -boolean free
+      +tryOccupy() boolean
+      +release()
+    }
+    class Vehicle {
+      -String plate
+      -VehicleType type
+    }
+    class Ticket {
+      -String id
+      -Vehicle vehicle
+      -ParkingSpot spot
+      -Instant entryTime
+    }
+    class Receipt {
+      -Ticket ticket
+      -Instant exitTime
+      -Money amount
+      -Payment payment
+    }
+    class SpotAllocationStrategy {
+      <<interface>>
+      +allocate(List~Floor~, VehicleType) Optional~ParkingSpot~
+    }
     class NearestFirstStrategy {
       <<class>>
     }
-    class PricingStrategy { <<interface>> +price(Ticket, Instant exit) Money }
+    class PricingStrategy {
+      <<interface>>
+      +price(Ticket, Instant exit) Money
+    }
     class HourlyPricing {
       <<class>>
     }
     class PeakHourPricing {
       <<class>>
     }
-    class PaymentProcessor { <<interface>> +pay(Money, PaymentMode) Payment }
+    class PaymentProcessor {
+      <<interface>>
+      +pay(Money, PaymentMode) Payment
+    }
     ParkingLot "1" *-- "many" Floor
     Floor "1" *-- "many" ParkingSpot
     Ticket --> Vehicle
@@ -347,9 +378,47 @@ classDiagram
 ```
 
 ## Amazon follow-up questions
-1. How do you price a stay from 8:30 to 10:15 with peak 9–11? (Slice by hour/minute; show the loop.)
-2. Two gates try to assign the last spot — what happens?
-3. How would you change pricing without redeploying? (rules in DB + cache refresh.)
-4. How would you support multiple lots with a central server? What if the network to the central server is down? (local gate cache, reconcile later.)
-5. Why enum `VehicleType` instead of subclass per vehicle? (No behaviour differs → composition.)
-6. How do you make receipts tamper-proof? (Immutable records, append-only table.)
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>How do you price a stay from 8:30 to 10:15 with peak 9–11? (Slice by hour/minute; show the loop.)</summary>
+
+Walk through the stay minute by minute (or hour by hour) and price each slice with the rate for that time. 8:30–9:00 is normal rate, 9:00–10:15 is peak rate. Add the slices together. In code it's a loop from entry to exit time that asks the pricing rule for the rate at each step.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>Two gates try to assign the last spot — what happens?</summary>
+
+Each spot has a status that can only change with an atomic compare-and-set (`FREE → OCCUPIED`). Both gates try, only one succeeds, and the loser gets `false` and simply asks the strategy for the next free spot. Nobody gets the same spot twice.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How would you change pricing without redeploying? (rules in DB + cache refresh.)</summary>
+
+Keep pricing rules (rates, peak hours, caps) in a database table, not in code. The service caches them and refreshes every few minutes or when an admin saves a change. New prices go live without a deploy.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How would you support multiple lots with a central server? What if the network to the central server is down? (local gate cache, reconcile later.)</summary>
+
+Each lot has a central server that owns spots, tickets and payments. Gates keep a local cache of free spots and can issue tickets offline, storing them locally. When the network comes back, they send the saved tickets to the server, which reconciles them. Give ticket ids a gate prefix so they never clash.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>Why enum <code>VehicleType</code> instead of subclass per vehicle? (No behaviour differs → composition.)</summary>
+
+Cars, bikes and trucks don't *behave* differently. They just need different spot sizes and prices. That's data, not behaviour, so an enum field is simpler. Subclasses make sense only when each type has different methods or logic.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How do you make receipts tamper-proof? (Immutable records, append-only table.)</summary>
+
+Receipts are never updated or deleted. They're written once to an append-only table. You can also store a hash (or signature) of each receipt so any change is detectable. Corrections are new records (like a refund) that point to the original.
+
+</details>

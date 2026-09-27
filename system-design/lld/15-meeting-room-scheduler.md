@@ -38,16 +38,49 @@ Design and implement a meeting room scheduler: book rooms for time intervals, no
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Room { +String id; +int capacity; +int floor; +Set~Amenity~ amenities }
-    class Interval { +Instant start; +Instant end; +overlaps(Interval) boolean }
-    class Booking { +String id; +String roomId; +Interval interval; +String organizer; +Set~String~ attendees; +BookingStatus status }
-    class RoomCalendar { -TreeMap~Instant,Booking~ byStart; +isFree(Interval) boolean; +add(Booking) boolean; +remove(Booking) }
-    class RoomSelectionStrategy { <<interface>> +choose(List~Room~, BookingRequest) Optional~Room~ }
+    class Room {
+      <<record>>
+      +String id
+      +int capacity
+      +int floor
+      +Set~Amenity~ amenities
+    }
+    class Interval {
+      +Instant start
+      +Instant end
+      +overlaps(Interval) boolean
+    }
+    class Booking {
+      +String id
+      +String roomId
+      +Interval interval
+      +String organizer
+      +Set~String~ attendees
+      +BookingStatus status
+    }
+    class RoomCalendar {
+      -TreeMap~Instant,Booking~ byStart
+      +isFree(Interval) boolean
+      +add(Booking) boolean
+      +remove(Booking)
+    }
+    class RoomSelectionStrategy {
+      <<interface>>
+      +choose(List~Room~, BookingRequest) Optional~Room~
+    }
     class SmallestFitStrategy {
       <<class>>
     }
-    class BookingListener { <<interface>> +onBooked(Booking); +onCancelled(Booking) }
-    class BookingService { +search(req) List~Room~; +book(req) Booking; +cancel(bookingId, user) }
+    class BookingListener {
+      <<interface>>
+      +onBooked(Booking)
+      +onCancelled(Booking)
+    }
+    class BookingService {
+      +search(req) List~Room~
+      +book(req) Booking
+      +cancel(bookingId, user)
+    }
     RoomSelectionStrategy <|.. SmallestFitStrategy
     BookingService --> RoomCalendar
     BookingService --> RoomSelectionStrategy
@@ -267,9 +300,47 @@ public class MeetingRoomDemo {
 | Google/Outlook calendar sync | `CalendarSyncListener` observer. |
 
 ## Amazon follow-up questions
-1. How do you check overlap efficiently? Complexity?
-2. Two users book the same room at the same time — prove only one wins.
-3. Why per-room lock instead of `synchronized book()`?
-4. How would you enforce no-overlap in the DB?
-5. How to support recurring meetings with exceptions ("this Tuesday moved")?
-6. Find the earliest slot when all attendees and a room are free (merge busy intervals).
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>How do you check overlap efficiently? Complexity?</summary>
+
+Two meetings overlap if `start1 < end2 AND start2 < end1`. Keep each room's bookings in a sorted structure by start time (a `TreeMap`). To check a new meeting, look only at the booking just before and just after it, which is O(log n) instead of scanning all.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>Two users book the same room at the same time — prove only one wins.</summary>
+
+Both requests take the room's own lock. The first gets it, checks for overlap (none), saves the booking and releases the lock. The second then gets the lock, re-checks, now finds the overlap and is rejected. The check and the save happen together under the lock, so no gap exists.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>Why per-room lock instead of <code>synchronized book()</code>?</summary>
+
+One global `synchronized` blocks *every* booking while any one is in progress, even for different rooms. A lock per room lets bookings for different rooms run at the same time and only queues requests for the same room.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How would you enforce no-overlap in the DB?</summary>
+
+In PostgreSQL, add an **exclusion constraint**: `EXCLUDE USING gist (room_id WITH =, tsrange(start, end) WITH &&)`. The database itself refuses any overlapping booking for the same room, even from buggy code. In other databases, split time into fixed slots and put a unique key on (room, slot).
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How to support recurring meetings with exceptions ("this Tuesday moved")?</summary>
+
+Store the series once with a rule, for example 'every Tuesday 10:00' (an RRULE). Store changes as exceptions: 'on 12 March, moved to 14:00' or 'on 19 March, cancelled'. When showing the calendar, expand the rule into dates and apply the exceptions on top.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>Find the earliest slot when all attendees and a room are free (merge busy intervals).</summary>
+
+Gather every attendee's busy times and the room's busy times, sort by start and merge overlapping ones into one list. Then walk the merged list looking for the first gap at least as long as the meeting, within working hours.
+
+</details>

@@ -37,17 +37,50 @@ Single controller (embedded); not distributed. Controller state is authoritative
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Direction { <<enumeration>> UP DOWN IDLE }
-    class ElevatorState { <<enumeration>> MOVING STOPPED DOORS_OPEN MAINTENANCE }
-    class Elevator { +int id; -int floor; -Direction dir; -ElevatorState state; -TreeSet~Integer~ upStops; -TreeSet~Integer~ downStops; +addStop(floor, dir); +step() }
-    class Request { <<interface>> +floor() int }
-    class HallRequest { +int floor; +Direction dir }
-    class CarRequest { +int elevatorId; +int floor }
-    class DispatchStrategy { <<interface>> +select(List~Elevator~, HallRequest) Elevator }
+    class Direction {
+      <<enumeration>>
+      UP DOWN IDLE
+    }
+    class ElevatorState {
+      <<enumeration>>
+      MOVING STOPPED DOORS_OPEN MAINTENANCE
+    }
+    class Elevator {
+      +int id
+      -int floor
+      -Direction dir
+      -ElevatorState state
+      -TreeSet~Integer~ upStops
+      -TreeSet~Integer~ downStops
+      +addStop(floor, dir)
+      +step()
+    }
+    class Request {
+      <<interface>>
+      +floor() int
+    }
+    class HallRequest {
+      +int floor
+      +Direction dir
+    }
+    class CarRequest {
+      +int elevatorId
+      +int floor
+    }
+    class DispatchStrategy {
+      <<interface>>
+      +select(List~Elevator~, HallRequest) Elevator
+    }
     class NearestCarStrategy {
       <<class>>
     }
-    class ElevatorController { -List~Elevator~ elevators; -DispatchStrategy strategy; +hallCall(HallRequest); +carCall(CarRequest); +tick() }
+    class ElevatorController {
+      -List~Elevator~ elevators
+      -DispatchStrategy strategy
+      +hallCall(HallRequest)
+      +carCall(CarRequest)
+      +tick()
+    }
     Request <|.. HallRequest
     Request <|.. CarRequest
     DispatchStrategy <|.. NearestCarStrategy
@@ -267,9 +300,47 @@ public class ElevatorDemo {
 | Energy saving (park idle cars) | `ParkingPolicy` when idle. |
 
 ## Amazon follow-up questions
-1. Why LOOK over FCFS? What's SCAN vs LOOK?
-2. How does your dispatcher pick an elevator? How do you avoid starvation?
-3. How do you handle concurrent button presses safely?
-4. How do you add capacity constraints?
-5. Where would the State pattern help? Show the transitions.
-6. How would you test this? (Deterministic ticks.)
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Why LOOK over FCFS? What's SCAN vs LOOK?</summary>
+
+**FCFS** serves requests in the order they were pressed, so the elevator zig-zags up and down and wastes time. **SCAN** sweeps all the way to the top and bottom floors, like a disk head. **LOOK** is SCAN but turns around at the last requested floor instead of the building's end, so fewer wasted trips.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>How does your dispatcher pick an elevator? How do you avoid starvation?</summary>
+
+It scores each elevator for the call: an idle one nearby, or one already moving toward the floor in the same direction, scores best, and it picks the lowest cost. To avoid starvation, a call's priority grows the longer it waits, so eventually some elevator must take it.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How do you handle concurrent button presses safely?</summary>
+
+Button presses are added to thread-safe sets (for example `ConcurrentSkipListSet`) per elevator, or go through one queue processed by the controller thread. Adding the same floor twice does nothing because it's a set.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How do you add capacity constraints?</summary>
+
+Track the current load (people or weight). If an elevator is full, it skips new pickups (only drops people off), and the dispatcher doesn't assign hall calls to full elevators.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>Where would the State pattern help? Show the transitions.</summary>
+
+Each elevator has states: `IDLE`, `MOVING_UP`, `MOVING_DOWN`, `DOORS_OPEN`. Each state is a class that decides what happens on a tick. For example, `MOVING_UP` at a stop goes to `DOORS_OPEN`, then back to `MOVING_UP` if there are stops above, else `MOVING_DOWN` or `IDLE`. This keeps the logic out of a big `if/else`.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How would you test this? (Deterministic ticks.)</summary>
+
+Drive the system with a manual `tick()` instead of real time. Press buttons, call `tick()` a set number of times, then check each elevator's floor and state. The same input always gives the same result, and there's no waiting.
+
+</details>

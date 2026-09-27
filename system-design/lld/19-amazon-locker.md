@@ -41,16 +41,50 @@ Delivery driver deposits a package into a locker; customer receives a code; cust
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class LockerLocation { +String id; +Location geo; +List~Compartment~ compartments }
-    class Compartment { +String id; +Size size; -AtomicReference~CompartmentStatus~ status; +tryReserve() boolean; +release() }
-    class Package { +String id; +String orderId; +Size size; +String customerId }
-    class Assignment { +String id; +Package pkg; +Compartment compartment; +String otpHash; +Instant expiresAt; +AssignmentStatus status }
-    class AllocationStrategy { <<interface>> +allocate(LockerLocation, Size) Optional~Compartment~ }
+    class LockerLocation {
+      +String id
+      +Location geo
+      +List~Compartment~ compartments
+    }
+    class Compartment {
+      +String id
+      +Size size
+      -AtomicReference~CompartmentStatus~ status
+      +tryReserve() boolean
+      +release()
+    }
+    class Package {
+      +String id
+      +String orderId
+      +Size size
+      +String customerId
+    }
+    class Assignment {
+      +String id
+      +Package pkg
+      +Compartment compartment
+      +String otpHash
+      +Instant expiresAt
+      +AssignmentStatus status
+    }
+    class AllocationStrategy {
+      <<interface>>
+      +allocate(LockerLocation, Size) Optional~Compartment~
+    }
     class SmallestFitAllocation {
       <<class>>
     }
-    class OtpService { +generate() String; +hash(String) String; +matches(String, String) boolean }
-    class LockerService { +reserve(locationId, pkg) Assignment; +deposit(assignmentId) String; +pickup(locationId, otp) Compartment; +expire() }
+    class OtpService {
+      +generate() String
+      +hash(String) String
+      +matches(String, String) boolean
+    }
+    class LockerService {
+      +reserve(locationId, pkg) Assignment
+      +deposit(assignmentId) String
+      +pickup(locationId, otp) Compartment
+      +expire()
+    }
     LockerLocation *-- Compartment
     Assignment --> Compartment
     Assignment --> Package
@@ -311,10 +345,54 @@ public class LockerDemo {
 | Predictive capacity | Forecast service reserves capacity per day. |
 
 ## Amazon follow-up questions
-1. Two drivers try to reserve the last M compartment simultaneously — what happens in DB?
-2. Do you need a distributed lock? When would you use one, and what's a fencing token?
-3. How do you store and validate OTPs securely? Brute force?
-4. Kiosk loses connectivity — can customers still pick up?
-5. How does the expiry job scale to millions of assignments? (Index on `expires_at`, sharded scans, or delayed queue per assignment.)
-6. What's in the notification flow and what if SMS fails?
-7. Smallest-fit vs exact-size — impact on utilization?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Two drivers try to reserve the last M compartment simultaneously — what happens in DB?</summary>
+
+Both run `UPDATE compartment SET status = 'RESERVED', order_id = ? WHERE id = ? AND status = 'AVAILABLE'`. The database applies them one at a time on that row. The first changes 1 row. The second finds the status is no longer `AVAILABLE` and changes 0 rows, so it tries another compartment or reports 'full'.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>Do you need a distributed lock? When would you use one, and what's a fencing token?</summary>
+
+Usually no: the conditional update above is enough. A distributed lock helps when the work spans several systems. A **fencing token** is a number that goes up each time the lock is granted. The storage rejects writes with an older number, so a client whose lock silently expired can't overwrite newer work.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How do you store and validate OTPs securely? Brute force?</summary>
+
+Store only a salted hash of the OTP, never the OTP itself. Compare hashes when the customer types it. Allow maybe 5 tries, then lock the compartment and ask them to contact support. Make OTPs expire, and use 6+ digits so guessing is hopeless.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>Kiosk loses connectivity — can customers still pick up?</summary>
+
+Yes. The kiosk keeps a local cache of OTP hashes for packages in its compartments, so it can check codes and open doors offline. It logs every pickup and uploads the log when it's back online.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How does the expiry job scale to millions of assignments? (Index on <code>expires_at</code>, sharded scans, or delayed queue per assignment.)</summary>
+
+Put a database index on `expires_at` and have each worker scan its own shard for 'expired and still deposited'. Or, when a package is deposited, put a delayed message in a queue set to fire at the expiry time, so nothing needs scanning.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>What's in the notification flow and what if SMS fails?</summary>
+
+After deposit: generate the OTP and send it by push, SMS and email. If SMS fails, retry, try a backup SMS provider, and rely on push and email. The customer can also see the code in the app. Remind them a day before expiry.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">7</span>Smallest-fit vs exact-size — impact on utilization?</summary>
+
+**Smallest-fit** puts a package into the smallest compartment it fits, even if that's one size up, so it rarely turns anyone away but can waste big compartments. **Exact size only** keeps big ones free for big packages but rejects more orders. Common approach: smallest fit, but hold a few large compartments back for large items.
+
+</details>

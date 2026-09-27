@@ -49,15 +49,50 @@ Design Google Docs: real-time collaboration (OT vs CRDT), WebSockets, delta-base
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Operation { <<interface>> +apply(StringBuilder) ; +transform(Operation other) Operation }
-    class InsertOp { +int pos; +String text }
-    class DeleteOp { +int pos; +int len }
-    class ClientOp { +String clientId; +int baseRevision; +Operation op }
-    class DocumentSession { -String docId; -StringBuilder text; -List~Operation~ log; +submit(ClientOp) int; +join(conn); +leave(conn) }
-    class OpStore { <<interface>> +append(docId, rev, op); +since(docId, rev) }
-    class SnapshotStore { <<interface>> +latest(docId) Snapshot; +save(Snapshot) }
-    class PresenceService { +update(docId, userId, cursor) }
-    class PermissionService { +check(userId, docId, Action) boolean }
+    class Operation {
+      <<interface>>
+      +apply(StringBuilder)
+      +transform(Operation other) Operation
+    }
+    class InsertOp {
+      +int pos
+      +String text
+    }
+    class DeleteOp {
+      +int pos
+      +int len
+    }
+    class ClientOp {
+      +String clientId
+      +int baseRevision
+      +Operation op
+    }
+    class DocumentSession {
+      -String docId
+      -StringBuilder text
+      -List~Operation~ log
+      +submit(ClientOp) int
+      +join(conn)
+      +leave(conn)
+    }
+    class OpStore {
+      <<interface>>
+      +append(docId, rev, op)
+      +since(docId, rev)
+    }
+    class SnapshotStore {
+      <<interface>>
+      +latest(docId) Snapshot
+      +save(Snapshot)
+    }
+    class PresenceService {
+      <<class>>
+      +update(docId, userId, cursor)
+    }
+    class PermissionService {
+      <<class>>
+      +check(userId, docId, Action) boolean
+    }
     Operation <|.. InsertOp
     Operation <|.. DeleteOp
     DocumentSession --> OpStore
@@ -279,9 +314,47 @@ public class GoogleDocsDemo {
 | Export PDF/Docx | Async `ExportJob` from snapshot. |
 
 ## Amazon follow-up questions
-1. Explain OT with an example of two concurrent inserts. How are ties broken?
-2. Why does OT need a central server? How does CRDT avoid it?
-3. How do you store history so opening a doc with 1M edits is fast? (Snapshot + tail.)
-4. How do you route all editors of a doc to the same server? What if it dies?
-5. How do you scale presence for 1000 viewers? (Viewers get throttled/batched updates, no cursor fan-out from them.)
-6. How are permissions enforced in real time?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Explain OT with an example of two concurrent inserts. How are ties broken?</summary>
+
+The document is "ab". Alice inserts X at position 0, Bob inserts Y at position 2, at the same time. The server gets Alice's first, making "Xab". Bob's position 2 was based on the old text, so the server *transforms* it: Alice inserted before it, so shift it by 1, giving position 3 and "XabY". Everyone ends up the same. If both insert at the same spot, a rule like 'lower user id goes first' breaks the tie.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>Why does OT need a central server? How does CRDT avoid it?</summary>
+
+OT needs one agreed order of operations, which a central server provides: it decides which op came first and transforms the rest. CRDTs give every character a unique, ordered id, so edits can merge in any order and still end up the same. No central judge is needed, which suits offline and peer-to-peer editing.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How do you store history so opening a doc with 1M edits is fast? (Snapshot + tail.)</summary>
+
+Don't replay 1M edits on open. Every so often (say every 1,000 ops) save a **snapshot** of the full document. To open, load the latest snapshot and replay only the few ops after it. The full op history stays in cheap storage for version history.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How do you route all editors of a doc to the same server? What if it dies?</summary>
+
+Pick the server for a document by hashing its id (consistent hashing), and have a registry say 'doc 123 lives on server 7'. All editors connect there. If that server dies, the registry assigns the doc to another server, which loads snapshot + recent ops from storage, and clients reconnect and resend their unconfirmed edits.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How do you scale presence for 1000 viewers? (Viewers get throttled/batched updates, no cursor fan-out from them.)</summary>
+
+Only active editors send cursor updates live. For viewers, send updates in batches (for example 2 per second) and show counts like '950 viewing' instead of everyone's cursor. Viewers don't broadcast their own positions.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How are permissions enforced in real time?</summary>
+
+Check permission when someone connects and on every op the server receives. When access is removed, the server immediately closes that user's connection or marks them read-only, and rejects further edits. Permissions are cached on the doc server and refreshed when an access change event arrives.
+
+</details>

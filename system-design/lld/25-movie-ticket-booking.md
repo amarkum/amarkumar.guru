@@ -37,16 +37,62 @@ Design a movie ticket booking system: browse movies by city, theatres & shows, v
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Movie { +String id; +String title; +Duration length }
-    class Theatre { +String id; +String city; +List~Screen~ screens }
-    class Screen { +String id; +List~Seat~ seats }
-    class Seat { +String id; +String row; +int number; +SeatType type }
-    class Show { +String id; +Movie movie; +Screen screen; +Instant start; +Map~String,ShowSeat~ seats }
-    class ShowSeat { +Seat seat; -SeatStatus status; -String holdId; -Instant holdExpiry }
-    class SeatHold { +String id; +String userId; +String showId; +List~String~ seatIds; +Instant expiresAt }
-    class Booking { +String id; +SeatHold hold; +BigDecimal amount; +BookingStatus status }
-    class PricingStrategy { <<interface>> +price(Show, List~Seat~) BigDecimal }
-    class BookingService { +hold(userId, showId, seatIds) SeatHold; +confirm(holdId, paymentRef) Booking; +release(holdId); +expireHolds() }
+    class Movie {
+      +String id
+      +String title
+      +Duration length
+    }
+    class Theatre {
+      +String id
+      +String city
+      +List~Screen~ screens
+    }
+    class Screen {
+      +String id
+      +List~Seat~ seats
+    }
+    class Seat {
+      +String id
+      +String row
+      +int number
+      +SeatType type
+    }
+    class Show {
+      +String id
+      +Movie movie
+      +Screen screen
+      +Instant start
+      +Map~String,ShowSeat~ seats
+    }
+    class ShowSeat {
+      +Seat seat
+      -SeatStatus status
+      -String holdId
+      -Instant holdExpiry
+    }
+    class SeatHold {
+      +String id
+      +String userId
+      +String showId
+      +List~String~ seatIds
+      +Instant expiresAt
+    }
+    class Booking {
+      +String id
+      +SeatHold hold
+      +BigDecimal amount
+      +BookingStatus status
+    }
+    class PricingStrategy {
+      <<interface>>
+      +price(Show, List~Seat~) BigDecimal
+    }
+    class BookingService {
+      +hold(userId, showId, seatIds) SeatHold
+      +confirm(holdId, paymentRef) Booking
+      +release(holdId)
+      +expireHolds()
+    }
     Theatre *-- Screen
     Screen *-- Seat
     Show --> Movie
@@ -276,9 +322,47 @@ public class MovieBookingDemo {
 | Virtual queue for blockbuster openings | Queue-it style admission service before hold. |
 
 ## Amazon follow-up questions
-1. Two users click the same seat at the same millisecond — what exactly happens?
-2. Why hold with TTL instead of locking until payment?
-3. Payment callback arrives after hold expiry — what do you do?
-4. DB-level approach: optimistic vs `SELECT FOR UPDATE` vs conditional update? Deadlocks with multiple seats?
-5. How do you scale the seat map reads for a blockbuster? (Cache + push deltas; DB only for writes.)
-6. How to prevent bots from holding all seats?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Two users click the same seat at the same millisecond — what exactly happens?</summary>
+
+Both try `UPDATE seats SET status='HELD', hold_id=? WHERE show_id=? AND seat_id=? AND status='AVAILABLE'`. The database does them one after the other: the first changes 1 row and holds the seat, and the second changes 0 rows and is told 'seat just taken, pick another'.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>Why hold with TTL instead of locking until payment?</summary>
+
+Payment can take minutes, or the user may leave. A lock held that long would freeze seats and database connections. A **hold** is just a status with an expiry time: other users see the seat as taken, and if payment never happens the hold expires and the seat comes back automatically.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>Payment callback arrives after hold expiry — what do you do?</summary>
+
+Check if the seat is still free. If yes, confirm the booking anyway. If someone else took it, refund the payment automatically and apologise (or offer nearby seats). Either way, never double-book.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>DB-level approach: optimistic vs <code>SELECT FOR UPDATE</code> vs conditional update? Deadlocks with multiple seats?</summary>
+
+**Optimistic** (version numbers) is fine when conflicts are rare. **`SELECT … FOR UPDATE`** locks rows, and with several seats two users can lock them in different orders and deadlock. Fix that by always locking seats in sorted order. A **conditional update** of all requested seats in one statement, checking the count, is simplest.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How do you scale the seat map reads for a blockbuster? (Cache + push deltas; DB only for writes.)</summary>
+
+Serve the seat map from a cache, not the database. Push only changes (seat 12 taken) to viewers over WebSocket or short polling. The database handles only the actual hold and book writes.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How to prevent bots from holding all seats?</summary>
+
+Require login, limit holds per user and per show (for example max 10 seats and one active hold), rate-limit by account and IP, add a CAPTCHA when behaviour looks automated, and use a virtual waiting room for big releases.
+
+</details>

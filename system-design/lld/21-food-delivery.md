@@ -41,16 +41,60 @@ Design the core architecture for a food delivery platform: restaurant onboarding
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class Restaurant { +String id; +Location loc; +boolean open; +Menu menu }
-    class MenuItem { +String id; +String name; +BigDecimal price; +boolean veg; +boolean available }
-    class Order { +String id; +String customerId; +String restaurantId; +List~OrderItem~ items; +OrderStatus status; +BigDecimal total; +transition(OrderStatus) }
-    class OrderItem { +String itemId; +int qty; +BigDecimal unitPrice }
-    class DeliveryPartner { +String id; +DpStatus status; +Location loc }
-    class Delivery { +String orderId; +String dpId; +DeliveryStatus status; +Instant eta }
-    class DpAssignmentStrategy { <<interface>> +pick(Order, List~DeliveryPartner~) Optional~DeliveryPartner~ }
-    class PaymentService { +pay(orderId, amount, method, idemKey) Payment }
-    class OrderService { +place(cart, method, idemKey) Order; +accept(); +ready(); +cancel() }
-    class DispatchService { +assign(Order) Delivery }
+    class Restaurant {
+      +String id
+      +Location loc
+      +boolean open
+      +Menu menu
+    }
+    class MenuItem {
+      +String id
+      +String name
+      +BigDecimal price
+      +boolean veg
+      +boolean available
+    }
+    class Order {
+      +String id
+      +String customerId
+      +String restaurantId
+      +List~OrderItem~ items
+      +OrderStatus status
+      +BigDecimal total
+      +transition(OrderStatus)
+    }
+    class OrderItem {
+      +String itemId
+      +int qty
+      +BigDecimal unitPrice
+    }
+    class DeliveryPartner {
+      +String id
+      +DpStatus status
+      +Location loc
+    }
+    class Delivery {
+      +String orderId
+      +String dpId
+      +DeliveryStatus status
+      +Instant eta
+    }
+    class DpAssignmentStrategy {
+      <<interface>>
+      +pick(Order, List~DeliveryPartner~) Optional~DeliveryPartner~
+    }
+    class PaymentService {
+      +pay(orderId, amount, method, idemKey) Payment
+    }
+    class OrderService {
+      +place(cart, method, idemKey) Order
+      +accept()
+      +ready()
+      +cancel()
+    }
+    class DispatchService {
+      +assign(Order) Delivery
+    }
     Restaurant *-- MenuItem
     Order *-- OrderItem
     OrderService --> PaymentService
@@ -290,9 +334,47 @@ public class FoodDeliveryDemo {
 | Group ordering | `Cart` HAS-A participants. |
 
 ## Amazon follow-up questions
-1. Walk through the order saga; what happens if payment succeeds but the restaurant rejects?
-2. When do you assign a DP — at order time or near ready time? Trade-offs.
-3. How do you serve search for "biryani near me" fast? (ES geo + text, cached per geohash.)
-4. How do you track 300k DPs in real time and push to customers?
-5. How are menu changes propagated to search? (CDC → Kafka → indexer.)
-6. How would you handle a 3× dinner peak?
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>Walk through the order saga; what happens if payment succeeds but the restaurant rejects?</summary>
+
+The order moves through steps (payment, restaurant accepts, delivery), and each step has an 'undo'. If payment succeeded but the restaurant rejects, the saga runs the undo: refund the payment (or release the hold), mark the order cancelled and tell the customer. No step is left half-done.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>When do you assign a DP — at order time or near ready time? Trade-offs.</summary>
+
+**At order time**: the driver may wait around at the restaurant, wasting their time. **Near ready time**: assign when 'food ready' minus 'driver travel time' arrives, so the driver arrives as the food is ready. The risk is no driver being free then. Most apps assign near ready time with a small buffer, and reserve earlier at peaks.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>How do you serve search for "biryani near me" fast? (ES geo + text, cached per geohash.)</summary>
+
+Use Elasticsearch with a geo filter (restaurants that deliver to the user's location) plus text matching on dish names. Cache popular searches per area (geohash) for a few minutes, because many people nearby search the same things.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How do you track 300k DPs in real time and push to customers?</summary>
+
+Each driver's app sends location every few seconds to a location service (in-memory, like Uber's). For each active order, customers keep a WebSocket open, and the service pushes that driver's position to them. Old positions go to Kafka for history.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How are menu changes propagated to search? (CDC → Kafka → indexer.)</summary>
+
+Restaurant menu changes are saved in the database. Change data capture (CDC) reads the database's change log and publishes to Kafka, and an indexer service updates Elasticsearch. Search catches up within seconds, with no double-writing in app code.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>How would you handle a 3× dinner peak?</summary>
+
+Scale up ahead of time, because dinner is predictable: add servers before 7pm. Use queues to absorb bursts, cache menus and search heavily, and lower non-essential work (recommendation refreshes, analytics) during the peak. Increase delivery fees or 'busy' labels in areas without enough drivers.
+
+</details>

@@ -40,19 +40,51 @@ Local library. For centralized logging (ELK/CloudWatch), shipping is **AP** — 
 ## Mermaid UML class diagram
 ```mermaid
 classDiagram
-    class LogLevel { <<enumeration>> TRACE DEBUG INFO WARN ERROR FATAL }
-    class LogEvent { +Instant ts; +LogLevel level; +String logger; +String thread; +String message; +Throwable error; +Map mdc }
-    class Logger { -String name; -LogLevel level; -Logger parent; -List~Appender~ appenders; -boolean additive; +info(msg, args); +isEnabled(level) }
-    class LoggerFactory { +getLogger(name) Logger }
-    class Appender { <<interface>> +append(LogEvent); +close() }
+    class LogLevel {
+      <<enumeration>>
+      TRACE DEBUG INFO WARN ERROR FATAL
+    }
+    class LogEvent {
+      <<record>>
+      +Instant ts
+      +LogLevel level
+      +String logger
+      +String thread
+      +String message
+      +Throwable error
+      +Map mdc
+    }
+    class Logger {
+      -String name
+      -LogLevel level
+      -Logger parent
+      -List~Appender~ appenders
+      -boolean additive
+      +info(msg, args)
+      +isEnabled(level)
+    }
+    class LoggerFactory {
+      +getLogger(name) Logger
+    }
+    class Appender {
+      <<interface>>
+      +append(LogEvent)
+      +close()
+    }
     class ConsoleAppender {
       <<class>>
     }
     class RollingFileAppender {
       <<class>>
     }
-    class AsyncAppender { -BlockingQueue~LogEvent~ queue; -Appender delegate }
-    class Formatter { <<interface>> +format(LogEvent) String }
+    class AsyncAppender {
+      -BlockingQueue~LogEvent~ queue
+      -Appender delegate
+    }
+    class Formatter {
+      <<interface>>
+      +format(LogEvent) String
+    }
     class PatternFormatter {
       <<class>>
     }
@@ -348,10 +380,54 @@ public class LoggingDemo {
 | PII masking | `MaskingFormatter` decorator. |
 
 ## Amazon follow-up questions
-1. How do you avoid cost when DEBUG is disabled? (Level check before building; `{}` placeholders; suppliers.)
-2. How do you guarantee lines don't interleave across threads?
-3. What happens when the async queue is full? Trade-offs.
-4. How does logger hierarchy / additivity work?
-5. How do you propagate requestId across thread pools? (MDC copy into tasks.)
-6. What if the disk is full — should the app crash?
-7. How would you build centralized logging for 10k hosts? (Agent → Kafka → ES/S3; sampling; retention tiers.)
+
+Tap a question to see a simple answer.
+
+<details class="qa">
+<summary><span class="qn">1</span>How do you avoid cost when DEBUG is disabled? (Level check before building; <code>{}</code> placeholders; suppliers.)</summary>
+
+Check the level first: `if (!isDebugEnabled()) return;` costs almost nothing. Use `{}` placeholders so the message string is only built when the log is actually written, and for expensive values pass a supplier (`() -> dumpState()`) that's only called if needed.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">2</span>How do you guarantee lines don't interleave across threads?</summary>
+
+Each log line is built fully into one string first, then written in one call. The writer is either synchronized, or a single background thread does all writing from a queue, so lines never mix.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">3</span>What happens when the async queue is full? Trade-offs.</summary>
+
+Choose: **block** the app until there's space (safe but slows the app), **drop** new messages, maybe keeping only WARN and ERROR, or **drop the oldest**. Most systems drop low-level logs and count how many were dropped, because slowing the app for logs is usually worse.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">4</span>How does logger hierarchy / additivity work?</summary>
+
+Logger names form a tree: `com.shop.order` is a child of `com.shop`, which is a child of root. If a logger has no level set, it uses its parent's. With *additivity* on, a message is also sent to the parents' appenders, so root's console appender prints everything unless you turn that off.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">5</span>How do you propagate requestId across thread pools? (MDC copy into tasks.)</summary>
+
+The MDC stores values like `requestId` per thread. When you hand work to a thread pool, the new thread doesn't have it. So wrap each task: copy the MDC map when submitting, set it at the start of the task, and clear it at the end.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">6</span>What if the disk is full — should the app crash?</summary>
+
+No: logging should never take down the app. Catch the write error, stop writing to that file, print a warning to stderr once, and keep counting dropped logs. Also alarm on disk space, and use log rotation with size limits so it rarely happens.
+
+</details>
+
+<details class="qa">
+<summary><span class="qn">7</span>How would you build centralized logging for 10k hosts? (Agent → Kafka → ES/S3; sampling; retention tiers.)</summary>
+
+Each host runs a small agent (like Fluent Bit) that reads log files and ships them to Kafka. From Kafka, logs go to Elasticsearch for recent searching (a few days) and to S3 for cheap long-term storage. Sample noisy DEBUG logs, and keep ERROR logs longer than INFO.
+
+</details>
