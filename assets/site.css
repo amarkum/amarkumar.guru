@@ -369,3 +369,10 @@ body.noscroll{overflow:hidden}
 .uml-zoom .fs{margin-left:6px;padding:0 14px;border-left:1px solid var(--line);border-radius:999px;background:var(--ink);color:var(--on-accent);border-color:var(--ink)}
 .uml-zoom .fs::before{content:none}
 .uml-zoom .fs:hover{background:color-mix(in srgb,var(--ink) 85%,var(--bg));border-color:transparent}
+/* Split code view: editor fills the pane, no stray grey block */
+.codebody{align-items:stretch}
+.codestack{background:#fffffe;display:flex;flex-direction:column}
+[data-theme="dark"] .codestack{background:#1e1e1e}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .codestack{background:#1e1e1e}}
+.codebox.split .codehost .monaco-editor,.codebox.split .codehost .overflow-guard{border-radius:0}
+@media (max-width:700px){.codebox.split .codehost{min-height:0}}

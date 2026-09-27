@@ -166,9 +166,9 @@ function splitJava(src){
  const im=imports.filter(l=>l.trim()).join("\n");
  return {parts,imports:im};
 }
-function makeEditor(host,src,lang){
+function makeEditor(host,src,lang,minH){
  const lines=src.split("\n").length;
- host.style.height=Math.min(560,Math.max(40,lines*19+16))+"px";
+ host.style.height=Math.min(560,Math.max(minH||40,lines*19+16))+"px";
  const ed=monaco.editor.create(host,{value:src,language:lang,readOnly:true,domReadOnly:true,
   theme:curTheme()==="dark"?"vs-dark":"vs",minimap:{enabled:false},scrollBeyondLastLine:false,fontSize:13,
   fontFamily:"JetBrains Mono, ui-monospace, monospace",lineNumbers:lines>3?"on":"off",renderLineHighlight:"none",
@@ -213,7 +213,7 @@ async function renderCode(root){
    b.innerHTML=(t.kind?`<i class="k k-${t.kind}">${KIND_LABEL[t.kind]}</i>`:"")+esc(t.label);
    b.onclick=()=>sel(i);tl.appendChild(b);return b});
   function sel(i){active=i;bar.querySelector(".cur").textContent=tabs[i].label;btns.forEach((b,j)=>b.setAttribute("aria-selected",j===i));panes.forEach((p,j)=>p.hidden=j!==i);
-   if(!panes[i].dataset.ready){panes[i].dataset.ready=1;makeEditor(panes[i],tabs[i].src,lang)}}
+   if(!panes[i].dataset.ready){panes[i].dataset.ready=1;makeEditor(panes[i],tabs[i].src,lang,Math.min(560,tl.scrollHeight))}}
   sel(active);
  }
 }
