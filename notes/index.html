@@ -59,7 +59,7 @@ window.mmInit();
     </div>
   </aside>
   <div class="content">
-    <div class="crumbs"><button id="sideBtn" class="sidebtn" type="button" aria-controls="nlist" title="Hide sidebar">⟨ Hide sidebar</button><a href="/notes/">Notes</a> <span id="ncrumb"></span></div>
+    <div class="crumbs"><button id="sideBtn" class="sidebtn" type="button" aria-controls="nlist" title="Hide sidebar"></button><a href="/notes/">Notes</a> <span id="ncrumb"></span></div>
     <article id="doc" class="card md">Loading…</article>
     <div class="markrow" id="nmark" hidden><button id="nMarkBtn" type="button" class="pbtn"></button></div>
     <div class="foot" id="npager"></div>
@@ -311,9 +311,10 @@ async function renderCode(root){
 }
 window.addEventListener("hashchange",show);
 window.onTheme=show;
-function setSide(h){nlayout.classList.toggle("noside",h);sideBtn.textContent=h?"☰ Show sidebar":"⟨ Hide sidebar";sideBtn.title=h?"Show sidebar":"Hide sidebar";sideBtn.setAttribute("aria-expanded",!h);
+function setSide(h){nlayout.classList.toggle("noside",h);sideBtn.innerHTML='<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.75" y="3.75" width="14.5" height="12.5" rx="2.5"/><path d="M7.75 3.75v12.5"/>'+(h?'<path d="M11 8.25 12.75 10 11 11.75"/>':'<path d="M13 8.25 11.25 10 13 11.75"/>')+'</svg><span>'+(h?'Show sidebar':'Hide sidebar')+'</span><kbd>\\</kbd>';sideBtn.title=(h?"Show sidebar":"Hide sidebar")+" (\\)";sideBtn.setAttribute("aria-expanded",!h);
  try{localStorage.setItem("sd-notes-side",h?"1":"0")}catch(e){}setTimeout(()=>editors.forEach(e=>{try{e.layout()}catch(x){}}),50)}
 sideBtn.onclick=()=>setSide(!nlayout.classList.contains("noside"));
+addEventListener("keydown",e=>{if(e.key==="\\"&&!e.metaKey&&!e.ctrlKey&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)&&!document.activeElement.isContentEditable){e.preventDefault();sideBtn.click()}});
 try{setSide(localStorage.getItem("sd-notes-side")==="1")}catch(e){setSide(false)}
 loadList().then(()=>{if(!location.hash&&NS.last&&LIST.some(x=>slugOf(x.f)===NS.last))history.replaceState(null,"","#"+NS.last);show()});
 

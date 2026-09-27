@@ -442,3 +442,12 @@ body.noscroll{overflow:hidden}
 .ax-foot{margin-top:10px;font-size:11.5px;color:var(--muted);text-align:right}
 /* UML stereotypes («class», «record» …) in Prima Sans */
 .diagram .stereo{font-family:"Prima Sans","Plus Jakarta Sans",system-ui,sans-serif!important;font-weight:400!important;font-size:12.5px;letter-spacing:.02em;opacity:.75}
+/* Sidebar toggle v2 */
+.crumbs{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
+.sidebtn{display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 8px 0 7px;margin-right:12px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--muted);font:500 12.5px var(--font);cursor:pointer;transition:background .15s,color .15s,border-color .15s}
+.sidebtn:hover{background:var(--soft);color:var(--ink);border-color:var(--line)}
+.sidebtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.sidebtn svg{flex:none}
+.sidebtn kbd{font:500 10.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 5px;line-height:15px;background:var(--surface);margin-left:2px}
+.layout.noside .sidebtn{color:var(--ink);border-color:var(--line);background:var(--surface);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+@media (max-width:700px){.sidebtn kbd{display:none}}
