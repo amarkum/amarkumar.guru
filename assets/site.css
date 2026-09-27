@@ -337,3 +337,7 @@ body.noscroll{overflow:hidden}
 #tRead{color:#16a34a}
 .nlist a.done::after{color:#16a34a;font-weight:700}
 .nlist a.done .num{color:#16a34a}
+/* Sidebar hidden: use the full width */
+.layout.noside .md{max-width:none}
+.layout.noside .md p,.layout.noside .card p{max-width:none}
+.layout.noside .uml-wrap{max-height:85vh}
