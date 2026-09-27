@@ -197,6 +197,34 @@ body{padding:0}
   </div>
 
   <section class="card">
+    <h2>Best guess: what this interviewer may ask</h2>
+    <p>The interviewer is most likely a senior engineer (SDE II or III) on or near the FinTech team. Engineers at that level usually run a hands-on round: a design problem close to their own work, a lot of follow-ups, and 1–2 Leadership Principles woven in. This is a guess, not inside information.</p>
+    <h3>Most likely design questions, in order</h3>
+    <ol>
+      <li><b>Payments or wallet flow:</b> charge, refund, retry safely. Expect idempotency, a double-entry ledger, reconciliation, and “what if the bank times out?”</li>
+      <li><b>Something from her own team (custom problem):</b> for example billing, invoicing, payouts to sellers, or syncing data between services. Clarify requirements carefully; she'll know every edge case.</li>
+      <li><b>LLD with code:</b> rate limiter, notification router, parking lot with pricing, file search with filters, or a shipping cost calculator. Then “add this feature”.</li>
+      <li><b>Concurrency follow-up:</b> “Two requests at once, the last unit or the same payment. What happens?”</li>
+      <li><b>Operations:</b> “How would you monitor this? What alarms? How do you roll back?”</li>
+    </ol>
+    <h3>Likely Leadership Principles questions</h3>
+    <ul>
+      <li><b>Ownership:</b> “Tell me about a time you owned a problem outside your scope.”</li>
+      <li><b>Dive Deep:</b> “Tell me about a hard bug or production issue you debugged.”</li>
+      <li><b>Customer Obsession:</b> “A time you changed a design because of customer impact.”</li>
+      <li><b>Deliver Results / Bias for Action:</b> “A tight deadline, what did you cut and why?”</li>
+      <li><b>Earn Trust / Have Backbone:</b> “A time you disagreed with a senior engineer.”</li>
+    </ul>
+    <h3>How to play it</h3>
+    <ul>
+      <li>Treat her as a teammate reviewing a design: ask “Is this close to what your team does?”</li>
+      <li>For money, always say correctness before speed, and bring up idempotency before she does.</li>
+      <li>Keep code clean and runnable; name classes well. SDE IIIs notice naming and structure.</li>
+    </ul>
+    <div class="cta"><a class="primary" href="/practice/">Practice these →</a></div>
+  </section>
+
+  <section class="card">
     <h2>Common follow-ups and how to answer</h2>
     <ul>
       <li><b>“Add this new feature.”</b> Show it's a new class implementing an existing interface (Open/Closed).</li>
