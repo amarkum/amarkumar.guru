@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Interview Guide | amarkumar.guru</title>
-  <meta name="description" content="How an Amazon SDE II design round runs, what to say and what to avoid, common follow-ups and questions to ask.">
+  <title>Know Your Interviewer | amarkumar.guru</title>
+  <meta name="description" content="How to prepare for an SDE III interviewer: what they look for, what to check on a public profile, and what to avoid.">
   <script>(function(){try{var t=localStorage.getItem("sc-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}})();</script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
   <script>(function(){var a=document.documentElement.getAttribute("data-theme"),d=a?a==="dark":matchMedia("(prefers-color-scheme: dark)").matches;mermaid.initialize({startOnLoad:false,theme:d?"dark":"neutral"})})();</script>
@@ -123,135 +123,75 @@ body{padding:0}
   <a class="brand" href="/">amarkumar<span>.guru</span></a>
   <nav class="site-nav" aria-label="Site">
     <a href="/">Course</a>
-    <a href="/guide/" aria-current="page">Guide</a>
-    <a href="/interviewer/">Interviewer</a>
+    <a href="/guide/">Guide</a>
+    <a href="/interviewer/" aria-current="page">Interviewer</a>
     <a href="/practice/">Practice</a>
     <a href="https://excalidraw.com" target="_blank" rel="noopener">Whiteboard ↗</a>
     <button id="themebtn" class="themebtn" type="button">Dark mode</button
 <div class="page">
   <header>
-    <div class="meta">Guide</div>
-    <h1>What to do in the interview</h1>
-    <p class="lede">How an Amazon SDE II design round usually runs, what to say at each step, and what to avoid. Read this once the day before and once in the morning.</p>
+    <div class="meta">Know your interviewer</div>
+    <h1>Prepare for the person, not just the problem</h1>
+    <p class="lede">Your interviewer is an SDE III. Here's what that usually means for the round, and what's worth a two-minute look on their public profile before the call.</p>
   </header>
 
   <section class="card">
-    <h2>How the hour usually goes</h2>
-    <ul class="tl">
-      <li><span class="time">0–5 min</span><div><b>Intros.</b> Give a 60–90 second summary: current role, one project you owned, the impact with a number. Then stop.</div></li>
-      <li><span class="time">5–15 min</span><div><b>Leadership Principles.</b> Usually 1–2 behavioral questions (“Tell me about a time…”). Answer in STAR. Expect follow-ups like “What would you do differently?”</div></li>
-      <li><span class="time">15–25 min</span><div><b>Requirements.</b> The problem may be vague on purpose (“Design a logging framework”). Ask questions, list functional and non-functional requirements, write assumptions down.</div></li>
-      <li><span class="time">25–50 min</span><div><b>Design.</b> LLD: entities → classes → interfaces → core code. HLD: API → diagram → data model → deep dive. Expect a new requirement mid-way (“now add peak pricing”, “find the nearest store”).</div></li>
-      <li><span class="time">50–55 min</span><div><b>Follow-ups.</b> Concurrency, failure, scale, extensibility. “What if two users do this at once?” is very common.</div></li>
-      <li><span class="time">55–60 min</span><div><b>Your questions.</b> Always ask one or two (list below).</div></li>
+    <h2>What an SDE III usually looks for</h2>
+    <ul>
+      <li><b>Ownership of the whole design.</b> Not only the happy path: failures, monitoring, rollout, on-call.</li>
+      <li><b>Depth under push-back.</b> They'll keep asking “why?” until you hit the edge of what you know. Stay calm and reason out loud.</li>
+      <li><b>Clean, extensible code.</b> Good names, small interfaces, easy to add the next feature.</li>
+      <li><b>Trade-offs stated clearly.</b> Consistency vs availability, simple vs scalable, cost vs speed.</li>
+      <li><b>Whether they'd want you on their team.</b> Treat the hour as a design review with a future teammate.</li>
     </ul>
   </section>
 
   <section class="card">
-    <h2>LLD vs HLD: what they check</h2>
-    <div class="two">
-      <div><h3>LLD (class design + code)</h3><ul>
-        <li>Requirement gathering, then the class structure explained</li>
-        <li>Design patterns where they fit: Strategy, Factory, Observer, State, Composite/Specification, Builder, Chain of Responsibility</li>
-        <li>Effective Java: immutability, builders, interfaces over classes, enums, composition over inheritance, equals/hashCode, Optional over null</li>
-        <li>Readable, running code with few bugs</li>
-        <li>Handling follow-ups by extending, not rewriting</li>
-      </ul></div>
-      <div><h3>HLD (architecture)</h3><ul>
-        <li>Requirements and rough numbers</li>
-        <li>API design and data model</li>
-        <li>Diagram: clients, LB, services, cache, DB, queues, CDN</li>
-        <li>Deep dive on the hardest part, with trade-offs</li>
-        <li>Scale, consistency, failure handling, monitoring</li>
-      </ul></div>
-    </div>
+    <h2>Two-minute check on their public profile</h2>
+    <p>Look only at their work info. Use it to guess the problem domain, not to bring up in the interview.</p>
+    <ul class="tl">
+      <li><span class="time">Team</span><div>FinTech teams build payments, billing, invoicing, payouts, tax, ledgers. Practice one of those end to end.</div></li>
+      <li><span class="time">Tech</span><div>AWS-heavy? Be ready to name DynamoDB, SQS, SNS, Lambda, S3 and say why you'd pick each.</div></li>
+      <li><span class="time">Tenure</span><div>Long at Amazon usually means deep LP focus. Polish your STAR stories.</div></li>
+      <li><span class="time">Background</span><div>A previous company in a domain like hardware, banking or retail may shape their custom question. Think about how that domain moves data or money.</div></li>
+    </ul>
   </section>
 
   <div class="two">
     <section class="card do">
-      <h3>Say this</h3>
+      <h3>Do</h3>
       <ul>
-        <li>“Can I take a minute to clarify requirements?”</li>
-        <li>“I'll assume X. Tell me if that's wrong.”</li>
-        <li>“I'll use a Strategy here so new pricing rules don't change existing code.”</li>
-        <li>“Two users could hit this at once, so I'll make the update atomic.”</li>
-        <li>“The trade-off is X vs Y. Given our requirements I'd pick X.”</li>
-        <li>“If this service fails, here's what happens…”</li>
-        <li>“I haven't used that, but here's how I'd reason about it.”</li>
-        <li>In stories: “<b>I</b> decided… <b>I</b> built… the result was 30% faster.”</li>
+        <li>Ask early: “Is this close to something your team works on?”</li>
+        <li>Connect choices to their customer (sellers, buyers, finance teams)</li>
+        <li>Thank them for hints and use them</li>
+        <li>Ask one real question about their team at the end</li>
       </ul>
     </section>
     <section class="card dont">
-      <h3>Avoid this</h3>
+      <h3>Don't</h3>
       <ul>
-        <li>Jumping into code before requirements</li>
-        <li>Long silences. Think out loud instead</li>
-        <li>Naming tools without a reason (“just use Kafka”)</li>
-        <li>“We did it” in stories without saying what <b>you</b> did</li>
-        <li>Bluffing about something you don't know</li>
-        <li>Arguing with hints. Hints are help</li>
-        <li>Saying “that's easy” or rushing</li>
-        <li>Criticising your current team or company</li>
-        <li>Bringing up salary or other offers in this round</li>
+        <li>Mention that you looked them up or quote their profile</li>
+        <li>Try to flatter or name-drop</li>
+        <li>Send connection requests or messages before the interview</li>
+        <li>Guess their team out loud; let them tell you</li>
       </ul>
     </section>
   </div>
 
   <section class="card">
-    <h2>Best guess: what this interviewer may ask</h2>
-    <p>The interviewer is an SDE III (senior engineer), likely on or near the FinTech team. SDE IIIs usually run a hands-on round: a design problem close to their own work, a lot of follow-ups, and 1–2 Leadership Principles woven in. This is a guess, not inside information.</p>
-    <h3>Most likely design questions, in order</h3>
-    <ol>
-      <li><b>Payments or wallet flow:</b> charge, refund, retry safely. Expect idempotency, a double-entry ledger, reconciliation, and “what if the bank times out?”</li>
-      <li><b>Something from her own team (custom problem):</b> for example billing, invoicing, payouts to sellers, or syncing data between services. Clarify requirements carefully; she'll know every edge case.</li>
-      <li><b>LLD with code:</b> rate limiter, notification router, parking lot with pricing, file search with filters, or a shipping cost calculator. Then “add this feature”.</li>
-      <li><b>Concurrency follow-up:</b> “Two requests at once, the last unit or the same payment. What happens?”</li>
-      <li><b>Operations:</b> “How would you monitor this? What alarms? How do you roll back?”</li>
-    </ol>
-    <h3>Likely Leadership Principles questions</h3>
+    <h2>Questions that land well with an SDE III</h2>
     <ul>
-      <li><b>Ownership:</b> “Tell me about a time you owned a problem outside your scope.”</li>
-      <li><b>Dive Deep:</b> “Tell me about a hard bug or production issue you debugged.”</li>
-      <li><b>Customer Obsession:</b> “A time you changed a design because of customer impact.”</li>
-      <li><b>Deliver Results / Bias for Action:</b> “A tight deadline, what did you cut and why?”</li>
-      <li><b>Earn Trust / Have Backbone:</b> “A time you disagreed with a senior engineer.”</li>
-    </ul>
-    <h3>How to play it</h3>
-    <ul>
-      <li>Treat her as a teammate reviewing a design: ask “Is this close to what your team does?”</li>
-      <li>For money, always say correctness before speed, and bring up idempotency before she does.</li>
-      <li>Keep code clean and runnable; name classes well. SDE IIIs notice naming and structure.</li>
-    </ul>
-    <div class="cta"><a class="primary" href="/practice/">Practice these →</a></div>
-  </section>
-
-  <section class="card">
-    <h2>Common follow-ups and how to answer</h2>
-    <ul>
-      <li><b>“Add this new feature.”</b> Show it's a new class implementing an existing interface (Open/Closed).</li>
-      <li><b>“Two users at once?”</b> Atomic conditional update, lock, or optimistic version check. Name which and why.</li>
-      <li><b>“Find the nearest X.”</b> Geohash or quadtree, search own cell plus neighbours (how Uber does it).</li>
-      <li><b>“What if it's retried?”</b> Idempotency key.</li>
-      <li><b>“What if this goes down?”</b> Replicas, retries with backoff, fallback, dead-letter queue, alarms.</li>
-      <li><b>“How do you know it's healthy?”</b> Metrics (latency, error rate), dashboards, alarms, logs with request IDs.</li>
-    </ul>
-  </section>
-
-  <section class="card">
-    <h2>Questions to ask at the end</h2>
-    <ul>
-      <li>What does the team own in FinTech, and what's the hardest problem right now?</li>
-      <li>What does a great first six months look like for this role?</li>
-      <li>How does the team handle on-call and operational load?</li>
+      <li>“What's a design decision your team made recently that you'd make differently now?”</li>
+      <li>“How do you handle operational load and on-call in FinTech?”</li>
+      <li>“What separates engineers who grow fast on this team?”</li>
     </ul>
   </section>
 
   <div class="cta">
-    <a class="primary" href="/practice/">Practice 52 real questions →</a>
-    <a href="/">Back to the course</a>
+    <a class="primary" href="/guide/">Read the interview guide →</a>
+    <a href="/practice/">Practice questions</a>
   </div>
 </div>
-
 <footer class="site-foot">© <span id="yr"></span> amarkumar.guru</footer>
 <script>
 function curTheme(){const a=document.documentElement.getAttribute("data-theme");return a||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}
