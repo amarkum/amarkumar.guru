@@ -353,3 +353,8 @@ body.noscroll{overflow:hidden}
 .uml-zoom button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.15)}
 .uml-zoom [data-z="full"]{margin-left:6px;padding-left:12px;border-left:1px solid var(--line);border-radius:0 999px 999px 0}
 .uml-zoom [data-z="full"]::before{content:"⤢ "}
+/* UML text: readable sans, bold names, muted stereotypes */
+.diagram.uml g.node{font-family:"Plus Jakarta Sans",system-ui,sans-serif}
+.diagram.uml g.label-group .nodeLabel{font-weight:700;letter-spacing:.01em}
+.diagram.uml g.label-group g:first-child .nodeLabel:has(+*),.diagram.uml .nodeLabel:where(:not(:empty)){line-height:1.45}
+.diagram.uml g.members-group .nodeLabel,.diagram.uml g.methods-group .nodeLabel{font-weight:500}

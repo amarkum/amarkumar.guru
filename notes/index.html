@@ -105,8 +105,8 @@ async function show(){const cur=location.hash.slice(1);const file=cur?cur+".md":
  doc.querySelectorAll("a[href$='.md']").forEach(a=>{const h=a.getAttribute("href");if(!/^https?:/.test(h))a.setAttribute("href","#"+h.split("/").pop().replace(/\.md$/,""))});
  doc.querySelectorAll("table").forEach(t=>{const w=document.createElement("div");w.className="tbl";t.parentNode.insertBefore(w,t);w.appendChild(t)});
  for(const c of doc.querySelectorAll("pre code.language-mermaid")){const pre=c.parentNode,src=c.textContent,box=document.createElement("div");box.className="diagram";pre.replaceWith(box);
-  const isCls=/^\s*classDiagram/.test(src);if(isCls)try{await document.fonts.load("500 13px 'JetBrains Mono'")}catch(e){}
-  try{const r=await mermaid.render("nm"+(rn++),isCls?"%%{init:{'fontFamily':'JetBrains Mono, ui-monospace, monospace','themeVariables':{'fontSize':'13px'}}}%%\n"+src:src);box.innerHTML=r.svg;
+  const isCls=/^\s*classDiagram/.test(src);if(isCls)try{await document.fonts.load("500 14px 'Plus Jakarta Sans'")}catch(e){}
+  try{const r=await mermaid.render("nm"+(rn++),isCls?"%%{init:{'fontFamily':'Plus Jakarta Sans, system-ui, sans-serif','themeVariables':{'fontSize':'14px'}}}%%\n"+src:src);box.innerHTML=r.svg;
    box.querySelectorAll("g.node").forEach(g=>{const k=(g.textContent.match(/«(\w+)»/)||[])[1];if(k)g.setAttribute("data-kind",k)});
    if(/^\s*classDiagram/.test(src))umlTools(box)}catch(e){box.innerHTML="<pre>"+src.replace(/</g,"&lt;")+"</pre>"}}
  await renderCode(doc);
