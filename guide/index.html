@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interview Guide | amarkumar.guru</title>
+  <meta name="description" content="How an Amazon SDE II design round runs, what to say and what to avoid, common follow-ups and questions to ask.">
+  <script>(function(){try{var t=localStorage.getItem("sc-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}})();</script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+  <script>(function(){var a=document.documentElement.getAttribute("data-theme"),d=a?a==="dark":matchMedia("(prefers-color-scheme: dark)").matches;mermaid.initialize({startOnLoad:false,theme:d?"dark":"neutral"})})();</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{
+  --bg:#F3F5F8;--surface:#FFFFFF;--ink:#16212E;--muted:#566476;--line:#D9DFE7;
+  --accent:#1F5FD1;--accent-soft:#E3ECFB;--say:#9A5B00;--say-soft:#FBF0DC;--ok:#1E7B4A;--bad:#B3261E;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10151C;--surface:#18202A;--ink:#E6ECF3;--muted:#98A6B8;--line:#2A3542;
+  --accent:#7FA8F5;--accent-soft:#1D2B44;--say:#F0B660;--say-soft:#2E2413;--ok:#5FD08F;--bad:#F28B82;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10151C;--surface:#18202A;--ink:#E6ECF3;--muted:#98A6B8;--line:#2A3542;
+  --accent:#7FA8F5;--accent-soft:#1D2B44;--say:#F0B660;--say-soft:#2E2413;--ok:#5FD08F;--bad:#F28B82;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 "Source Sans 3",system-ui,sans-serif;padding-inline:16px;padding-block:28px 60px}
+.wrap{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(2rem,6vw,3rem);font-weight:800;letter-spacing:-.02em}
+.lede{color:var(--muted);margin:6px 0 0;max-width:60ch}
+.prog{display:flex;align-items:center;gap:12px;font:500 13px "JetBrains Mono",monospace;color:var(--muted)}
+.bar{flex:1;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .3s}
+nav{display:flex;flex-wrap:wrap;gap:8px}
+nav button{font:600 14px "Source Sans 3",sans-serif;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 12px;border-radius:999px;cursor:pointer;display:flex;gap:6px;align-items:center}
+nav button .n{font:500 12px "JetBrains Mono",monospace;color:var(--muted)}
+nav button[aria-current="true"]{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+nav button[aria-current="true"] .n{color:var(--bg)}
+nav button.done::after{content:"✓";color:var(--ok);font-weight:700}
+nav button[aria-current="true"].done::after{color:var(--bg)}
+button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mod{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(18px,4vw,32px);display:flex;flex-direction:column;gap:22px}
+.meta{font:500 12px "JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.mod h2{font-size:clamp(1.5rem,4vw,2rem);font-weight:800}
+.why{color:var(--muted);margin:4px 0 0}
+.ideas{display:grid;gap:14px;margin:0;padding:0;list-style:none}
+.ideas li{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.ideas li b{font-weight:600}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--accent);margin-top:9px}
+.say{background:var(--say-soft);border-radius:10px;padding:14px 16px}
+.say h3{font-size:13px;font-family:"JetBrains Mono",monospace;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--say);margin-bottom:6px}
+.say p{margin:6px 0 0}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13px}
+code,.mono{font-family:"JetBrains Mono",monospace;font-size:.88em}
+pre.mermaid{background:transparent;margin:0}
+.prep{border:1px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 16px}.prep h3{font-size:13px;font-family:"JetBrains Mono",monospace;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}.prep p{margin:6px 0 0}.prep a,.ideas a{color:var(--accent);font-weight:600}
+.quiz{border-top:1px dashed var(--line);padding-top:18px;display:flex;flex-direction:column;gap:16px}
+.q p{margin:0 0 8px;font-weight:600}
+.opts{display:flex;flex-direction:column;gap:6px}
+.opts button{text-align:left;font:inherit;font-size:16px;padding:9px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.opts button.right{border-color:var(--ok);color:var(--ok);font-weight:600}
+.opts button.wrong{border-color:var(--bad);color:var(--bad);text-decoration:line-through}
+.expl{font-size:15px;color:var(--muted);margin-top:6px}
+.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.foot button{font:600 15px "Source Sans 3",sans-serif;padding:10px 16px;border-radius:8px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.foot .primary{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.themebtn{font:600 14px inherit;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:6px 12px;border-radius:999px;cursor:pointer}
+</style>
+<style>
+.page{max-width:900px;margin:0 auto;padding-inline:16px;padding-block:28px 60px;display:flex;flex-direction:column;gap:24px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:clamp(18px,4vw,28px);display:flex;flex-direction:column;gap:14px}
+.card h2{font-size:clamp(1.3rem,3.5vw,1.7rem);font-weight:800}
+.card ul,.card ol{margin:0;padding-left:1.2em;display:grid;gap:8px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:700px){.two{grid-template-columns:1fr}}
+.do{border-top:4px solid var(--ok)}.dont{border-top:4px solid var(--bad)}
+.do h3{color:var(--ok)}.dont h3{color:var(--bad)}
+.tl{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.tl li{display:grid;grid-template-columns:110px 1fr;gap:12px;align-items:start;border-bottom:1px solid var(--line);padding-bottom:10px}
+.tl .time{font:500 13px "JetBrains Mono",monospace;color:var(--accent);padding-top:3px}
+@media (max-width:520px){.tl li{grid-template-columns:1fr;gap:2px}}
+.cta{display:flex;gap:10px;flex-wrap:wrap}
+.cta a{font-weight:600;text-decoration:none;padding:10px 16px;border-radius:8px;border:1px solid var(--line);color:var(--ink);background:var(--surface)}
+.cta a.primary{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.card a{color:var(--accent)}
+</style>
+</head>
+<body>
+<style>
+body{padding:0}
+.site-head{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--surface);border-bottom:1px solid var(--line)}
+.site-head .in{max-width:1180px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{font:800 20px "Bricolage Grotesque",system-ui,sans-serif;color:var(--ink);text-decoration:none;letter-spacing:-.01em}
+.brand span{color:var(--accent)}
+.site-nav{display:flex;gap:4px;margin-left:auto;align-items:center;flex-wrap:wrap}
+.site-nav a{color:var(--muted);text-decoration:none;font-weight:600;font-size:15px;padding:6px 10px;border-radius:8px}
+.site-nav a[aria-current="page"],.site-nav a:hover{color:var(--ink);background:var(--bg)}
+.crumbs{font-size:14px;color:var(--muted)}
+.crumbs a{color:var(--muted)}
+.layout{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:28px 60px;display:grid;grid-template-columns:280px minmax(0,1fr);gap:32px;align-items:start}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);display:flex;flex-direction:column;gap:14px}
+.side h2{font-size:16px}
+.side .sub{font-size:14px;color:var(--muted);margin:2px 0 0}
+.side nav{flex-direction:column;flex-wrap:nowrap;gap:2px}
+.side nav button{border:0;background:transparent;border-radius:8px;padding:8px 10px;text-align:left;font-weight:600;font-size:15px;width:100%;justify-content:flex-start}
+.side nav button:hover{background:var(--bg)}
+.side nav button[aria-current="true"]{background:var(--accent-soft);color:var(--accent)}
+.side nav button[aria-current="true"] .n{color:var(--accent)}
+.side nav button[aria-current="true"].done::after{color:var(--ok)}
+.side nav button.done::after{margin-left:auto}
+.content{display:flex;flex-direction:column;gap:22px;min-width:0}
+.site-foot{border-top:1px solid var(--line);color:var(--muted);font-size:14px;text-align:center;padding:20px 16px}
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr;gap:20px}
+  .side{position:static}
+  .side nav{flex-direction:row;flex-wrap:wrap;gap:6px}
+  .side nav button{width:auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px}
+}
+</style>
+<header class="site-head"><div class="in">
+  <a class="brand" href="/">amarkumar<span>.guru</span></a>
+  <nav class="site-nav" aria-label="Site">
+    <a href="/" aria-current="page">Course</a>
+    <a href="/guide/">Guide</a>
+    <a href="/practice/">Practice</a>
+    <a href="https://excalidraw.com" target="_blank" rel="noopener">Whiteboard ↗</a>
+    <button id="themebtn" class="themebtn" type="button">Dark mode</button
+<div class="page">
+  <header>
+    <div class="meta">Guide</div>
+    <h1>What to do in the interview</h1>
+    <p class="lede">How an Amazon SDE II design round usually runs, what to say at each step, and what to avoid. Read this once the day before and once in the morning.</p>
+  </header>
+
+  <section class="card">
+    <h2>How the hour usually goes</h2>
+    <ul class="tl">
+      <li><span class="time">0–5 min</span><div><b>Intros.</b> Give a 60–90 second summary: current role, one project you owned, the impact with a number. Then stop.</div></li>
+      <li><span class="time">5–15 min</span><div><b>Leadership Principles.</b> Usually 1–2 behavioral questions (“Tell me about a time…”). Answer in STAR. Expect follow-ups like “What would you do differently?”</div></li>
+      <li><span class="time">15–25 min</span><div><b>Requirements.</b> The problem may be vague on purpose (“Design a logging framework”). Ask questions, list functional and non-functional requirements, write assumptions down.</div></li>
+      <li><span class="time">25–50 min</span><div><b>Design.</b> LLD: entities → classes → interfaces → core code. HLD: API → diagram → data model → deep dive. Expect a new requirement mid-way (“now add peak pricing”, “find the nearest store”).</div></li>
+      <li><span class="time">50–55 min</span><div><b>Follow-ups.</b> Concurrency, failure, scale, extensibility. “What if two users do this at once?” is very common.</div></li>
+      <li><span class="time">55–60 min</span><div><b>Your questions.</b> Always ask one or two (list below).</div></li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>LLD vs HLD: what they check</h2>
+    <div class="two">
+      <div><h3>LLD (class design + code)</h3><ul>
+        <li>Requirement gathering, then the class structure explained</li>
+        <li>Design patterns where they fit: Strategy, Factory, Observer, State, Composite/Specification, Builder, Chain of Responsibility</li>
+        <li>Effective Java: immutability, builders, interfaces over classes, enums, composition over inheritance, equals/hashCode, Optional over null</li>
+        <li>Readable, running code with few bugs</li>
+        <li>Handling follow-ups by extending, not rewriting</li>
+      </ul></div>
+      <div><h3>HLD (architecture)</h3><ul>
+        <li>Requirements and rough numbers</li>
+        <li>API design and data model</li>
+        <li>Diagram: clients, LB, services, cache, DB, queues, CDN</li>
+        <li>Deep dive on the hardest part, with trade-offs</li>
+        <li>Scale, consistency, failure handling, monitoring</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <div class="two">
+    <section class="card do">
+      <h3>Say this</h3>
+      <ul>
+        <li>“Can I take a minute to clarify requirements?”</li>
+        <li>“I'll assume X. Tell me if that's wrong.”</li>
+        <li>“I'll use a Strategy here so new pricing rules don't change existing code.”</li>
+        <li>“Two users could hit this at once, so I'll make the update atomic.”</li>
+        <li>“The trade-off is X vs Y. Given our requirements I'd pick X.”</li>
+        <li>“If this service fails, here's what happens…”</li>
+        <li>“I haven't used that, but here's how I'd reason about it.”</li>
+        <li>In stories: “<b>I</b> decided… <b>I</b> built… the result was 30% faster.”</li>
+      </ul>
+    </section>
+    <section class="card dont">
+      <h3>Avoid this</h3>
+      <ul>
+        <li>Jumping into code before requirements</li>
+        <li>Long silences. Think out loud instead</li>
+        <li>Naming tools without a reason (“just use Kafka”)</li>
+        <li>“We did it” in stories without saying what <b>you</b> did</li>
+        <li>Bluffing about something you don't know</li>
+        <li>Arguing with hints. Hints are help</li>
+        <li>Saying “that's easy” or rushing</li>
+        <li>Criticising your current team or company</li>
+        <li>Bringing up salary or other offers in this round</li>
+      </ul>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Common follow-ups and how to answer</h2>
+    <ul>
+      <li><b>“Add this new feature.”</b> Show it's a new class implementing an existing interface (Open/Closed).</li>
+      <li><b>“Two users at once?”</b> Atomic conditional update, lock, or optimistic version check. Name which and why.</li>
+      <li><b>“Find the nearest X.”</b> Geohash or quadtree, search own cell plus neighbours (how Uber does it).</li>
+      <li><b>“What if it's retried?”</b> Idempotency key.</li>
+      <li><b>“What if this goes down?”</b> Replicas, retries with backoff, fallback, dead-letter queue, alarms.</li>
+      <li><b>“How do you know it's healthy?”</b> Metrics (latency, error rate), dashboards, alarms, logs with request IDs.</li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>Questions to ask at the end</h2>
+    <ul>
+      <li>What does the team own in FinTech, and what's the hardest problem right now?</li>
+      <li>What does a great first six months look like for this role?</li>
+      <li>How does the team handle on-call and operational load?</li>
+    </ul>
+  </section>
+
+  <div class="cta">
+    <a class="primary" href="/practice/">Practice 52 real questions →</a>
+    <a href="/">Back to the course</a>
+  </div>
+</div>
+
+<footer class="site-foot">© <span id="yr"></span> amarkumar.guru</footer>
+<script>
+function curTheme(){const a=document.documentElement.getAttribute("data-theme");return a||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}
+function setBtn(){document.getElementById("themebtn").textContent=curTheme()==="dark"?"Light mode":"Dark mode"}
+document.getElementById("themebtn").onclick=()=>{const t=curTheme()==="dark"?"light":"dark";
+  document.documentElement.setAttribute("data-theme",t);document.documentElement.style.colorScheme=t;
+  try{localStorage.setItem("sc-theme",t)}catch(e){}
+  if(window.mermaid){try{mermaid.initialize({startOnLoad:false,theme:t==="dark"?"dark":"neutral"})}catch(e){}}
+  setBtn();if(window.onTheme)onTheme()};
+setBtn();document.getElementById("yr").textContent=new Date().getFullYear();
+</script>
+</body>
+</html>
