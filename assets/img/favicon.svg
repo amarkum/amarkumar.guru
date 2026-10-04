@@ -1,12 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <circle cx="32" cy="32" r="31" fill="#1c2822"/>
-  <circle cx="32" cy="32" r="26.5" fill="none" stroke="#b8975a" stroke-width="1.4"/>
-  <g fill="#f2c14e">
-    <circle cx="32" cy="13" r="3.6"/><circle cx="32" cy="51" r="3.6"/><circle cx="13" cy="32" r="3.6"/><circle cx="51" cy="32" r="3.6"/>
-    <circle cx="18.6" cy="18.6" r="3"/><circle cx="45.4" cy="18.6" r="3"/><circle cx="18.6" cy="45.4" r="3"/><circle cx="45.4" cy="45.4" r="3"/>
-  </g>
-  <circle cx="32" cy="32" r="12.5" fill="#e9a23b"/>
-  <circle cx="32" cy="32" r="11" fill="none" stroke="#9a5a12" stroke-opacity=".45" stroke-width="2.4" stroke-dasharray="1.8 2"/>
-  <circle cx="32" cy="32" r="7" fill="#f2c14e"/>
-  <circle cx="32" cy="32" r="2.8" fill="#7a4a10"/>
+  <rect width="64" height="64" rx="14" fill="#16100e"/>
+  <circle cx="32" cy="32" r="27" fill="none" stroke="#c9a45c" stroke-width="1.2" opacity=".9"/>
+  <circle cx="32" cy="32" r="23.5" fill="none" stroke="#c9a45c" stroke-width=".6" stroke-dasharray="1.5 3" opacity=".7"/>
+  <text x="32" y="41" text-anchor="middle" font-family="Cormorant Garamond, Georgia, 'Times New Roman', serif" font-size="27" font-weight="300" fill="#f3ede3" letter-spacing="-1">A<tspan fill="#e8cf98" font-style="italic" font-size="20" dy="-1">&amp;</tspan><tspan dy="1">G</tspan></text>
 </svg>

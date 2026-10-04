@@ -2571,3 +2571,42 @@ body { background: var(--night); }
 .finale__copy--below .event__text { text-shadow: none; }
 .finale__copy--below .verse__text, .finale__copy--below .verse__meaning { text-shadow: none; }
 @media (max-width: 760px) { .finale__copy { margin-top: 0; } .finale__copy--below { margin-top: 32px; } }
+
+/* Hero: "Wedding Invitation" label at the very top */
+.hero__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 1em;
+  margin: 0 0 clamp(20px, 3vh, 36px);
+  font-size: .7rem;
+  font-weight: 500;
+  letter-spacing: .36em;
+  text-transform: uppercase;
+  color: var(--gold-2);
+}
+.hero__label::before, .hero__label::after { content: ""; width: 40px; height: 1px; background: currentColor; opacity: .6; }
+.hero__label [lang="hi"] { font-size: 1.1rem; letter-spacing: normal; }
+.hero__content > :nth-child(1) { --n: 0; } .hero__content > :nth-child(2) { --n: 1; } .hero__content > :nth-child(3) { --n: 2; }
+.hero__content > :nth-child(4) { --n: 3; } .hero__content > :nth-child(5) { --n: 4; } .hero__content > :nth-child(6) { --n: 5; } .hero__content > :nth-child(7) { --n: 6; }
+.hero__label { display: grid; justify-items: center; gap: .45rem; }
+.hero__label::before, .hero__label::after { display: none; }
+.hero__label [lang="hi"] { font-size: 1.35rem; color: var(--gold-2); }
+.hero__label-en { display: inline-flex; align-items: center; gap: 1em; }
+.hero__label-en::before, .hero__label-en::after { content: ""; width: 40px; height: 1px; background: currentColor; opacity: .6; }
+
+/* ------------------------------------------------------------------ stacked bilingual labels everywhere */
+.eyebrow--stack { display: grid; justify-items: start; gap: .4rem; }
+.eyebrow--stack::before, .eyebrow--stack::after { display: none; }
+.eyebrow--stack [lang="hi"] { font-size: 1.3rem; line-height: 1.3; color: var(--gold-2); }
+.eyebrow--stack .eyebrow__en { display: inline-flex; align-items: center; gap: 1em; }
+.eyebrow--stack .eyebrow__en::before, .eyebrow--stack .eyebrow__en::after { content: ""; width: 40px; height: 1px; background: currentColor; opacity: .6; }
+/* left-aligned contexts: rule only on the right */
+.eyebrow--stack .eyebrow__en::before { display: none; }
+.invite__head .eyebrow--stack, .section-head--center .eyebrow--stack, .countdown .eyebrow--stack, .footer .eyebrow--stack, .pheras .eyebrow--stack { justify-items: center; }
+.invite__head .eyebrow--stack .eyebrow__en::before, .section-head--center .eyebrow--stack .eyebrow__en::before, .countdown .eyebrow--stack .eyebrow__en::before, .footer .eyebrow--stack .eyebrow__en::before, .pheras .eyebrow--stack .eyebrow__en::before { display: block; }
+.invite .eyebrow--stack [lang="hi"], .celebrations .eyebrow--stack [lang="hi"], .venue .eyebrow--stack [lang="hi"], .stay .eyebrow--stack [lang="hi"] { color: var(--gold-2); }
+.guide .eyebrow--stack [lang="hi"] { color: var(--gold-ink); }
+.pair__role--stack { display: grid; gap: .3rem; }
+.pair__role--stack [lang="hi"] { font-size: 1.25rem; line-height: 1.2; }
+.pair--diag .pair__side--groom .pair__role--stack { justify-items: start; }
+.pair--diag .pair__side--bride .pair__role--stack { justify-items: end; }
