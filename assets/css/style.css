@@ -2769,6 +2769,7 @@ body { background: var(--night); }
 /* Menu bar: tools on the right, hamburger on small screens */
 .nav__tools { display: flex; align-items: center; gap: 10px; flex: none; }
 .nav__music { margin-left: 0; }
+.nav__tools .nav__music, .nav__tools .nav__burger { box-sizing: border-box; height: 38px; min-height: 38px; }
 .nav__burger {
   display: none;
   align-items: center;
@@ -2791,7 +2792,7 @@ body { background: var(--night); }
   .nav { flex-wrap: wrap; }
   .nav__mark { font-size: 1.5rem; }
   .nav__burger { display: inline-flex; }
-  .nav__music { padding: 8px 9px; }
+  .nav__music { width: 38px; padding: 0; justify-content: center; }
   .nav__links {
     order: 3;
     flex: 1 0 100%;
