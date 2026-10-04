@@ -381,7 +381,7 @@
       musicBtn.setAttribute('aria-pressed', String(on));
       musicBtn.setAttribute('aria-label', on ? 'Pause background music' : 'Play background music');
       musicBtn.classList.toggle('is-playing', on);
-      if (remember) { try { localStorage.setItem('ag-music', on ? '1' : '0'); } catch (e) {} }
+      if (remember) { try { localStorage.setItem('ag-music2', on ? '1' : '0'); } catch (e) {} }
     };
     // Only the visitor's own toggle is remembered; a blocked autoplay attempt is not a choice.
     const play = (remember) => { music.volume = 0.45; music.play().then(() => setState(true, remember)).catch(() => setState(false, false)); };
@@ -390,7 +390,7 @@
       if (!r.ok) return;
       musicBtn.hidden = false;
       let wanted = '1';
-      try { wanted = localStorage.getItem('ag-music') ?? '1'; } catch (e) {}
+      try { wanted = localStorage.getItem('ag-music2') ?? '1'; } catch (e) {}
       if (wanted === '1' && !reduceMotion.matches) {
         // Try straight away (allowed where the browser trusts the site); otherwise the first gesture starts it.
         play();
@@ -410,17 +410,30 @@
   if (intro && !root.classList.contains('no-intro')) {
     const open = () => {
       if (intro.classList.contains('is-done')) return;
+      // Start the music first, synchronously inside the tap: that is what phones require.
+      if (music) {
+        let wanted = '1';
+        try { wanted = localStorage.getItem('ag-music2') ?? '1'; } catch (e) {}
+        if (wanted === '1') {
+          music.muted = false;
+          music.volume = 0.45;
+          const p = music.play();
+          const mark = () => { musicBtn?.setAttribute('aria-pressed', 'true'); musicBtn?.classList.add('is-playing'); };
+          if (p && p.then) p.then(mark).catch(() => {
+            // Rare: retry on the next touch anywhere.
+            const again = () => music.play().then(mark).catch(() => {});
+            window.addEventListener('pointerdown', again, { once: true, passive: true });
+            window.addEventListener('touchend', again, { once: true, passive: true });
+          }); else mark();
+        }
+      }
       intro.classList.add('is-done');
       root.classList.remove('intro-open');
       root.classList.add('no-intro');
-      if (music) {
-        let wanted = '1';
-        try { wanted = localStorage.getItem('ag-music') ?? '1'; } catch (e) {}
-        if (wanted === '1') { music.volume = 0.45; music.play().then(() => { musicBtn?.setAttribute('aria-pressed', 'true'); musicBtn?.classList.add('is-playing'); }).catch(() => {}); }
-      }
       setTimeout(() => intro.remove(), 1000);
     };
     intro.addEventListener('click', open);
+    intro.addEventListener('touchend', (e) => { e.preventDefault(); open(); }, { passive: false });
     intro.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') open(); });
     if (reduceMotion.matches) open();
   } else if (intro) {
