@@ -2165,11 +2165,12 @@ body { background: var(--night); }
 .pair--diag .pair__amp {
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 66%;
   translate: -50% -50%;
   margin: 0;
   z-index: 4;
 }
+@media (max-width: 760px) { .pair--diag .pair__amp { top: 60%; } }
 @media (max-width: 760px) {
   .pair--diag { height: 150vw; }
   .pair--diag .pair__side, .pair--diag .pair__side--groom, .pair--diag .pair__side--bride { width: 70%; }
