@@ -271,24 +271,80 @@
     };
   })();
 
-  if (petals && hero && !reduceMotion.matches && 'IntersectionObserver' in window) {
-    new IntersectionObserver(([entry]) => petals.setAmbient(entry.isIntersecting && !reduceMotion.matches), { threshold: 0.45 }).observe(hero);
-  }
+  // Petals only fall on request (the blessings button); the hero stays clean.
 
   /* ---------------------------------------------------------------- video */
-  // Background clips are silent loops; they only play while on screen, and not at all for reduced motion.
+  // Background clips are silent loops: play while on screen, pause when off, never for reduced motion.
   const videos = $$('video.cine');
-  const syncVideo = (video, visible) => {
-    if (visible && !reduceMotion.matches) video.play().catch(() => {});
-    else video.pause();
+  const inView = new Set();
+  const tryPlay = (video) => {
+    if (reduceMotion.matches || document.hidden || !inView.has(video)) return;
+    video.muted = true;
+    video.defaultMuted = true;
+    const p = video.play();
+    if (p && p.catch) p.catch(() => { /* blocked: retried on readiness or first gesture */ });
   };
+  const syncVideo = (video, visible) => {
+    if (visible) { inView.add(video); tryPlay(video); }
+    else { inView.delete(video); video.pause(); }
+  };
+  for (const v of videos) {
+    v.muted = true;
+    v.addEventListener('canplay', () => { if (v.paused) tryPlay(v); });
+  }
   if ('IntersectionObserver' in window) {
     const vio = new IntersectionObserver((entries) => {
       for (const entry of entries) syncVideo(entry.target, entry.isIntersecting);
-    }, { threshold: 0.15 });
+    }, { threshold: 0.1 });
     videos.forEach((v) => vio.observe(v));
+  } else {
+    videos.forEach((v) => syncVideo(v, true));
   }
-  reduceMotion.addEventListener?.('change', () => videos.forEach((v) => syncVideo(v, !reduceMotion.matches)));
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) videos.forEach((v) => v.pause());
+    else videos.forEach(tryPlay);
+  });
+  // If autoplay was blocked (e.g. low-power mode), the first tap or scroll kicks it off.
+  const nudge = () => videos.forEach(tryPlay);
+  for (const type of ['pointerdown', 'touchstart', 'keydown', 'scroll']) {
+    window.addEventListener(type, nudge, { passive: true, once: true });
+  }
+  reduceMotion.addEventListener?.('change', () => {
+    if (reduceMotion.matches) videos.forEach((v) => v.pause());
+    else videos.forEach(tryPlay);
+  });
+
+  /* ---------------------------------------------------------------- venue carousel */
+  for (const root of $$('[data-carousel]')) {
+    const slides = $$('.carousel__slide', root);
+    const dotsWrap = $('.carousel__dots', root);
+    if (slides.length < 2) continue;
+    let index = 0, timer = 0;
+    const dots = slides.map((_, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('role', 'tab');
+      b.setAttribute('aria-label', `Photo ${i + 1} of ${slides.length}`);
+      b.addEventListener('click', () => { show(i); restart(); });
+      dotsWrap.appendChild(b);
+      return b;
+    });
+    function show(i) {
+      index = (i + slides.length) % slides.length;
+      slides.forEach((s, k) => s.classList.toggle('is-active', k === index));
+      dots.forEach((d, k) => d.setAttribute('aria-selected', String(k === index)));
+    }
+    function start() { if (!timer && !reduceMotion.matches) timer = setInterval(() => show(index + 1), 4500); }
+    function stop() { clearInterval(timer); timer = 0; }
+    function restart() { stop(); start(); }
+    root.addEventListener('pointerenter', stop);
+    root.addEventListener('pointerleave', start);
+    root.addEventListener('focusin', stop);
+    root.addEventListener('focusout', start);
+    document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
+    show(0);
+    start();
+  }
 
   /* ---------------------------------------------------------------- countdown */
   const clock = $('[data-countdown]');
