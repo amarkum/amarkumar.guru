@@ -2610,3 +2610,14 @@ body { background: var(--night); }
 .pair__role--stack [lang="hi"] { font-size: 1.25rem; line-height: 1.2; }
 .pair--diag .pair__side--groom .pair__role--stack { justify-items: start; }
 .pair--diag .pair__side--bride .pair__role--stack { justify-items: end; }
+
+/* Buttons never wrap; venue buttons share one line on phones */
+.btn { white-space: nowrap; }
+.venue__title .venue__actions { flex-wrap: nowrap; gap: 12px; }
+@media (max-width: 760px) {
+  .venue__title .venue__actions .btn { flex: 1 1 0; min-width: 0; padding: 0 .9rem; min-height: 50px; font-size: .66rem; letter-spacing: .14em; }
+  .btn--pin svg { width: 14px; height: 14px; }
+  .hero__cta { flex-wrap: nowrap; }
+  .hero__cta .btn { flex: 1 1 0; min-width: 0; padding: 0 .9rem; font-size: .64rem; letter-spacing: .12em; }
+  .footer__actions .btn { padding: 0 1.1rem; font-size: .66rem; letter-spacing: .14em; }
+}
