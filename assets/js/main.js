@@ -280,7 +280,7 @@
   if (clock) {
     const start = Date.parse(clock.dataset.countdown);
     const end = Date.parse(clock.dataset.ends);
-    const weddingDay = Date.parse('2026-10-07T00:00:00+05:30');
+    const weddingDay = Date.parse('2027-02-07T00:00:00+05:30');
     const title = $('#countdown-title');
     const note = $('[data-countdown-note]');
     const units = {};
@@ -299,10 +299,10 @@
         clock.hidden = true;
         if (now < weddingDay) {
           title.textContent = 'The celebrations have begun';
-          note.textContent = 'Haldi & Mehndi are happening today. Shubh Vivah tomorrow, 7 October.';
+          note.textContent = 'Haldi & Sangeet are happening today. Shubh Vivah tomorrow, 7 February.';
         } else {
           title.textContent = 'Today is the day';
-          note.textContent = 'Shubh Vivah is happening today, 7 October, at Sterling Quinta.';
+          note.textContent = 'Shubh Vivah is happening today, 7 February, at Sterling Quinta.';
         }
         setTimeout(tick, 30000);
         return;
@@ -347,7 +347,7 @@
   if (shareBtn) {
     shareBtn.addEventListener('click', async () => {
       const url = window.location.href.split('#')[0];
-      const text = 'You are invited to the wedding of Amar Kumar & Gurubani Gulati: Haldi & Mehndi on 6 October and Shubh Vivah on 7 October 2026 at Sterling Quinta, Jim Corbett.';
+      const text = 'You are invited to the wedding of Amar Kumar & Gurubani Gulati: Haldi & Sangeet on 6 February and Shubh Vivah on 7 February 2027 at Sterling Quinta, Jim Corbett.';
       if (navigator.share) {
         try { await navigator.share({ title: 'Amar weds Gurubani', text, url }); } catch (e) { /* share sheet dismissed */ }
       } else {
