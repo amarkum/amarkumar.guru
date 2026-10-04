@@ -1,353 +1,390 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>System Design Crash Course | amarkumar.guru</title>
-  <meta name="description" content="A 10-module system design crash course for interviews: framework, estimation, caching, databases, queues, classic designs, payments and Amazon Leadership Principles, with 51 quiz questions.">
-  <script>(function(){try{var t=localStorage.getItem("sc-theme");if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t)}catch(e){}})();</script>
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Amar &amp; Gurubani · Wedding Invitation</title>
+  <meta name="description" content="Amar Kumar and Gurubani Gulati invite you to their wedding: Haldi &amp; Mehndi on 6 October and Shubh Vivah on 7 October 2026 at Sterling Quinta, Jim Corbett.">
+  <meta name="theme-color" content="#4a0812">
+  <link rel="canonical" href="https://amarkumar.guru/">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://amarkumar.guru/">
+  <meta property="og:title" content="Amar weds Gurubani · 6 &amp; 7 October 2026">
+  <meta property="og:description" content="Haldi &amp; Mehndi on 6 October, Shubh Vivah on 7 October, at Sterling Quinta, Jim Corbett. We would love to celebrate with you.">
+  <meta property="og:image" content="https://amarkumar.guru/assets/img/og-invite.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preload" href="assets/fonts/great-vibes-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/cormorant-garamond-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/cinzel-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/css/style.css">
   <script>
-window.mmInit=function(){var a=document.documentElement.getAttribute("data-theme"),d=a?a==="dark":matchMedia("(prefers-color-scheme: dark)").matches;
-mermaid.initialize({startOnLoad:false,securityLevel:"loose",theme:"base",fontFamily:"DM Sans, system-ui, sans-serif",flowchart:{htmlLabels:true,curve:"basis"},
-themeVariables:d?{background:"#0a0a0a",primaryColor:"#1f1f1f",primaryTextColor:"#f2f2f2",primaryBorderColor:"#5a5a5a",lineColor:"#8a8a8a",secondaryColor:"#1a1a1a",tertiaryColor:"#141414",noteBkgColor:"#262626",noteTextColor:"#f2f2f2",actorBkg:"#1f1f1f",actorTextColor:"#f2f2f2",actorBorder:"#5a5a5a",signalColor:"#c8c8c8",signalTextColor:"#f2f2f2",labelBoxBkgColor:"#1f1f1f",labelTextColor:"#f2f2f2",edgeLabelBackground:"#141414",clusterBkg:"#141414",clusterBorder:"#3a3a3a",fontSize:"14px"}
-:{background:"#f7f7f7",primaryColor:"#ffffff",primaryTextColor:"#1a1a1a",primaryBorderColor:"#1a1a1a",lineColor:"#6b6b6b",secondaryColor:"#f1f1f1",tertiaryColor:"#fafafa",noteBkgColor:"#fffbeb",noteTextColor:"#1a1a1a",actorBkg:"#ffffff",actorTextColor:"#1a1a1a",actorBorder:"#1a1a1a",signalColor:"#404040",signalTextColor:"#1a1a1a",labelBoxBkgColor:"#ffffff",labelTextColor:"#1a1a1a",edgeLabelBackground:"#f7f7f7",clusterBkg:"#fafafa",clusterBorder:"#d4d4d4",fontSize:"14px"}})};
-window.mmInit();
-</script>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
-<link rel="stylesheet" href="/assets/site.css">
+    document.documentElement.classList.add('js');
+    // play the opening doors once per visit
+    try {
+      if (sessionStorage.getItem('ag-doors')) document.documentElement.classList.add('no-doors');
+      sessionStorage.setItem('ag-doors', '1');
+    } catch (e) {}
+  </script>
+  <script src="assets/js/main.js" defer></script>
 </head>
 <body>
-<div class="readbar" aria-hidden="true"><i id="readfill"></i></div>
-<header class="site-head"><div class="in">
-  <a class="brand" href="/">amarkumar<span>.guru</span></a>
-  <nav class="site-nav" aria-label="Site">
-    <a href="/" aria-current="page">Course</a>
-    <a href="/plan/">2-Day Plan</a>
-    <a href="/notes/">Notes</a>
-    <a href="/guide/">Guide</a>
-    <a href="/interviewer/">Interviewer</a>
-    <a href="/practice/">Practice</a>
-    <a href="https://excalidraw.com" target="_blank" rel="noopener">Whiteboard ↗</a>
-    <button id="themebtn" class="themebtn" type="button">Dark mode</button>
-  </nav>
-</div></header>
 
-<div class="layout">
-  <aside class="side" id="modules">
-    <div><h2>System Design Crash Course</h2><p class="sub">11 modules · ~2h · 57 questions</p></div>
-    <div class="prog"><span id="pct">0 of 11 done</span><div class="bar"><i id="barfill"></i></div></div>
-    <div class="tracker" aria-label="Progress tracker">
-      <h3>Tracker</h3>
-      <div class="tstats">
-        <div><b id="tMods">0/11</b><span>modules</span></div>
-        <div><b id="tAns">0/0</b><span>answered</span></div>
-        <div><b id="tAcc">–</b><span>correct</span></div>
-      </div>
-      <div class="tgrid" id="tgrid"></div>
-    </div>
-    <nav id="nav" aria-label="Modules"></nav>
-    <div class="savebox">
-      <p>Your progress and quiz answers are saved in this browser, so you can close the tab and pick up where you left off.</p>
-      <button id="resetBtn" type="button" class="linkbtn">Start over</button>
-      <div id="resetAsk" class="ask" hidden>
-        <p>This clears your progress and quiz answers on this device.</p>
-        <div class="askrow"><button id="resetYes" type="button" class="danger">Clear everything</button><button id="resetNo" type="button">Keep it</button></div>
-      </div>
-    </div>
-  </aside>
-  <div class="content">
-    <div class="crumbs">Learn / System Design / Crash Course</div>
-    <header>
-      <h1>System Design in One Night</h1>
-      <p class="lede">New here? Open the <a href="/plan/">2-day plan</a> and tick things off as you go. Start with “Before you go”. It has a simple plan for the next two days. After that, work through the modules in order. Each one takes about ten minutes: read the main ideas, practise the lines out loud, and try the short quiz at the end. When you're done, read the <a href="/guide/">interview guide</a> and try the <a href="/practice/">practice questions</a>. For the full write-up of any question, see the <a href="/notes/">design notes</a>.</p>
-    </header>
-    <main id="mod" class="mod"></main>
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <radialGradient id="g-flame" cx="50%" cy="70%" r="60%">
+      <stop offset="0" stop-color="#fffbe0"/>
+      <stop offset=".45" stop-color="#ffd23f"/>
+      <stop offset="1" stop-color="#f26a0c"/>
+    </radialGradient>
+    <radialGradient id="g-glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffd76a" stop-opacity=".75"/>
+      <stop offset="1" stop-color="#ffb02e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="g-brass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6dc8c"/>
+      <stop offset=".55" stop-color="#c9952f"/>
+      <stop offset="1" stop-color="#8a5f17"/>
+    </linearGradient>
+    <linearGradient id="g-clay" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#e2793c"/>
+      <stop offset="1" stop-color="#8f3714"/>
+    </linearGradient>
+
+    <symbol id="marigold" viewBox="-10 -10 20 20">
+      <circle r="9.6" fill="currentColor"/>
+      <circle r="8.6" fill="none" stroke="#000" stroke-opacity=".16" stroke-width="1.8" stroke-dasharray="1.3 1.5"/>
+      <circle r="6.2" fill="none" stroke="#000" stroke-opacity=".14" stroke-width="1.5" stroke-dasharray="1.1 1.3"/>
+      <circle r="3.8" fill="none" stroke="#fff" stroke-opacity=".22" stroke-width="1.2" stroke-dasharray=".9 1.1"/>
+      <circle r="1.7" fill="#7a2c00" fill-opacity=".45"/>
+    </symbol>
+    <symbol id="leaf" viewBox="-10 0 20 40" overflow="visible">
+      <path d="M0 0C9 6 9 26 0 40C-9 26-9 6 0 0Z" fill="currentColor"/>
+      <path d="M0 3V36" stroke="#d8e9b0" stroke-opacity=".5" stroke-width="1"/>
+    </symbol>
+    <symbol id="bell" viewBox="0 0 18 24">
+      <rect x="7.5" y="0" width="3" height="4" rx="1" fill="url(#g-brass)"/>
+      <path d="M9 3C4 3 3 8 3 13C3 16 1.5 17.5 0.5 19H17.5C16.5 17.5 15 16 15 13C15 8 14 3 9 3Z" fill="url(#g-brass)"/>
+      <circle cx="9" cy="21.2" r="2.4" fill="#8a5f17"/>
+    </symbol>
+    <symbol id="diya" viewBox="-50 -78 100 100">
+      <circle class="diya__glow" cx="0" cy="-34" r="44" fill="url(#g-glow)"/>
+      <path class="diya__flame" d="M0-6C9-15 8-31 0-50C-8-31-9-15 0-6Z" fill="url(#g-flame)"/>
+      <path d="M-44-6C-40 14 40 14 46-6C30-2-30-2-44-6Z" fill="url(#g-clay)"/>
+      <path d="M46-6C52-10 58-10 62-14C58-4 52 0 44 0Z" fill="#b5501f"/>
+      <path d="M-30 4C-14 9 14 9 30 4" fill="none" stroke="#f3c26b" stroke-width="2" stroke-dasharray="2 4"/>
+      <ellipse cx="0" cy="-6" rx="44" ry="5" fill="#6d260c"/>
+    </symbol>
+    <symbol id="paisley" viewBox="0 0 120 170">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+        <path d="M60 30C92 40 112 74 108 108C104 142 78 162 54 160C26 158 8 134 10 106C12 74 32 56 48 46C60 38 58 22 46 18C36 15 30 24 36 30"/>
+        <path d="M58 52C82 62 96 86 92 110C88 134 70 146 54 144C34 142 22 126 24 106C26 84 40 70 52 62"/>
+        <path d="M56 76C70 84 78 98 76 112C74 126 64 132 54 131C42 130 36 120 37 108C38 96 46 86 54 80"/>
+      </g>
+      <g fill="currentColor"><circle cx="56" cy="108" r="5"/><circle cx="18" cy="70" r="2"/><circle cx="102" cy="66" r="2"/><circle cx="114" cy="96" r="2"/><circle cx="6" cy="140" r="2"/><circle cx="96" cy="148" r="2"/></g>
+    </symbol>
+    <symbol id="lotus" viewBox="0 0 64 40">
+      <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+        <path d="M32 4C40 12 40 26 32 36C24 26 24 12 32 4Z"/>
+        <path d="M32 36C38 24 48 18 58 18C56 28 46 36 32 36Z"/>
+        <path d="M32 36C26 24 16 18 6 18C8 28 18 36 32 36Z"/>
+        <path d="M14 36H50"/>
+      </g>
+    </symbol>
+    <symbol id="mandala" viewBox="-200 -200 400 400">
+  <defs>
+  <path id="m-p1" d="M0-24C10-34 10-52 0-62C-10-52-10-34 0-24Z"/>
+  <path id="m-p2" d="M0-26C6-34 6-44 0-50C-6-44-6-34 0-26Z"/>
+  <path id="m-p3" d="M0-74C15-88 15-112 0-126C-15-112-15-88 0-74ZM0-84V-116"/>
+  <path id="m-p4" d="M0-78C7-86 7-96 0-104C-7-96-7-86 0-78Z"/>
+  <path id="m-p5" d="M-13-146C-13-160-4-170 0-180C4-170 13-160 13-146"/>
+  <path id="m-p6" d="M0-150C3-155 3-161 0-165C-3-161-3-155 0-150Z"/>
+  </defs>
+  <g fill="none" stroke="currentColor" stroke-width="1.3">
+    <circle r="12"/><circle r="20"/><circle r="66"/><circle r="71"/>
+    <circle r="132" stroke-width="1"/><circle r="146"/><circle r="190" stroke-dasharray="2 5"/>
+    <use href="#m-p1" transform="rotate(0)"/><use href="#m-p1" transform="rotate(45)"/><use href="#m-p1" transform="rotate(90)"/><use href="#m-p1" transform="rotate(135)"/><use href="#m-p1" transform="rotate(180)"/><use href="#m-p1" transform="rotate(225)"/><use href="#m-p1" transform="rotate(270)"/><use href="#m-p1" transform="rotate(315)"/><use href="#m-p2" transform="rotate(22.5)"/><use href="#m-p2" transform="rotate(67.5)"/><use href="#m-p2" transform="rotate(112.5)"/><use href="#m-p2" transform="rotate(157.5)"/><use href="#m-p2" transform="rotate(202.5)"/><use href="#m-p2" transform="rotate(247.5)"/><use href="#m-p2" transform="rotate(292.5)"/><use href="#m-p2" transform="rotate(337.5)"/><use href="#m-p3" transform="rotate(0)"/><use href="#m-p3" transform="rotate(22.5)"/><use href="#m-p3" transform="rotate(45)"/><use href="#m-p3" transform="rotate(67.5)"/><use href="#m-p3" transform="rotate(90)"/><use href="#m-p3" transform="rotate(112.5)"/><use href="#m-p3" transform="rotate(135)"/><use href="#m-p3" transform="rotate(157.5)"/><use href="#m-p3" transform="rotate(180)"/><use href="#m-p3" transform="rotate(202.5)"/><use href="#m-p3" transform="rotate(225)"/><use href="#m-p3" transform="rotate(247.5)"/><use href="#m-p3" transform="rotate(270)"/><use href="#m-p3" transform="rotate(292.5)"/><use href="#m-p3" transform="rotate(315)"/><use href="#m-p3" transform="rotate(337.5)"/><use href="#m-p4" transform="rotate(11.2)"/><use href="#m-p4" transform="rotate(33.8)"/><use href="#m-p4" transform="rotate(56.2)"/><use href="#m-p4" transform="rotate(78.8)"/><use href="#m-p4" transform="rotate(101.2)"/><use href="#m-p4" transform="rotate(123.8)"/><use href="#m-p4" transform="rotate(146.2)"/><use href="#m-p4" transform="rotate(168.8)"/><use href="#m-p4" transform="rotate(191.2)"/><use href="#m-p4" transform="rotate(213.8)"/><use href="#m-p4" transform="rotate(236.2)"/><use href="#m-p4" transform="rotate(258.8)"/><use href="#m-p4" transform="rotate(281.2)"/><use href="#m-p4" transform="rotate(303.8)"/><use href="#m-p4" transform="rotate(326.2)"/><use href="#m-p4" transform="rotate(348.8)"/>
+    <use href="#m-p5" transform="rotate(0)"/><use href="#m-p5" transform="rotate(11.2)"/><use href="#m-p5" transform="rotate(22.5)"/><use href="#m-p5" transform="rotate(33.8)"/><use href="#m-p5" transform="rotate(45)"/><use href="#m-p5" transform="rotate(56.2)"/><use href="#m-p5" transform="rotate(67.5)"/><use href="#m-p5" transform="rotate(78.8)"/><use href="#m-p5" transform="rotate(90)"/><use href="#m-p5" transform="rotate(101.2)"/><use href="#m-p5" transform="rotate(112.5)"/><use href="#m-p5" transform="rotate(123.8)"/><use href="#m-p5" transform="rotate(135)"/><use href="#m-p5" transform="rotate(146.2)"/><use href="#m-p5" transform="rotate(157.5)"/><use href="#m-p5" transform="rotate(168.8)"/><use href="#m-p5" transform="rotate(180)"/><use href="#m-p5" transform="rotate(191.2)"/><use href="#m-p5" transform="rotate(202.5)"/><use href="#m-p5" transform="rotate(213.8)"/><use href="#m-p5" transform="rotate(225)"/><use href="#m-p5" transform="rotate(236.2)"/><use href="#m-p5" transform="rotate(247.5)"/><use href="#m-p5" transform="rotate(258.8)"/><use href="#m-p5" transform="rotate(270)"/><use href="#m-p5" transform="rotate(281.2)"/><use href="#m-p5" transform="rotate(292.5)"/><use href="#m-p5" transform="rotate(303.8)"/><use href="#m-p5" transform="rotate(315)"/><use href="#m-p5" transform="rotate(326.2)"/><use href="#m-p5" transform="rotate(337.5)"/><use href="#m-p5" transform="rotate(348.8)"/><use href="#m-p6" transform="rotate(5.6)"/><use href="#m-p6" transform="rotate(16.9)"/><use href="#m-p6" transform="rotate(28.1)"/><use href="#m-p6" transform="rotate(39.4)"/><use href="#m-p6" transform="rotate(50.6)"/><use href="#m-p6" transform="rotate(61.9)"/><use href="#m-p6" transform="rotate(73.1)"/><use href="#m-p6" transform="rotate(84.4)"/><use href="#m-p6" transform="rotate(95.6)"/><use href="#m-p6" transform="rotate(106.9)"/><use href="#m-p6" transform="rotate(118.1)"/><use href="#m-p6" transform="rotate(129.4)"/><use href="#m-p6" transform="rotate(140.6)"/><use href="#m-p6" transform="rotate(151.9)"/><use href="#m-p6" transform="rotate(163.1)"/><use href="#m-p6" transform="rotate(174.4)"/><use href="#m-p6" transform="rotate(185.6)"/><use href="#m-p6" transform="rotate(196.9)"/><use href="#m-p6" transform="rotate(208.1)"/><use href="#m-p6" transform="rotate(219.4)"/><use href="#m-p6" transform="rotate(230.6)"/><use href="#m-p6" transform="rotate(241.9)"/><use href="#m-p6" transform="rotate(253.1)"/><use href="#m-p6" transform="rotate(264.4)"/><use href="#m-p6" transform="rotate(275.6)"/><use href="#m-p6" transform="rotate(286.9)"/><use href="#m-p6" transform="rotate(298.1)"/><use href="#m-p6" transform="rotate(309.4)"/><use href="#m-p6" transform="rotate(320.6)"/><use href="#m-p6" transform="rotate(331.9)"/><use href="#m-p6" transform="rotate(343.1)"/><use href="#m-p6" transform="rotate(354.4)"/>
+  </g>
+  <g fill="currentColor"><circle cx="6.1" cy="-14.8" r="1.6"/><circle cx="14.8" cy="-6.1" r="1.6"/><circle cx="14.8" cy="6.1" r="1.6"/><circle cx="6.1" cy="14.8" r="1.6"/><circle cx="-6.1" cy="14.8" r="1.6"/><circle cx="-14.8" cy="6.1" r="1.6"/><circle cx="-14.8" cy="-6.1" r="1.6"/><circle cx="-6.1" cy="-14.8" r="1.6"/><circle cx="0" cy="-139" r="1.5"/><circle cx="18.1" cy="-137.8" r="1.5"/><circle cx="36" cy="-134.3" r="1.5"/><circle cx="53.2" cy="-128.4" r="1.5"/><circle cx="69.5" cy="-120.4" r="1.5"/><circle cx="84.6" cy="-110.3" r="1.5"/><circle cx="98.3" cy="-98.3" r="1.5"/><circle cx="110.3" cy="-84.6" r="1.5"/><circle cx="120.4" cy="-69.5" r="1.5"/><circle cx="128.4" cy="-53.2" r="1.5"/><circle cx="134.3" cy="-36" r="1.5"/><circle cx="137.8" cy="-18.1" r="1.5"/><circle cx="139" cy="-0" r="1.5"/><circle cx="137.8" cy="18.1" r="1.5"/><circle cx="134.3" cy="36" r="1.5"/><circle cx="128.4" cy="53.2" r="1.5"/><circle cx="120.4" cy="69.5" r="1.5"/><circle cx="110.3" cy="84.6" r="1.5"/><circle cx="98.3" cy="98.3" r="1.5"/><circle cx="84.6" cy="110.3" r="1.5"/><circle cx="69.5" cy="120.4" r="1.5"/><circle cx="53.2" cy="128.4" r="1.5"/><circle cx="36" cy="134.3" r="1.5"/><circle cx="18.1" cy="137.8" r="1.5"/><circle cx="0" cy="139" r="1.5"/><circle cx="-18.1" cy="137.8" r="1.5"/><circle cx="-36" cy="134.3" r="1.5"/><circle cx="-53.2" cy="128.4" r="1.5"/><circle cx="-69.5" cy="120.4" r="1.5"/><circle cx="-84.6" cy="110.3" r="1.5"/><circle cx="-98.3" cy="98.3" r="1.5"/><circle cx="-110.3" cy="84.6" r="1.5"/><circle cx="-120.4" cy="69.5" r="1.5"/><circle cx="-128.4" cy="53.2" r="1.5"/><circle cx="-134.3" cy="36" r="1.5"/><circle cx="-137.8" cy="18.1" r="1.5"/><circle cx="-139" cy="0" r="1.5"/><circle cx="-137.8" cy="-18.1" r="1.5"/><circle cx="-134.3" cy="-36" r="1.5"/><circle cx="-128.4" cy="-53.2" r="1.5"/><circle cx="-120.4" cy="-69.5" r="1.5"/><circle cx="-110.3" cy="-84.6" r="1.5"/><circle cx="-98.3" cy="-98.3" r="1.5"/><circle cx="-84.6" cy="-110.3" r="1.5"/><circle cx="-69.5" cy="-120.4" r="1.5"/><circle cx="-53.2" cy="-128.4" r="1.5"/><circle cx="-36" cy="-134.3" r="1.5"/><circle cx="-18.1" cy="-137.8" r="1.5"/><circle cx="18" cy="-183.1" r="1.8"/><circle cx="53.4" cy="-176.1" r="1.8"/><circle cx="86.7" cy="-162.3" r="1.8"/><circle cx="116.7" cy="-142.2" r="1.8"/><circle cx="142.2" cy="-116.7" r="1.8"/><circle cx="162.3" cy="-86.7" r="1.8"/><circle cx="176.1" cy="-53.4" r="1.8"/><circle cx="183.1" cy="-18" r="1.8"/><circle cx="183.1" cy="18" r="1.8"/><circle cx="176.1" cy="53.4" r="1.8"/><circle cx="162.3" cy="86.7" r="1.8"/><circle cx="142.2" cy="116.7" r="1.8"/><circle cx="116.7" cy="142.2" r="1.8"/><circle cx="86.7" cy="162.3" r="1.8"/><circle cx="53.4" cy="176.1" r="1.8"/><circle cx="18" cy="183.1" r="1.8"/><circle cx="-18" cy="183.1" r="1.8"/><circle cx="-53.4" cy="176.1" r="1.8"/><circle cx="-86.7" cy="162.3" r="1.8"/><circle cx="-116.7" cy="142.2" r="1.8"/><circle cx="-142.2" cy="116.7" r="1.8"/><circle cx="-162.3" cy="86.7" r="1.8"/><circle cx="-176.1" cy="53.4" r="1.8"/><circle cx="-183.1" cy="18" r="1.8"/><circle cx="-183.1" cy="-18" r="1.8"/><circle cx="-176.1" cy="-53.4" r="1.8"/><circle cx="-162.3" cy="-86.7" r="1.8"/><circle cx="-142.2" cy="-116.7" r="1.8"/><circle cx="-116.7" cy="-142.2" r="1.8"/><circle cx="-86.7" cy="-162.3" r="1.8"/><circle cx="-53.4" cy="-176.1" r="1.8"/><circle cx="-18" cy="-183.1" r="1.8"/><circle cx="11.3" cy="-56.9" r="1.6"/><circle cx="32.2" cy="-48.2" r="1.6"/><circle cx="48.2" cy="-32.2" r="1.6"/><circle cx="56.9" cy="-11.3" r="1.6"/><circle cx="56.9" cy="11.3" r="1.6"/><circle cx="48.2" cy="32.2" r="1.6"/><circle cx="32.2" cy="48.2" r="1.6"/><circle cx="11.3" cy="56.9" r="1.6"/><circle cx="-11.3" cy="56.9" r="1.6"/><circle cx="-32.2" cy="48.2" r="1.6"/><circle cx="-48.2" cy="32.2" r="1.6"/><circle cx="-56.9" cy="11.3" r="1.6"/><circle cx="-56.9" cy="-11.3" r="1.6"/><circle cx="-48.2" cy="-32.2" r="1.6"/><circle cx="-32.2" cy="-48.2" r="1.6"/><circle cx="-11.3" cy="-56.9" r="1.6"/></g>
+</symbol>
+  </defs>
+</svg>
+
+<div class="doors" aria-hidden="true">
+  <div class="door door--left"><svg class="door__mandala"><use href="#mandala"/></svg></div>
+  <div class="door door--right"><svg class="door__mandala"><use href="#mandala"/></svg></div>
+  <div class="doors__seal">
+    <span class="doors__om" lang="hi">ॐ</span>
+    <span class="doors__mono">A <i>&amp;</i> G</span>
+    <span class="doors__label">Shubh Vivah</span>
   </div>
 </div>
-<footer class="site-foot">© <span id="yr"></span> amarkumar.guru</footer>
 
-<script>
-const M=[
-{t:"The 45-minute game plan",why:"Interviewers care more about how you get to a design than the final picture. If you follow the same steps every time, you won't panic and you'll stay in control of the hour.",
-ideas:[
-["Requirements (5 min).","Ask: who uses it, the 3 core features, and scale. Write functional and non-functional requirements on the board. Cut scope out loud."],
-["Estimate (3 min).","Users → requests/sec → storage per year. Round hard. Only estimate what changes a decision."],
-["API (3 min).","List 3–4 endpoints, e.g. <code>POST /urls</code>, <code>GET /{code}</code>."],
-["High-level design (10 min).","Client → load balancer → stateless app servers → cache → database. Add a queue if work can happen later."],
-["Deep dive (15 min).","Pick the 1–2 hardest parts (the bottleneck) and go deep. Ask: “Which part would you like me to dig into?”"],
-["Wrap up (5 min).","Name bottlenecks, failure cases, and what you'd add next: monitoring, rate limiting, multi-region."]],
-say:["“Before I draw anything, let me confirm the requirements and the scale.”","“I'll start simple and then scale the parts that break.”","“The trade-off here is X versus Y. Given our requirements, I'd pick X.”"],
-diagram:`flowchart LR
-  R[Requirements] --> E[Estimate] --> A[API] --> H[High-level] --> D[Deep dive] --> W[Wrap up]`,
-quiz:[["The interviewer says “Design Twitter.” What do you do first?",["Draw the database schema","Ask clarifying questions about features and scale","Pick Cassandra","Talk about microservices"],1,"Always clarify scope first. Twitter is huge; agree on 2–3 core features (post, follow, timeline)."],
-["You have 10 minutes left and haven't gone deep on anything. Best move?",["Add more boxes","Pick the main bottleneck and discuss it in depth","Restart the design","Talk about CI/CD"],1,"Depth on the hardest part is what separates strong candidates."]]},
+<canvas class="petals" aria-hidden="true"></canvas>
 
-{t:"Back-of-envelope numbers",why:"Nobody expects exact numbers. You just need to know roughly how big things are, so you can tell when one database is enough and when it isn't.",
-table:[["Fact","Number to remember"],["Seconds in a day","~100,000 (86,400)"],["1M requests/day","~12 per second"],["100M requests/day","~1,200/s avg, peak ≈ 2–3× avg"],["Memory read","~100 ns"],["SSD read","~100 µs"],["Same-datacenter round trip","~0.5 ms"],["Cross-continent round trip","~150 ms"],["One app server","~1,000–10,000 simple req/s"],["One SQL DB (single node)","~a few thousand writes/s"],["Redis","~100,000 ops/s"]],
-ideas:[["Formula for QPS.","Daily active users × actions per user ÷ 100,000."],["Formula for storage.","Items per day × size per item × 365 × years. Then add replication (×3)."],["Read:write ratio.","Most apps are read-heavy (10:1 to 100:1). That tells you to cache and add read replicas."]],
-say:["“Let's say 100M daily users, each doing 10 reads a day. That's 1 billion reads a day, around 10,000 per second, so a single database won't handle it. We'll need caching.”"],
-quiz:[["10M users each post 2 photos a day at 500 KB. Storage per day?",["10 GB","100 GB","10 TB","1 PB"],2,"10M × 2 × 500 KB = 10,000,000 KB × ... = 10 TB per day."],
-["50M requests per day is roughly how many per second?",["50","500","5,000","50,000"],1,"50M ÷ 100,000 ≈ 500 per second."]]},
+<nav class="nav" aria-label="Sections">
+  <a class="nav__mark" href="#top" aria-label="Back to top">A<span>&amp;</span>G</a>
+  <div class="nav__links">
+    <a href="#invite">Invitation</a>
+    <a href="#celebrations">Events</a>
+    <a href="#venue">Venue</a>
+  </div>
+</nav>
 
-{t:"Scaling and load balancing",why:"Every system starts as one server. This module walks through what you add, and why, as more people start using it.",
-ideas:[["Vertical vs horizontal.","Vertical = bigger machine (simple, has a ceiling). Horizontal = more machines (needs a load balancer, scales far)."],
-["Stateless servers.","Keep no user session in app server memory. Put sessions in Redis or a token (JWT). Then any server can handle any request and you can add servers freely."],
-["Load balancer.","Spreads traffic across servers. Algorithms: round robin, least connections, hash by user. Does health checks and removes dead servers."],
-["L4 vs L7.","L4 routes by IP/port (fast). L7 reads the HTTP request and can route by path, e.g. <code>/api</code> vs <code>/images</code>."],
-["No single point of failure.","Run 2+ of everything, across availability zones. The load balancer itself runs as a pair."],
-["Autoscaling.","Add servers when CPU or queue length goes up, remove them when it drops."]],
-diagram:`flowchart LR
-  U[Users] --> CDN
-  U --> LB[Load balancer]
-  LB --> S1[App server]
-  LB --> S2[App server]
-  LB --> S3[App server]
-  S1 & S2 & S3 --> C[(Cache)]
-  S1 & S2 & S3 --> DB[(Database)]`,
-say:["“I'll keep the app servers stateless so we can scale them horizontally behind a load balancer.”"],
-quiz:[["Why must app servers be stateless to scale horizontally?",["It's faster","Any server can serve any request, so we can add or remove servers freely","It saves disk","Load balancers require it by law"],1,"If a server holds a user's session, that user is stuck to it and losing the server loses the session."],
-["You want /video traffic on different servers from /api. Which load balancer?",["L4","L7","DNS only","None"],1,"L7 understands HTTP paths."]]},
+<header class="hero" id="top" data-host>
+  <div class="hero__sky" data-speed="0.55"></div>
+  <div class="hero__mandala" data-speed="0.4" data-depth="10"><svg><use href="#mandala"/></svg></div>
+  <svg class="hero__arch" data-speed="0.25" data-depth="18" viewBox="0 0 400 560" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M14 560V232C14 128 104 56 200 8C296 56 386 128 386 232V560" fill="none" stroke="currentColor" stroke-width="1.6" vector-effect="non-scaling-stroke"/>
+    <path d="M30 560V238C30 142 114 76 200 30C286 76 370 142 370 238V560" fill="none" stroke="currentColor" stroke-width="1" stroke-opacity=".6" vector-effect="non-scaling-stroke"/>
+  </svg>
 
-{t:"Caching",why:"When someone asks “how do we make this faster?”, the answer is usually a cache. Learn where caches sit and the few ways they go wrong.",
-ideas:[["Where caches live.","Browser → CDN (static files, images, video) → app cache (Redis/Memcached) → database's own cache."],
-["Cache-aside (most common).","Read: check cache, on miss read DB and put it in cache. Write: update DB, then delete the cache key."],
-["Write-through vs write-back.","Write-through: write cache and DB together (consistent, slower writes). Write-back: write cache, flush to DB later (fast, can lose data)."],
-["Eviction.","LRU (least recently used) is the default answer. Always set a TTL."],
-["Stampede.","A hot key expires and 10,000 requests hit the DB at once. Fixes: lock so one request refills, or refresh before expiry, add jitter to TTLs."],
-["Hot keys.","One celebrity key overloads one cache node. Fix: replicate that key or add a small local in-memory cache."]],
-say:["“This is read-heavy, so I'll put Redis in front of the database with cache-aside and a TTL. On writes, I'll invalidate the key.”","“Staleness of a few seconds is fine for a feed, so caching is safe here.”"],
-quiz:[["In cache-aside, what happens on a cache miss?",["Return an error","App reads DB, writes result to cache, returns it","Cache reads DB by itself","Request is dropped"],1,"The application does the loading. That's why it's called cache-aside."],
-["A viral post's cache key expires and the DB falls over. Name?",["Split brain","Cache stampede (thundering herd)","Deadlock","Sharding"],1,"Fix with a lock/single-flight or early refresh."]]},
+  <div class="toran" data-speed="-0.35" data-depth="-14">
+    <svg class="toran__top" viewBox="0 0 1200 110" preserveAspectRatio="xMidYMin slice" aria-hidden="true"><use href="#marigold" x="-7.8" y="4.2" width="15.6" height="15.6" color="#f08a0b"/><use href="#marigold" x="3.9" y="17" width="15.7" height="15.7" color="#f08a0b"/><use href="#marigold" x="16" y="28.6" width="15" height="15" color="#e8770a"/><use href="#marigold" x="27.8" y="38.2" width="15" height="15" color="#f7bd22"/><use href="#marigold" x="38.6" y="45.3" width="17" height="17" color="#f7bd22"/><use href="#marigold" x="51.4" y="52.7" width="14.9" height="14.9" color="#f39a12"/><use href="#marigold" x="62.7" y="57.1" width="15.8" height="15.8" color="#f08a0b"/><use href="#marigold" x="74.8" y="60.7" width="15" height="15" color="#f39a12"/><use href="#marigold" x="86.6" y="62.3" width="14.9" height="14.9" color="#f7bd22"/><use href="#marigold" x="97.3" y="61.3" width="17.1" height="17.1" color="#f7bd22"/><use href="#marigold" x="109.6" y="60.1" width="16.2" height="16.2" color="#f39a12"/><use href="#marigold" x="122" y="57.5" width="14.9" height="14.9" color="#f08a0b"/><use href="#marigold" x="133.7" y="52.7" width="14.9" height="14.9" color="#f08a0b"/><use href="#marigold" x="145.2" y="46" width="15.5" height="15.5" color="#f7bd22"/><use href="#marigold" x="156.7" y="37.7" width="16.1" height="16.1" color="#f9c933"/><use href="#marigold" x="168.4" y="28" width="16.1" height="16.1" color="#e8770a"/><use href="#marigold" x="180.6" y="17.2" width="15.2" height="15.2" color="#e8770a"/><use href="#marigold" x="191.9" y="3.9" width="16.2" height="16.2" color="#f08a0b"/><use href="#marigold" x="192.2" y="4.2" width="15.7" height="15.7" color="#e8770a"/><use href="#marigold" x="203.5" y="16.6" width="16.5" height="16.5" color="#e8770a"/><use href="#marigold" x="216.1" y="28.6" width="14.9" height="14.9" color="#f08a0b"/><use href="#marigold" x="227.3" y="37.7" width="16" height="16" color="#f9c933"/><use href="#marigold" x="238.7" y="45.4" width="16.7" height="16.7" color="#f9c933"/><use href="#marigold" x="250.7" y="52.1" width="16.2" height="16.2" color="#f39a12"/><use href="#marigold" x="262.8" y="57.1" width="15.7" height="15.7" color="#f08a0b"/><use href="#marigold" x="274" y="59.8" width="16.7" height="16.7" color="#e8770a"/><use href="#marigold" x="285.8" y="61.5" width="16.7" height="16.7" color="#f7bd22"/><use href="#marigold" x="297.8" y="61.7" width="16.2" height="16.2" color="#f9c933"/><use href="#marigold" x="309.2" y="59.7" width="16.9" height="16.9" color="#e8770a"/><use href="#marigold" x="321.5" y="57" width="15.9" height="15.9" color="#e8770a"/><use href="#marigold" x="332.6" y="51.6" width="17.2" height="17.2" color="#f08a0b"/><use href="#marigold" x="344.9" y="45.7" width="16" height="16" color="#f7bd22"/><use href="#marigold" x="356.4" y="37.4" width="16.6" height="16.6" color="#f7bd22"/><use href="#marigold" x="368" y="27.6" width="17" height="17" color="#f39a12"/><use href="#marigold" x="380.8" y="17.4" width="14.9" height="14.9" color="#e8770a"/><use href="#marigold" x="392.5" y="4.5" width="15" height="15" color="#e8770a"/><use href="#marigold" x="391.9" y="3.9" width="16.2" height="16.2" color="#f39a12"/><use href="#marigold" x="404" y="17" width="15.6" height="15.6" color="#f39a12"/><use href="#marigold" x="415.4" y="28" width="16.2" height="16.2" color="#e8770a"/><use href="#marigold" x="426.9" y="37.4" width="16.7" height="16.7" color="#f7bd22"/><use href="#marigold" x="438.7" y="45.3" width="16.8" height="16.8" color="#f9c933"/><use href="#marigold" x="450.9" y="52.2" width="15.9" height="15.9" color="#e8770a"/><use href="#marigold" x="463.1" y="57.5" width="15" height="15" color="#e8770a"/><use href="#marigold" x="474.1" y="60" width="16.5" height="16.5" color="#e8770a"/><use href="#marigold" x="486" y="61.7" width="16.2" height="16.2" color="#f9c933"/><use href="#marigold" x="498.1" y="62.1" width="15.5" height="15.5" color="#f9c933"/><use href="#marigold" x="509.2" y="59.7" width="16.9" height="16.9" color="#f39a12"/><use href="#marigold" x="522" y="57.6" width="14.9" height="14.9" color="#f39a12"/><use href="#marigold" x="533.3" y="52.3" width="15.7" height="15.7" color="#e8770a"/><use href="#marigold" x="545.4" y="46.2" width="15.1" height="15.1" color="#f7bd22"/><use href="#marigold" x="557" y="38.1" width="15.3" height="15.3" color="#f9c933"/><use href="#marigold" x="568.9" y="28.5" width="15.1" height="15.1" color="#f08a0b"/><use href="#marigold" x="580.4" y="17" width="15.8" height="15.8" color="#f39a12"/><use href="#marigold" x="592.5" y="4.5" width="15" height="15" color="#f39a12"/><use href="#marigold" x="592.1" y="4.1" width="15.8" height="15.8" color="#f39a12"/><use href="#marigold" x="603.3" y="16.4" width="16.9" height="16.9" color="#f39a12"/><use href="#marigold" x="615.1" y="27.6" width="16.9" height="16.9" color="#f39a12"/><use href="#marigold" x="627" y="37.5" width="16.5" height="16.5" color="#f9c933"/><use href="#marigold" x="638.8" y="45.5" width="16.4" height="16.4" color="#f9c933"/><use href="#marigold" x="650.3" y="51.6" width="17.1" height="17.1" color="#f08a0b"/><use href="#marigold" x="663.1" y="57.5" width="15" height="15" color="#f08a0b"/><use href="#marigold" x="674.7" y="60.5" width="15.4" height="15.4" color="#f08a0b"/><use href="#marigold" x="686.7" y="62.4" width="14.8" height="14.8" color="#f7bd22"/><use href="#marigold" x="698.2" y="62.1" width="15.4" height="15.4" color="#f7bd22"/><use href="#marigold" x="710.1" y="60.6" width="15.1" height="15.1" color="#e8770a"/><use href="#marigold" x="721.6" y="57.1" width="15.7" height="15.7" color="#e8770a"/><use href="#marigold" x="733.4" y="52.4" width="15.6" height="15.6" color="#f08a0b"/><use href="#marigold" x="744.7" y="45.5" width="16.5" height="16.5" color="#f7bd22"/><use href="#marigold" x="756.8" y="37.8" width="15.9" height="15.9" color="#f9c933"/><use href="#marigold" x="768.6" y="28.2" width="15.8" height="15.8" color="#f39a12"/><use href="#marigold" x="780.7" y="17.3" width="15" height="15" color="#e8770a"/><use href="#marigold" x="792.1" y="4.1" width="15.8" height="15.8" color="#f08a0b"/><use href="#marigold" x="792.5" y="4.5" width="15" height="15" color="#f08a0b"/><use href="#marigold" x="803.8" y="16.9" width="15.9" height="15.9" color="#f08a0b"/><use href="#marigold" x="815.7" y="28.3" width="15.6" height="15.6" color="#f08a0b"/><use href="#marigold" x="827.8" y="38.2" width="15" height="15" color="#f7bd22"/><use href="#marigold" x="839" y="45.7" width="16.1" height="16.1" color="#f9c933"/><use href="#marigold" x="850.7" y="52" width="16.3" height="16.3" color="#f08a0b"/><use href="#marigold" x="862.1" y="56.5" width="16.9" height="16.9" color="#e8770a"/><use href="#marigold" x="874.5" y="60.3" width="15.7" height="15.7" color="#e8770a"/><use href="#marigold" x="886.4" y="62.1" width="15.4" height="15.4" color="#f9c933"/><use href="#marigold" x="897.8" y="61.7" width="16.2" height="16.2" color="#f9c933"/><use href="#marigold" x="910.1" y="60.6" width="15.1" height="15.1" color="#f39a12"/><use href="#marigold" x="920.8" y="56.4" width="17.2" height="17.2" color="#f39a12"/><use href="#marigold" x="933.2" y="52.2" width="16" height="16" color="#f39a12"/><use href="#marigold" x="945.4" y="46.2" width="15" height="15" color="#f7bd22"/><use href="#marigold" x="956.4" y="37.4" width="16.6" height="16.6" color="#f9c933"/><use href="#marigold" x="968.5" y="28.1" width="15.9" height="15.9" color="#e8770a"/><use href="#marigold" x="980.6" y="17.3" width="15.2" height="15.2" color="#f08a0b"/><use href="#marigold" x="992.4" y="4.4" width="15.3" height="15.3" color="#e8770a"/><use href="#marigold" x="992.2" y="4.2" width="15.7" height="15.7" color="#e8770a"/><use href="#marigold" x="1003.7" y="16.8" width="16.1" height="16.1" color="#f08a0b"/><use href="#marigold" x="1015.2" y="27.8" width="16.6" height="16.6" color="#f39a12"/><use href="#marigold" x="1026.7" y="37.1" width="17.1" height="17.1" color="#f7bd22"/><use href="#marigold" x="1038.8" y="45.5" width="16.5" height="16.5" color="#f9c933"/><use href="#marigold" x="1050.8" y="52.1" width="16" height="16" color="#f08a0b"/><use href="#marigold" x="1062.8" y="57.2" width="15.7" height="15.7" color="#f08a0b"/><use href="#marigold" x="1074.3" y="60.2" width="16.1" height="16.1" color="#e8770a"/><use href="#marigold" x="1086.3" y="62" width="15.6" height="15.6" color="#f7bd22"/><use href="#marigold" x="1097.7" y="61.7" width="16.3" height="16.3" color="#f7bd22"/><use href="#marigold" x="1109.3" y="59.8" width="16.7" height="16.7" color="#f39a12"/><use href="#marigold" x="1121.1" y="56.7" width="16.6" height="16.6" color="#f08a0b"/><use href="#marigold" x="1133.5" y="52.5" width="15.3" height="15.3" color="#f39a12"/><use href="#marigold" x="1145.1" y="45.9" width="15.7" height="15.7" color="#f7bd22"/><use href="#marigold" x="1156.1" y="37.1" width="17.2" height="17.2" color="#f9c933"/><use href="#marigold" x="1168.5" y="28.1" width="15.9" height="15.9" color="#f08a0b"/><use href="#marigold" x="1180" y="16.6" width="16.5" height="16.5" color="#f39a12"/><use href="#marigold" x="1192.1" y="4.1" width="15.9" height="15.9" color="#e8770a"/><use href="#marigold" x="-7" y="19" width="14" height="14" color="#f08a0b"/><use href="#marigold" x="-7" y="32" width="14" height="14" color="#f7bd22"/><use href="#marigold" x="-7" y="45" width="14" height="14" color="#e8770a"/><use href="#bell" x="-7" y="62" width="14" height="18"/><use href="#marigold" x="193" y="19" width="14" height="14" color="#f08a0b"/><use href="#marigold" x="193" y="32" width="14" height="14" color="#f7bd22"/><use href="#marigold" x="193" y="45" width="14" height="14" color="#e8770a"/><use href="#bell" x="193" y="62" width="14" height="18"/><use href="#marigold" x="393" y="19" width="14" height="14" color="#f08a0b"/><use href="#marigold" x="393" y="32" width="14" height="14" color="#f7bd22"/><use href="#marigold" x="393" y="45" width="14" height="14" color="#e8770a"/><use href="#bell" x="393" y="62" width="14" height="18"/><use href="#marigold" x="593" y="19" width="14" height="14" color="#f08a0b"/><use href="#marigold" x="593" y="32" width="14" height="14" color="#f7bd22"/><use href="#marigold" x="593" y="45" width="14" height="14" color="#e8770a"/><use href="#bell" x="593" y="62" width="14" height="18"/><use href="#marigold" x="793" y="19" width="14" height="14" color="#f08a0b"/><use href="#marigold" x="793" y="32" width="14" height="14" color="#f7bd22"/><use href="#marigold" x="793" y="45" width="14" height="14" color="#e8770a"/><use href="#bell" x="793" y="62" width="14" height="18"/><use href="#marigold" x="993" y="19" width="14" height="14" color="#f08a0b"/><use href="#marigold" x="993" y="32" width="14" height="14" color="#f7bd22"/><use href="#marigold" x="993" y="45" width="14" height="14" color="#e8770a"/><use href="#bell" x="993" y="62" width="14" height="18"/><use href="#marigold" x="1193" y="19" width="14" height="14" color="#f08a0b"/><use href="#marigold" x="1193" y="32" width="14" height="14" color="#f7bd22"/><use href="#marigold" x="1193" y="45" width="14" height="14" color="#e8770a"/><use href="#bell" x="1193" y="62" width="14" height="18"/><path d="M0 8Q600 20 1200 8" fill="none" stroke="#7a4a12" stroke-width="2"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(8 8.1) rotate(9.8) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(30 8.3) rotate(9.1) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(52 8.5) rotate(-2.7) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(74 8.7) rotate(-5.6) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(96 8.9) rotate(-5.5) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(118 9.1) rotate(-6.1) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(140 9.2) rotate(-5.9) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(162 9.4) rotate(2.5) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(184 9.6) rotate(8) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(206 9.7) rotate(6.8) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(228 9.8) rotate(-0.4) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(250 10) rotate(3.1) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(272 10.1) rotate(6) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(294 10.2) rotate(-8.3) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(316 10.3) rotate(3.2) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(338 10.4) rotate(8.2) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(360 10.5) rotate(5.6) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(382 10.6) rotate(5) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(404 10.7) rotate(-0.4) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(426 10.7) rotate(-6.4) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(448 10.8) rotate(5.8) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(470 10.9) rotate(-3.3) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(492 10.9) rotate(6) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(514 10.9) rotate(9.4) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(536 11) rotate(-2.1) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(558 11) rotate(-2) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(580 11) rotate(8.9) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(602 11) rotate(4.5) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(624 11) rotate(-6.6) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(646 11) rotate(-7.5) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(668 11) rotate(-7) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(690 10.9) rotate(8.1) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(712 10.9) rotate(6.1) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(734 10.9) rotate(-7.1) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(756 10.8) rotate(6.5) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(778 10.7) rotate(9.6) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(800 10.7) rotate(3.1) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(822 10.6) rotate(-3) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(844 10.5) rotate(1) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(866 10.4) rotate(-7.4) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(888 10.3) rotate(-9.7) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(910 10.2) rotate(9.4) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(932 10.1) rotate(3) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(954 10) rotate(0.5) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(976 9.8) rotate(8.7) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(998 9.7) rotate(-1.3) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(1020 9.5) rotate(7.4) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(1042 9.4) rotate(6.5) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(1064 9.2) rotate(-5.8) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(1086 9) rotate(-5) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(1108 8.8) rotate(-4.1) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(1130 8.7) rotate(-5.2) scale(0.85)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(1152 8.5) rotate(1.7) scale(0.85)" color="#4f7f31"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(1174 8.3) rotate(-4.8) scale(0.85)" color="#365f24"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(1196 8) rotate(-1.6) scale(0.85)" color="#3f6b2a"/><use href="#marigold" x="-11" y="1" width="22" height="22" color="#e8650a"/><use href="#marigold" x="189" y="1" width="22" height="22" color="#e8650a"/><use href="#marigold" x="389" y="1" width="22" height="22" color="#e8650a"/><use href="#marigold" x="589" y="1" width="22" height="22" color="#e8650a"/><use href="#marigold" x="789" y="1" width="22" height="22" color="#e8650a"/><use href="#marigold" x="989" y="1" width="22" height="22" color="#e8650a"/><use href="#marigold" x="1189" y="1" width="22" height="22" color="#e8650a"/></svg>
+    <svg class="toran__side toran__side--left" viewBox="0 0 260 450" aria-hidden="true"><g class="strand" style="--i:0"><line x1="20" y1="0" x2="20" y2="420" stroke="#7a4a12" stroke-width="1.4"/><use href="#marigold" x="10.6" y="5.2" width="17.6" height="17.6" color="#f39a12"/><use href="#marigold" x="12.1" y="17.9" width="17.1" height="17.1" color="#e8770a"/><use href="#marigold" x="11.1" y="30.2" width="17.6" height="17.6" color="#e8770a"/><use href="#marigold" x="11.4" y="43.4" width="16.1" height="16.1" color="#f7bd22"/><use href="#marigold" x="11.9" y="55.3" width="17.4" height="17.4" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 70.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 70.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="12.4" y="68.5" width="16.1" height="16.1" color="#f08a0b"/><use href="#marigold" x="11.3" y="80.4" width="17.3" height="17.3" color="#e8770a"/><use href="#marigold" x="10.7" y="92.9" width="17.2" height="17.2" color="#e8770a"/><use href="#marigold" x="11.4" y="105.3" width="17.4" height="17.4" color="#f7bd22"/><use href="#marigold" x="12.7" y="118.5" width="15.9" height="15.9" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 133) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 133) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="11" y="130.3" width="17.3" height="17.3" color="#e8770a"/><use href="#marigold" x="12" y="143.6" width="15.9" height="15.9" color="#f08a0b"/><use href="#marigold" x="11.4" y="155.5" width="17" height="17" color="#e8770a"/><use href="#marigold" x="12.1" y="168.4" width="16.2" height="16.2" color="#f9c933"/><use href="#marigold" x="11.5" y="180.6" width="16.9" height="16.9" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 195.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 195.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="11.9" y="193.4" width="16.3" height="16.3" color="#e8770a"/><use href="#marigold" x="11.8" y="205.2" width="17.7" height="17.7" color="#f39a12"/><use href="#marigold" x="11.9" y="217.7" width="17.6" height="17.6" color="#f08a0b"/><use href="#marigold" x="12.5" y="231" width="16.1" height="16.1" color="#f7bd22"/><use href="#marigold" x="11.6" y="243.3" width="16.4" height="16.4" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 258) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 258) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="11.8" y="255.9" width="16.2" height="16.2" color="#f39a12"/><use href="#marigold" x="11.7" y="267.7" width="17.6" height="17.6" color="#f08a0b"/><use href="#marigold" x="12.2" y="280.5" width="17.1" height="17.1" color="#f39a12"/><use href="#marigold" x="10.6" y="292.7" width="17.6" height="17.6" color="#f9c933"/><use href="#marigold" x="10.7" y="305.1" width="17.7" height="17.7" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 320.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 320.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="12.6" y="318.4" width="16.1" height="16.1" color="#e8770a"/><use href="#marigold" x="12.5" y="330.9" width="16.1" height="16.1" color="#f39a12"/><use href="#marigold" x="12.5" y="343.2" width="16.6" height="16.6" color="#f39a12"/><use href="#marigold" x="11.3" y="355.8" width="16.4" height="16.4" color="#f9c933"/><use href="#marigold" x="10.8" y="368" width="16.9" height="16.9" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 383) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 383) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="12" y="380.7" width="16.6" height="16.6" color="#e8770a"/><use href="#marigold" x="11.8" y="393.1" width="16.8" height="16.8" color="#f08a0b"/><use href="#marigold" x="10.6" y="405.2" width="17.6" height="17.6" color="#f08a0b"/><circle cx="20" cy="428.5" r="5" fill="#b3122a"/><use href="#bell" x="11" y="432.5" width="18" height="24"/></g><g class="strand" style="--i:1"><line x1="66" y1="0" x2="66" y2="360" stroke="#7a4a12" stroke-width="1.4"/><use href="#marigold" x="58.7" y="6" width="16" height="16" color="#f39a12"/><use href="#marigold" x="56.8" y="17.7" width="17.6" height="17.6" color="#f08a0b"/><use href="#marigold" x="57.6" y="31" width="16.1" height="16.1" color="#f39a12"/><use href="#marigold" x="58" y="42.9" width="17.2" height="17.2" color="#f9c933"/><use href="#marigold" x="57.4" y="55.6" width="16.9" height="16.9" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 70.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 70.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="58.3" y="68.5" width="16" height="16" color="#f08a0b"/><use href="#marigold" x="58.4" y="80.9" width="16.2" height="16.2" color="#f08a0b"/><use href="#marigold" x="57.7" y="93.6" width="15.8" height="15.8" color="#f08a0b"/><use href="#marigold" x="58.5" y="106" width="16" height="16" color="#f7bd22"/><use href="#marigold" x="56.5" y="117.7" width="17.5" height="17.5" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 133) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 133) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="56.3" y="130.1" width="17.8" height="17.8" color="#f39a12"/><use href="#marigold" x="58.5" y="143.3" width="16.3" height="16.3" color="#f08a0b"/><use href="#marigold" x="56.7" y="155.4" width="17.2" height="17.2" color="#f08a0b"/><use href="#marigold" x="58.6" y="168.3" width="16.3" height="16.3" color="#f7bd22"/><use href="#marigold" x="57.3" y="180.8" width="16.4" height="16.4" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 195.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 195.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="57.9" y="193.4" width="16.2" height="16.2" color="#f39a12"/><use href="#marigold" x="57.9" y="205.9" width="16.2" height="16.2" color="#f39a12"/><use href="#marigold" x="57.6" y="217.6" width="17.8" height="17.8" color="#f08a0b"/><use href="#marigold" x="56.6" y="230.4" width="17.3" height="17.3" color="#f7bd22"/><use href="#marigold" x="57.9" y="243.4" width="16.3" height="16.3" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 258) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 258) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="56.7" y="255.3" width="17.4" height="17.4" color="#f39a12"/><use href="#marigold" x="57.8" y="268.1" width="16.9" height="16.9" color="#f39a12"/><use href="#marigold" x="58.5" y="280.8" width="16.4" height="16.4" color="#f08a0b"/><use href="#marigold" x="58.5" y="293.3" width="16.5" height="16.5" color="#f7bd22"/><use href="#marigold" x="57.6" y="305.8" width="16.5" height="16.5" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 320.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 320.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="58.6" y="318.6" width="15.8" height="15.8" color="#e8770a"/><use href="#marigold" x="58.2" y="330.8" width="16.3" height="16.3" color="#f08a0b"/><use href="#marigold" x="56.7" y="342.9" width="17.1" height="17.1" color="#f39a12"/><circle cx="66" cy="366" r="5" fill="#b3122a"/><use href="#bell" x="57" y="370" width="18" height="24"/></g><g class="strand" style="--i:2"><line x1="112" y1="0" x2="112" y2="300" stroke="#7a4a12" stroke-width="1.4"/><use href="#marigold" x="104" y="5.4" width="17.1" height="17.1" color="#f39a12"/><use href="#marigold" x="103.6" y="17.9" width="17.2" height="17.2" color="#f08a0b"/><use href="#marigold" x="103.9" y="30.9" width="16.1" height="16.1" color="#f39a12"/><use href="#marigold" x="102.9" y="43.2" width="16.5" height="16.5" color="#f9c933"/><use href="#marigold" x="104.3" y="55.6" width="16.9" height="16.9" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 70.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 70.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="102.5" y="67.7" width="17.6" height="17.6" color="#f08a0b"/><use href="#marigold" x="103.9" y="81.1" width="15.8" height="15.8" color="#f39a12"/><use href="#marigold" x="103.2" y="93.3" width="16.4" height="16.4" color="#e8770a"/><use href="#marigold" x="103.1" y="105.6" width="16.8" height="16.8" color="#f7bd22"/><use href="#marigold" x="102.6" y="117.8" width="17.4" height="17.4" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 133) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 133) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="103.9" y="131.1" width="15.9" height="15.9" color="#f08a0b"/><use href="#marigold" x="103.1" y="143" width="17.1" height="17.1" color="#f08a0b"/><use href="#marigold" x="103.7" y="155.6" width="16.9" height="16.9" color="#f08a0b"/><use href="#marigold" x="103.6" y="167.9" width="17.2" height="17.2" color="#f9c933"/><use href="#marigold" x="103.8" y="180.4" width="17.2" height="17.2" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 195.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 195.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="102.8" y="192.9" width="17.2" height="17.2" color="#e8770a"/><use href="#marigold" x="102.7" y="205.3" width="17.4" height="17.4" color="#e8770a"/><use href="#marigold" x="104.1" y="218" width="17.1" height="17.1" color="#e8770a"/><use href="#marigold" x="103.9" y="230.6" width="16.8" height="16.8" color="#f7bd22"/><use href="#marigold" x="104" y="243" width="17" height="17" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 258) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 258) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="103.4" y="256.1" width="15.9" height="15.9" color="#e8770a"/><use href="#marigold" x="103.8" y="268.5" width="16" height="16" color="#f39a12"/><use href="#marigold" x="103.6" y="280.5" width="17.1" height="17.1" color="#e8770a"/><circle cx="112" cy="303.5" r="5" fill="#b3122a"/><use href="#bell" x="103" y="307.5" width="18" height="24"/></g><g class="strand" style="--i:3"><line x1="158" y1="0" x2="158" y2="240" stroke="#7a4a12" stroke-width="1.4"/><use href="#marigold" x="149.9" y="5.9" width="16.3" height="16.3" color="#f39a12"/><use href="#marigold" x="148.5" y="17.8" width="17.4" height="17.4" color="#e8770a"/><use href="#marigold" x="149.9" y="30.2" width="17.6" height="17.6" color="#f08a0b"/><use href="#marigold" x="150.3" y="43.5" width="15.9" height="15.9" color="#f9c933"/><use href="#marigold" x="149.6" y="56" width="15.9" height="15.9" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(158 70.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(158 70.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="148.9" y="67.8" width="17.3" height="17.3" color="#f08a0b"/><use href="#marigold" x="149.5" y="80.1" width="17.8" height="17.8" color="#f39a12"/><use href="#marigold" x="150.6" y="93.5" width="16" height="16" color="#e8770a"/><use href="#marigold" x="149.7" y="106.1" width="15.9" height="15.9" color="#f7bd22"/><use href="#marigold" x="149.3" y="118.5" width="16.1" height="16.1" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(158 133) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(158 133) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="149.6" y="130.4" width="17.2" height="17.2" color="#e8770a"/><use href="#marigold" x="150.2" y="143.6" width="15.8" height="15.8" color="#f08a0b"/><use href="#marigold" x="149.1" y="155.1" width="17.7" height="17.7" color="#f08a0b"/><use href="#marigold" x="149.7" y="167.9" width="17.2" height="17.2" color="#f9c933"/><use href="#marigold" x="150.1" y="180.8" width="16.4" height="16.4" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(158 195.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(158 195.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="149.9" y="193.5" width="16" height="16" color="#e8770a"/><use href="#marigold" x="148.6" y="205.1" width="17.8" height="17.8" color="#f39a12"/><use href="#marigold" x="148.9" y="218.1" width="16.7" height="16.7" color="#e8770a"/><use href="#marigold" x="150.4" y="230.7" width="16.7" height="16.7" color="#f9c933"/><circle cx="158" cy="253.5" r="5" fill="#b3122a"/><use href="#bell" x="149" y="257.5" width="18" height="24"/></g><g class="strand" style="--i:4"><line x1="204" y1="0" x2="204" y2="180" stroke="#7a4a12" stroke-width="1.4"/><use href="#marigold" x="195" y="5.2" width="17.6" height="17.6" color="#f08a0b"/><use href="#marigold" x="195.3" y="18.5" width="16" height="16" color="#e8770a"/><use href="#marigold" x="195.2" y="30.1" width="17.7" height="17.7" color="#f08a0b"/><use href="#marigold" x="195.6" y="43" width="17.1" height="17.1" color="#f9c933"/><use href="#marigold" x="196" y="55.4" width="17.2" height="17.2" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(204 70.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(204 70.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="195.2" y="67.7" width="17.6" height="17.6" color="#f39a12"/><use href="#marigold" x="195.3" y="81.1" width="15.8" height="15.8" color="#f39a12"/><use href="#marigold" x="196" y="93.2" width="16.6" height="16.6" color="#e8770a"/><use href="#marigold" x="195.2" y="105.8" width="16.5" height="16.5" color="#f9c933"/><use href="#marigold" x="195.2" y="118.3" width="16.5" height="16.5" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(204 133) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(204 133) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="195.7" y="130.3" width="17.5" height="17.5" color="#f08a0b"/><use href="#marigold" x="196.6" y="143.4" width="16.2" height="16.2" color="#f08a0b"/><use href="#marigold" x="196.5" y="155.8" width="16.4" height="16.4" color="#f39a12"/><use href="#marigold" x="195" y="168.2" width="16.6" height="16.6" color="#f7bd22"/><circle cx="204" cy="191" r="5" fill="#b3122a"/><use href="#bell" x="195" y="195" width="18" height="24"/></g><g class="strand" style="--i:5"><line x1="248" y1="0" x2="248" y2="120" stroke="#7a4a12" stroke-width="1.4"/><use href="#marigold" x="239.4" y="5.7" width="16.7" height="16.7" color="#f39a12"/><use href="#marigold" x="240.4" y="18.3" width="16.4" height="16.4" color="#f08a0b"/><use href="#marigold" x="240.3" y="30.8" width="16.4" height="16.4" color="#f08a0b"/><use href="#marigold" x="239.4" y="43.3" width="16.3" height="16.3" color="#f9c933"/><use href="#marigold" x="239.2" y="55.7" width="16.5" height="16.5" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(248 70.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(248 70.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="239.9" y="67.8" width="17.4" height="17.4" color="#e8770a"/><use href="#marigold" x="239.1" y="80.2" width="17.6" height="17.6" color="#e8770a"/><use href="#marigold" x="239.5" y="92.9" width="17.2" height="17.2" color="#f08a0b"/><use href="#marigold" x="240.4" y="105.7" width="16.6" height="16.6" color="#f7bd22"/><circle cx="248" cy="128.5" r="5" fill="#b3122a"/><use href="#bell" x="239" y="132.5" width="18" height="24"/></g></svg>
+    <svg class="toran__side toran__side--right" viewBox="0 0 260 450" aria-hidden="true"><g class="strand" style="--i:0"><line x1="20" y1="0" x2="20" y2="420" stroke="#7a4a12" stroke-width="1.4"/><use href="#marigold" x="10.6" y="5.2" width="17.6" height="17.6" color="#f39a12"/><use href="#marigold" x="12.1" y="17.9" width="17.1" height="17.1" color="#e8770a"/><use href="#marigold" x="11.1" y="30.2" width="17.6" height="17.6" color="#e8770a"/><use href="#marigold" x="11.4" y="43.4" width="16.1" height="16.1" color="#f7bd22"/><use href="#marigold" x="11.9" y="55.3" width="17.4" height="17.4" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 70.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 70.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="12.4" y="68.5" width="16.1" height="16.1" color="#f08a0b"/><use href="#marigold" x="11.3" y="80.4" width="17.3" height="17.3" color="#e8770a"/><use href="#marigold" x="10.7" y="92.9" width="17.2" height="17.2" color="#e8770a"/><use href="#marigold" x="11.4" y="105.3" width="17.4" height="17.4" color="#f7bd22"/><use href="#marigold" x="12.7" y="118.5" width="15.9" height="15.9" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 133) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 133) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="11" y="130.3" width="17.3" height="17.3" color="#e8770a"/><use href="#marigold" x="12" y="143.6" width="15.9" height="15.9" color="#f08a0b"/><use href="#marigold" x="11.4" y="155.5" width="17" height="17" color="#e8770a"/><use href="#marigold" x="12.1" y="168.4" width="16.2" height="16.2" color="#f9c933"/><use href="#marigold" x="11.5" y="180.6" width="16.9" height="16.9" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 195.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 195.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="11.9" y="193.4" width="16.3" height="16.3" color="#e8770a"/><use href="#marigold" x="11.8" y="205.2" width="17.7" height="17.7" color="#f39a12"/><use href="#marigold" x="11.9" y="217.7" width="17.6" height="17.6" color="#f08a0b"/><use href="#marigold" x="12.5" y="231" width="16.1" height="16.1" color="#f7bd22"/><use href="#marigold" x="11.6" y="243.3" width="16.4" height="16.4" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 258) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 258) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="11.8" y="255.9" width="16.2" height="16.2" color="#f39a12"/><use href="#marigold" x="11.7" y="267.7" width="17.6" height="17.6" color="#f08a0b"/><use href="#marigold" x="12.2" y="280.5" width="17.1" height="17.1" color="#f39a12"/><use href="#marigold" x="10.6" y="292.7" width="17.6" height="17.6" color="#f9c933"/><use href="#marigold" x="10.7" y="305.1" width="17.7" height="17.7" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 320.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 320.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="12.6" y="318.4" width="16.1" height="16.1" color="#e8770a"/><use href="#marigold" x="12.5" y="330.9" width="16.1" height="16.1" color="#f39a12"/><use href="#marigold" x="12.5" y="343.2" width="16.6" height="16.6" color="#f39a12"/><use href="#marigold" x="11.3" y="355.8" width="16.4" height="16.4" color="#f9c933"/><use href="#marigold" x="10.8" y="368" width="16.9" height="16.9" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 383) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(20 383) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="12" y="380.7" width="16.6" height="16.6" color="#e8770a"/><use href="#marigold" x="11.8" y="393.1" width="16.8" height="16.8" color="#f08a0b"/><use href="#marigold" x="10.6" y="405.2" width="17.6" height="17.6" color="#f08a0b"/><circle cx="20" cy="428.5" r="5" fill="#b3122a"/><use href="#bell" x="11" y="432.5" width="18" height="24"/></g><g class="strand" style="--i:1"><line x1="66" y1="0" x2="66" y2="360" stroke="#7a4a12" stroke-width="1.4"/><use href="#marigold" x="58.7" y="6" width="16" height="16" color="#f39a12"/><use href="#marigold" x="56.8" y="17.7" width="17.6" height="17.6" color="#f08a0b"/><use href="#marigold" x="57.6" y="31" width="16.1" height="16.1" color="#f39a12"/><use href="#marigold" x="58" y="42.9" width="17.2" height="17.2" color="#f9c933"/><use href="#marigold" x="57.4" y="55.6" width="16.9" height="16.9" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 70.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 70.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="58.3" y="68.5" width="16" height="16" color="#f08a0b"/><use href="#marigold" x="58.4" y="80.9" width="16.2" height="16.2" color="#f08a0b"/><use href="#marigold" x="57.7" y="93.6" width="15.8" height="15.8" color="#f08a0b"/><use href="#marigold" x="58.5" y="106" width="16" height="16" color="#f7bd22"/><use href="#marigold" x="56.5" y="117.7" width="17.5" height="17.5" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 133) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 133) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="56.3" y="130.1" width="17.8" height="17.8" color="#f39a12"/><use href="#marigold" x="58.5" y="143.3" width="16.3" height="16.3" color="#f08a0b"/><use href="#marigold" x="56.7" y="155.4" width="17.2" height="17.2" color="#f08a0b"/><use href="#marigold" x="58.6" y="168.3" width="16.3" height="16.3" color="#f7bd22"/><use href="#marigold" x="57.3" y="180.8" width="16.4" height="16.4" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 195.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 195.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="57.9" y="193.4" width="16.2" height="16.2" color="#f39a12"/><use href="#marigold" x="57.9" y="205.9" width="16.2" height="16.2" color="#f39a12"/><use href="#marigold" x="57.6" y="217.6" width="17.8" height="17.8" color="#f08a0b"/><use href="#marigold" x="56.6" y="230.4" width="17.3" height="17.3" color="#f7bd22"/><use href="#marigold" x="57.9" y="243.4" width="16.3" height="16.3" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 258) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 258) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="56.7" y="255.3" width="17.4" height="17.4" color="#f39a12"/><use href="#marigold" x="57.8" y="268.1" width="16.9" height="16.9" color="#f39a12"/><use href="#marigold" x="58.5" y="280.8" width="16.4" height="16.4" color="#f08a0b"/><use href="#marigold" x="58.5" y="293.3" width="16.5" height="16.5" color="#f7bd22"/><use href="#marigold" x="57.6" y="305.8" width="16.5" height="16.5" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 320.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(66 320.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="58.6" y="318.6" width="15.8" height="15.8" color="#e8770a"/><use href="#marigold" x="58.2" y="330.8" width="16.3" height="16.3" color="#f08a0b"/><use href="#marigold" x="56.7" y="342.9" width="17.1" height="17.1" color="#f39a12"/><circle cx="66" cy="366" r="5" fill="#b3122a"/><use href="#bell" x="57" y="370" width="18" height="24"/></g><g class="strand" style="--i:2"><line x1="112" y1="0" x2="112" y2="300" stroke="#7a4a12" stroke-width="1.4"/><use href="#marigold" x="104" y="5.4" width="17.1" height="17.1" color="#f39a12"/><use href="#marigold" x="103.6" y="17.9" width="17.2" height="17.2" color="#f08a0b"/><use href="#marigold" x="103.9" y="30.9" width="16.1" height="16.1" color="#f39a12"/><use href="#marigold" x="102.9" y="43.2" width="16.5" height="16.5" color="#f9c933"/><use href="#marigold" x="104.3" y="55.6" width="16.9" height="16.9" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 70.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 70.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="102.5" y="67.7" width="17.6" height="17.6" color="#f08a0b"/><use href="#marigold" x="103.9" y="81.1" width="15.8" height="15.8" color="#f39a12"/><use href="#marigold" x="103.2" y="93.3" width="16.4" height="16.4" color="#e8770a"/><use href="#marigold" x="103.1" y="105.6" width="16.8" height="16.8" color="#f7bd22"/><use href="#marigold" x="102.6" y="117.8" width="17.4" height="17.4" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 133) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 133) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="103.9" y="131.1" width="15.9" height="15.9" color="#f08a0b"/><use href="#marigold" x="103.1" y="143" width="17.1" height="17.1" color="#f08a0b"/><use href="#marigold" x="103.7" y="155.6" width="16.9" height="16.9" color="#f08a0b"/><use href="#marigold" x="103.6" y="167.9" width="17.2" height="17.2" color="#f9c933"/><use href="#marigold" x="103.8" y="180.4" width="17.2" height="17.2" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 195.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 195.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="102.8" y="192.9" width="17.2" height="17.2" color="#e8770a"/><use href="#marigold" x="102.7" y="205.3" width="17.4" height="17.4" color="#e8770a"/><use href="#marigold" x="104.1" y="218" width="17.1" height="17.1" color="#e8770a"/><use href="#marigold" x="103.9" y="230.6" width="16.8" height="16.8" color="#f7bd22"/><use href="#marigold" x="104" y="243" width="17" height="17" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 258) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(112 258) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="103.4" y="256.1" width="15.9" height="15.9" color="#e8770a"/><use href="#marigold" x="103.8" y="268.5" width="16" height="16" color="#f39a12"/><use href="#marigold" x="103.6" y="280.5" width="17.1" height="17.1" color="#e8770a"/><circle cx="112" cy="303.5" r="5" fill="#b3122a"/><use href="#bell" x="103" y="307.5" width="18" height="24"/></g><g class="strand" style="--i:3"><line x1="158" y1="0" x2="158" y2="240" stroke="#7a4a12" stroke-width="1.4"/><use href="#marigold" x="149.9" y="5.9" width="16.3" height="16.3" color="#f39a12"/><use href="#marigold" x="148.5" y="17.8" width="17.4" height="17.4" color="#e8770a"/><use href="#marigold" x="149.9" y="30.2" width="17.6" height="17.6" color="#f08a0b"/><use href="#marigold" x="150.3" y="43.5" width="15.9" height="15.9" color="#f9c933"/><use href="#marigold" x="149.6" y="56" width="15.9" height="15.9" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(158 70.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(158 70.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="148.9" y="67.8" width="17.3" height="17.3" color="#f08a0b"/><use href="#marigold" x="149.5" y="80.1" width="17.8" height="17.8" color="#f39a12"/><use href="#marigold" x="150.6" y="93.5" width="16" height="16" color="#e8770a"/><use href="#marigold" x="149.7" y="106.1" width="15.9" height="15.9" color="#f7bd22"/><use href="#marigold" x="149.3" y="118.5" width="16.1" height="16.1" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(158 133) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(158 133) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="149.6" y="130.4" width="17.2" height="17.2" color="#e8770a"/><use href="#marigold" x="150.2" y="143.6" width="15.8" height="15.8" color="#f08a0b"/><use href="#marigold" x="149.1" y="155.1" width="17.7" height="17.7" color="#f08a0b"/><use href="#marigold" x="149.7" y="167.9" width="17.2" height="17.2" color="#f9c933"/><use href="#marigold" x="150.1" y="180.8" width="16.4" height="16.4" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(158 195.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(158 195.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="149.9" y="193.5" width="16" height="16" color="#e8770a"/><use href="#marigold" x="148.6" y="205.1" width="17.8" height="17.8" color="#f39a12"/><use href="#marigold" x="148.9" y="218.1" width="16.7" height="16.7" color="#e8770a"/><use href="#marigold" x="150.4" y="230.7" width="16.7" height="16.7" color="#f9c933"/><circle cx="158" cy="253.5" r="5" fill="#b3122a"/><use href="#bell" x="149" y="257.5" width="18" height="24"/></g><g class="strand" style="--i:4"><line x1="204" y1="0" x2="204" y2="180" stroke="#7a4a12" stroke-width="1.4"/><use href="#marigold" x="195" y="5.2" width="17.6" height="17.6" color="#f08a0b"/><use href="#marigold" x="195.3" y="18.5" width="16" height="16" color="#e8770a"/><use href="#marigold" x="195.2" y="30.1" width="17.7" height="17.7" color="#f08a0b"/><use href="#marigold" x="195.6" y="43" width="17.1" height="17.1" color="#f9c933"/><use href="#marigold" x="196" y="55.4" width="17.2" height="17.2" color="#f7bd22"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(204 70.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(204 70.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="195.2" y="67.7" width="17.6" height="17.6" color="#f39a12"/><use href="#marigold" x="195.3" y="81.1" width="15.8" height="15.8" color="#f39a12"/><use href="#marigold" x="196" y="93.2" width="16.6" height="16.6" color="#e8770a"/><use href="#marigold" x="195.2" y="105.8" width="16.5" height="16.5" color="#f9c933"/><use href="#marigold" x="195.2" y="118.3" width="16.5" height="16.5" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(204 133) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(204 133) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="195.7" y="130.3" width="17.5" height="17.5" color="#f08a0b"/><use href="#marigold" x="196.6" y="143.4" width="16.2" height="16.2" color="#f08a0b"/><use href="#marigold" x="196.5" y="155.8" width="16.4" height="16.4" color="#f39a12"/><use href="#marigold" x="195" y="168.2" width="16.6" height="16.6" color="#f7bd22"/><circle cx="204" cy="191" r="5" fill="#b3122a"/><use href="#bell" x="195" y="195" width="18" height="24"/></g><g class="strand" style="--i:5"><line x1="248" y1="0" x2="248" y2="120" stroke="#7a4a12" stroke-width="1.4"/><use href="#marigold" x="239.4" y="5.7" width="16.7" height="16.7" color="#f39a12"/><use href="#marigold" x="240.4" y="18.3" width="16.4" height="16.4" color="#f08a0b"/><use href="#marigold" x="240.3" y="30.8" width="16.4" height="16.4" color="#f08a0b"/><use href="#marigold" x="239.4" y="43.3" width="16.3" height="16.3" color="#f9c933"/><use href="#marigold" x="239.2" y="55.7" width="16.5" height="16.5" color="#f9c933"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(248 70.5) rotate(140) scale(0.45)" color="#3f6b2a"/><use href="#leaf" x="-10" width="20" height="40" transform="translate(248 70.5) rotate(-140) scale(0.45)" color="#4f7f31"/><use href="#marigold" x="239.9" y="67.8" width="17.4" height="17.4" color="#e8770a"/><use href="#marigold" x="239.1" y="80.2" width="17.6" height="17.6" color="#e8770a"/><use href="#marigold" x="239.5" y="92.9" width="17.2" height="17.2" color="#f08a0b"/><use href="#marigold" x="240.4" y="105.7" width="16.6" height="16.6" color="#f7bd22"/><circle cx="248" cy="128.5" r="5" fill="#b3122a"/><use href="#bell" x="239" y="132.5" width="18" height="24"/></g></svg>
+  </div>
 
-{t:"Databases: pick, replicate, shard",why:"Most deep dives end up talking about the database. Know how to pick one and what to do when it gets too big.",
-table:[["Need","Pick","Why"],["Money, orders, relationships","SQL (Postgres, MySQL)","Transactions, joins, strong consistency"],["Huge write volume, simple lookups","Wide-column (Cassandra, DynamoDB)","Scales writes horizontally"],["Flexible documents","Document (MongoDB)","Schema changes easily"],["Cache, counters, sessions","Key-value (Redis)","In-memory, very fast"],["Search text","Elasticsearch","Inverted index"],["Images, video, files","Object storage (S3)","Cheap, durable blobs; store the URL in the DB"]],
-ideas:[["Indexes.","Make reads fast, slow down writes a bit. Index what you filter or sort on."],
-["Replication.","One leader takes writes, followers serve reads. Replica lag means a follower can be slightly stale."],
-["Sharding.","Split data across machines by a shard key (e.g. user_id). Pick a key that spreads load evenly and keeps a user's queries on one shard."],
-["Consistent hashing.","Place servers on a ring; a key goes to the next server clockwise. Adding a server only moves a small slice of keys."],
-["CAP.","During a network partition you choose Consistency (refuse/wait) or Availability (answer, maybe stale). Banks pick C, social feeds pick A."],
-["Transactions across services.","Avoid 2-phase commit. Use a saga: a chain of local steps with undo (compensating) steps."]],
-say:["“The access pattern is lookups by user_id, so I'll shard by user_id using consistent hashing.”","“For payments I want strong consistency, so SQL with transactions. For the activity feed, eventual consistency is fine.”"],
-quiz:[["Chat messages: billions of writes per day, always read by conversation. Best store?",["Single MySQL","Cassandra with partition key = conversation_id","Elasticsearch","S3"],1,"High write volume, simple access pattern by one key."],
-["Why consistent hashing instead of hash(key) % N?",["It's more secure","Adding/removing a server moves only a small fraction of keys","It uses less memory","It sorts keys"],1,"With % N, changing N reshuffles almost every key."]]},
+  <div class="hero__content" data-speed="0.18" data-depth="-6">
+    <p class="hero__invocation" lang="hi">॥ श्री गणेशाय नमः ॥</p>
+    <p class="hero__eyebrow">Together with their families</p>
+    <h1 class="hero__names">
+      <span class="hero__name">Amar Kumar</span>
+      <span class="hero__amp">&amp;</span>
+      <span class="hero__name">Gurubani Gulati</span>
+    </h1>
+    <p class="hero__lede">joyfully invite you to celebrate their wedding</p>
+    <div class="hero__when">
+      <span>6 &amp; 7 October 2026</span>
+      <span class="hero__dot" aria-hidden="true"></span>
+      <span>Sterling Quinta, Jim Corbett</span>
+    </div>
+  </div>
 
-{t:"Queues and async work",why:"If some work is slow or comes in bursts, put it on a queue and do it in the background. This one idea fixes a lot of designs.",
-ideas:[["Why a queue.","Decouples producer and consumer, absorbs traffic spikes, lets you retry. User gets a fast response while work happens in the background."],
-["Queue vs pub/sub.","Queue (SQS, RabbitMQ): each message handled by one worker. Pub/sub or log (Kafka): many consumers each read every event."],
-["Delivery guarantees.","“At least once” is the realistic default, so consumers must be idempotent: processing the same message twice has the same effect as once. Use an idempotency key."],
-["Dead-letter queue.","Messages that keep failing go aside so they don't block everything."],
-["Sync vs async APIs.","REST for request/response. WebSockets for real-time push (chat). Long polling as a fallback. Webhooks for server-to-server callbacks."],
-["Rate limiting.","Token bucket: tokens refill at a fixed rate, each request uses one. Store counters in Redis, keyed by user or IP. Return HTTP 429."]],
-diagram:`flowchart LR
-  API[Upload API] -->|fast 202| U[User]
-  API --> Q[[Queue]]
-  Q --> W1[Worker: transcode]
-  Q --> W2[Worker: thumbnail]
-  W1 & W2 --> S[(Object storage)]`,
-say:["“Video processing is slow, so the upload API just stores the file and puts a job on a queue. Workers process it and we notify the user when it's done.”","“Delivery is at-least-once, so the consumer uses an idempotency key to avoid double charges.”"],
-quiz:[["A payment message might be delivered twice. What protects you?",["Faster workers","Idempotency key checked before charging","Bigger queue","Using UDP"],1,"Store processed keys; skip duplicates."],
-["Which rate limiting algorithm allows short bursts but a steady average?",["Fixed window","Token bucket","Round robin","LRU"],1,"The bucket holds extra tokens for bursts."]]},
+  <div class="hero__diyas" data-speed="-0.12" aria-hidden="true">
+    <svg class="diya" style="--d:0s"><use href="#diya"/></svg>
+    <svg class="diya" style="--d:.7s"><use href="#diya"/></svg>
+    <svg class="diya diya--centre" style="--d:.3s"><use href="#diya"/></svg>
+    <svg class="diya" style="--d:1.1s"><use href="#diya"/></svg>
+    <svg class="diya" style="--d:.5s"><use href="#diya"/></svg>
+  </div>
 
-{t:"Four classic designs, as skeletons",why:"Most interview questions are a twist on one of these. Know the basic shape of each one and the one hard part people get asked about.",
-table:[["System","Core pieces","The hard part to deep-dive"],
-["URL shortener","API → app → DB (code → long URL), Redis cache, 301/302 redirect","Generating unique short codes: base62 of an ID from a counter or Snowflake-style IDs; heavy read caching"],
-["Chat (WhatsApp)","WebSocket gateways, message service, Cassandra by conversation_id, presence in Redis","Delivering to online vs offline users: route via user→gateway map; store and push notification if offline; message ordering per conversation"],
-["News feed (Twitter)","Post service, follow graph, feed cache per user","Fan-out on write (push to followers' feeds) vs on read; hybrid: push for normal users, pull for celebrities"],
-["Notification system","Event → queue → workers per channel (push, SMS, email) → providers","Retries, dedupe, user preferences, rate limits per user, templates"]],
-ideas:[["Unique IDs.","Snowflake: 41 bits time + machine ID + sequence. Sortable by time, no central bottleneck."],
-["Typeahead.","Trie of prefixes with top-k suggestions stored at each node, served from cache, rebuilt offline."],
-["File storage (Drive).","Split files into chunks, store in S3, metadata in SQL, sync only changed chunks."],
-["Video (YouTube).","Upload → queue → transcode into multiple resolutions → CDN. Adaptive bitrate streaming."]],
-say:["“For celebrities with millions of followers, fan-out on write is too expensive, so I'd use a hybrid: push for regular users and pull celebrity posts at read time.”"],
-quiz:[["A user with 50M followers posts. Fan-out on write means…",["1 write","50M feed writes","No writes","Only a cache write"],1,"That's why celebrities are handled by pull at read time."],
-["How does a chat server send a message to a user connected to a different server?",["Broadcast to all servers","Look up which gateway holds the user's WebSocket and route there","Email it","Wait for the user to poll"],1,"Keep a user → gateway map in Redis or use pub/sub."]]},
+  <a class="hero__scroll" href="#invite"><span>Scroll to open</span><i aria-hidden="true"></i></a>
+</header>
 
-{t:"Amazon FinTech: design a payment system",why:"The team is FinTech, so expect something about payments, wallets, billing or a ledger. For money, being correct and handling failures matters more than huge scale.",
-ideas:[["Requirements to ask for.","Charge a customer, refund, check payment status. Never double-charge, never lose money, keep a full audit trail. Strong consistency for money, eventual consistency is fine for status pages and analytics."],
-["Flow.","Client → Payment API (with an idempotency key) → Payment service writes a <code>PENDING</code> record → calls the external processor (card network/bank) → updates to <code>SUCCESS</code>/<code>FAILED</code> → emits an event → ledger, notifications, and order service consume it."],
-["Idempotency is the #1 topic.","Client sends a unique key per payment attempt. Server stores key → result. A retry with the same key returns the stored result instead of charging again."],
-["Double-entry ledger.","Every movement is two rows: debit one account, credit another, and they always sum to zero. Append-only. Never update or delete, only add correcting entries."],
-["Failures and retries.","Processor times out? You don't know if it charged. Mark as <code>UNKNOWN</code>, retry with the same idempotency key, and run a reconciliation job that compares your records with the processor's daily report."],
-["Multi-step flows.","Order → charge → reserve inventory: use a saga with compensations (refund if inventory fails), plus the outbox pattern so the DB write and the event are never out of sync."],
-["Storage.","SQL (e.g. Aurora/Postgres) with transactions for payments and ledger. Shard by account or merchant ID. Kafka/SQS for events. Encrypt card data; better, store only a token from the processor (PCI)."]],
-diagram:`flowchart LR
-  C[Client] -->|idempotency key| API[Payment API]
-  API --> PS[Payment service]
-  PS --> DB[(Payments DB)]
-  PS --> PSP[External processor]
-  PS --> K[[Event queue]]
-  K --> L[(Ledger)]
-  K --> N[Notifications]
-  R[Reconciliation job] --> DB
-  R --> PSP`,
-say:["“For money I'd choose consistency over availability. If we're unsure whether a charge went through, we'd rather show 'processing' than risk a double charge.”","“Every request carries an idempotency key, so client or network retries are safe.”","“A nightly reconciliation job catches anything our retries missed.”"],
-quiz:[["The processor call times out. What's the safe action?",["Charge again with a new request","Mark it unknown, retry with the same idempotency key, reconcile later","Tell the user it failed","Delete the record"],1,"A new request risks a double charge. The same key makes the retry safe."],
-["Why is a ledger append-only?",["It saves space","You get a full audit trail; corrections are new entries, never edits","SQL requires it","It's faster to delete"],1,"Auditors and debugging both need full history."]]},
+<main>
 
-{t:"Amazon's twist: Leadership Principles",why:"Every Amazon interviewer also checks a few Leadership Principles, even in a design round. You'll probably get at least one “tell me about a time” question too.",
-ideas:[["Customer Obsession.","Open the design with the customer: “A customer paying at checkout needs it to be fast and never charged twice.” Tie choices back to them."],
-["Ownership.","Talk about monitoring, alarms, on-call, and what happens at 3 a.m. when something fails. Owners design for operations, not only the happy path."],
-["Dive Deep.","When pushed, go one level deeper with numbers and specifics instead of changing the subject."],
-["Are Right, A Lot / Have Backbone.","Defend a choice with a reason, and change it gracefully if the interviewer shows a real flaw."],
-["Frugality.","Mention cost: “S3 for old records, not the main DB.” “Start with managed services.”"],
-["STAR stories.","Prepare 4–5 stories: Situation, Task, Action (what <b>I</b> did, say “I” not “we”), Result with a number. Cover: a tough bug, a disagreement, a deadline, a mistake, going beyond scope."]],
-say:["“I'd add alarms on payment failure rate and latency, and a dashboard so the on-call engineer can see issues quickly.”","“In my last project, I owned… The result was a 30% drop in…”"],
-quiz:[["Which is the strongest Ownership signal in a design round?",["Using the newest database","Covering monitoring, alarms, failure handling, and rollback","Drawing more boxes","Saying 'the team handled it'"],1,"Owners think about running the system, not just building it."],
-["In a STAR story, how should she describe her actions?",["We did it","I did X, specifically","The manager decided","Skip the action part"],1,"Interviewers need her individual contribution."]]},
+  <section class="invite" id="invite" data-host>
+    <svg class="float float--paisley-l" data-speed="-0.3"><use href="#paisley"/></svg>
+    <svg class="float float--paisley-r" data-speed="0.25"><use href="#paisley"/></svg>
+    <svg class="float float--mandala" data-speed="0.15"><use href="#mandala"/></svg>
 
-{t:"Night-before checklist",why:"Read this once the night before and once on the morning of the interview. Then close the laptop and rest.",
-ideas:[["Talk the whole time.","Silence reads as stuck. Think out loud, even “I'm weighing two options here…”"],
-["Clarify, then commit.","Ask questions early. Once you pick, state it and move on. You can revisit later."],
-["Every choice gets a reason.","“Redis because it's read-heavy.” “Queue because the work is slow.” Never just name a tool."],
-["Say the trade-off.","Consistency vs availability, latency vs cost, simple vs scalable. Naming it shows seniority."],
-["It's a conversation.","Check in: “Does this direction make sense?” Follow the interviewer's hints; they are giving you points."],
-["Know your default toolbox.","Load balancer, stateless servers, Redis, SQL + replicas, sharding by key, Kafka/SQS queue, S3 + CDN, WebSockets. This covers 90% of questions."],
-["When stuck.","Go back to requirements and numbers. Find what breaks first at that scale and fix that one thing."]],
-say:["“Let me find the bottleneck. At 10k writes per second a single database breaks first, so I'd shard it.”","“I don't know that tool in depth, but here's how I'd reason about it.”"],
-quiz:[["The interviewer says “What if the cache goes down?” Good answer?",["“It won't.”","Requests fall through to the DB; protect it with replicas, rate limits, and a Redis cluster with replicas","Restart the servers","Remove the cache"],1,"Always plan for failure of each component."],
-["You chose Postgres. What should you say next?",["Nothing","Why: we need transactions and joins for orders, and it handles our write rate","It's popular","My friend uses it"],1,"Tool + reason tied to a requirement."]]}
-];
+    <div class="wrap">
+      <div class="shloka reveal">
+        <svg class="ornament" aria-hidden="true"><use href="#lotus"/></svg>
+        <p class="shloka__text" lang="hi">वक्रतुण्ड महाकाय सूर्यकोटि समप्रभ।<br>निर्विघ्नं कुरु मे देव सर्वकार्येषु सर्वदा॥</p>
+        <p class="shloka__meaning">O Lord Ganesha, of the curved trunk and mighty form, radiant as a million suns, keep every path we walk free of obstacles, always.</p>
+      </div>
 
+      <h2 class="title reveal"><span class="title__script">With joy in our hearts</span></h2>
+      <p class="invite__text reveal">With the blessings of Lord Ganesha and the love of our families, we request the pleasure of your company as two hearts become one. Come laugh with us through the haldi, dance with us at the mehndi, and bless us as we take our seven pheras.</p>
 
-const EXTRA=[
-[["Which is a non-functional requirement?",["Users can post photos","99.99% availability and p99 latency under 200 ms","Users can follow others","Users can comment"],1,"Non-functional = qualities like availability, latency, durability, consistency."],
-["How long should requirements and scoping take in a 45–60 min round?",["Under a minute","About 5 minutes","20 minutes","The whole interview"],1,"Enough to lock scope, then move on."],
-["The interviewer pushes back on your database choice. Best response?",["Switch immediately","Explain the reasoning, consider their point, and adjust if the flaw is real","Argue until they agree","Ignore it"],1,"Shows backbone plus openness."]],
-[["Peak traffic is usually estimated as…",["Same as average","2–3× average","100× average","Half of average"],1,"Use a peak multiplier to size capacity."],
-["Which is fastest?",["SSD read","Memory read","Cross-continent round trip","Disk seek"],1,"Memory ~100 ns, SSD ~100 µs, cross-continent ~150 ms."],
-["1 billion reads/day with a 100:1 read:write ratio means writes/day are about…",["1 million","10 million","100 million","1 billion"],1,"1B ÷ 100 = 10M writes/day ≈ 100/s."]],
-[["What does a load balancer health check do?",["Encrypts traffic","Stops sending traffic to unhealthy servers","Caches responses","Shards the DB"],1,"Dead servers are removed from rotation automatically."],
-["Where should user sessions live so app servers stay stateless?",["In app server memory","In a shared store like Redis, or a signed token","On the load balancer's disk","In the CDN"],1,"Any server can then handle any request."],
-["What is the main downside of vertical scaling?",["Needs a load balancer","There's a hardware ceiling and it's a single point of failure","It's always slower","It requires sharding"],1,"Bigger boxes only go so far."]],
-[["Which content belongs on a CDN?",["Bank balances","Images, videos, JS/CSS files","Payment transactions","Session tokens"],1,"Static, widely-read content close to users."],
-["Default eviction policy to mention?",["FIFO","LRU","Random","Never evict"],1,"Least recently used plus a TTL."],
-["Write-back caching risks…",["Slow reads","Losing data if the cache crashes before flushing","Too many DB writes","Stale CDN"],1,"Writes sit only in cache until flushed."]],
-[["What is replica lag?",["Slow network cable","Followers being slightly behind the leader","A crashed leader","A slow index"],1,"Reads from a follower may be a bit stale."],
-["A bad shard key causes…",["Encryption failures","Hot shards: one machine gets most of the load","Faster queries","Fewer replicas"],1,"Pick a key that spreads load evenly."],
-["Adding an index to a column usually…",["Speeds writes, slows reads","Speeds reads on that column, slightly slows writes","Has no effect","Deletes duplicates"],1,"Writes must also update the index."]],
-[["Kafka differs from a simple queue because…",["It can't retry","Multiple consumer groups can each read every event, and events are retained","It only runs in memory","It's synchronous"],1,"It's a durable log, replayable by many consumers."],
-["Best transport for real-time chat delivery?",["Polling every minute","WebSockets","Email","FTP"],1,"A persistent two-way connection."],
-["What HTTP status does a rate limiter return?",["200","404","429","500"],2,"429 Too Many Requests."]],
-[["Why does Snowflake put the timestamp first in the ID?",["Security","IDs sort by creation time","Shorter IDs","Encryption"],1,"Time-ordered IDs help indexing and pagination."],
-["URL shortener: 301 vs 302 redirect?",["No difference","301 is cached by browsers (less load, less analytics); 302 hits your server each time","302 is permanent","301 is faster to generate"],1,"Pick 302 if you need click tracking."],
-["For a typeahead, where are top suggestions stored for speed?",["Computed on each keystroke from raw logs","Precomputed top-k at each trie node, served from cache","In S3","In the load balancer"],1,"Rebuilt offline, read in milliseconds."]],
-[["What is the outbox pattern for?",["Sending email","Writing the DB change and the event in one transaction so they never diverge","Encrypting cards","Rate limiting"],1,"A relay later publishes events from the outbox table."],
-["Where should raw card numbers be stored?",["In your DB in plain text","Ideally nowhere: store the processor's token","In logs","In Redis"],1,"Tokenization keeps you out of most PCI scope."],
-["Reconciliation compares…",["Two cache nodes","Your payment records against the processor/bank settlement report","Frontend and backend code","CPU and memory"],1,"Catches mismatches retries missed."],
-["For a payments DB, which do you favor during a partition?",["Availability","Consistency","Neither","Latency"],1,"Better to wait than to move money wrongly."]],
-[["Which Leadership Principle is shown by mentioning cost trade-offs?",["Frugality","Invent and Simplify","Earn Trust","Hire and Develop"],0,"Accomplish more with less."],
-["The Result in a STAR story should ideally include…",["A metric or measurable outcome","Only feelings","Nothing","The manager's name"],0,"Numbers make impact concrete."],
-["Starting a design with “Who is the customer and what do they need?” shows…",["Bias for Action","Customer Obsession","Frugality","Think Big"],1,"Amazon's first principle."]],
-[["You don't know a technology the interviewer mentions. Best move?",["Bluff","Say so and reason from first principles","Change the topic","Stay silent"],1,"Honest reasoning scores better than bluffing."],
-["You've been quiet for a minute while thinking. What should you do?",["Keep silent","Think out loud so the interviewer can follow","Ask to end","Draw random boxes"],1,"They grade your reasoning, so make it visible."],
-["The interviewer drops a hint. You should…",["Ignore it","Pick it up and explore it","Say you already knew","Argue"],1,"Hints are points being offered."]]
-];
-EXTRA.forEach((q,i)=>M[i]&&M[i].quiz.push(...q));
-const PREP=[
-"Close this page and say the steps out loud from memory. Then set a 45-minute timer and design a URL shortener on Excalidraw, talking the whole time.",
-"Pick three apps you know (Instagram, Uber, WhatsApp). For each one, spend three minutes working out requests per second, storage per year and how many reads there are per write. Say it out loud.",
-"Draw the basic setup from memory: users, CDN, load balancer, app servers, cache, database. Explain what each box does in one sentence.",
-"In every design you practice, say where the cache goes, how it gets filled, how long things stay in it, and what happens if it goes down.",
-"For payments, chat and a news feed, pick a database and how you'd split the data. Give one sentence of reasoning for each.",
-"Take something slow, like a video upload or sending receipts, and redraw it with a queue. Explain what happens if a step fails or runs twice.",
-"Pick two of these and design them start to finish on Excalidraw with a timer. Record yourself once and listen back. You'll notice things you'd never catch otherwise.",
-"Do a full 45-minute practice run of “design payments for Amazon checkout”. Make sure you bring up idempotency keys, the ledger, reconciliation, and what happens when a step fails halfway.",
-"Write five short stories in bullet points: a tough bug, a disagreement, a tight deadline, a mistake, and a time you went beyond your job. Practise telling each in under two minutes, and end with a real number.",
-"Read this list tonight and again on the morning of the interview. After that, stop studying. You're ready."
-];
-M.forEach((m,i)=>m.prep=PREP[i]);
-M.unshift({t:"Before you go: how to prepare",why:"Start here. It's a simple two-day plan, what to have ready for the call, and where to practice drawing designs.",
-table:[["When","Do this"],
-["2 days before","Go through modules 2 to 7. After each one, do the short practice task at the bottom, out loud."],
-["1 day before","Finish the rest of the modules. Then do two timed 45-minute practice runs on Excalidraw, one for a payment system and one for a notification system. Write down your five stories for the “tell me about a time” questions."],
-["Interview morning","Skim the last module and your story notes. Don't start anything new."],
-["30 min before","Check that Zoom, your camera, mic and screen sharing all work. Open a blank Excalidraw board. Keep water and a pen and paper nearby, and join five minutes early."]],
-ideas:[
-["Practise drawing, not just reading.","You'll probably share your screen and draw while you talk, so practise that way too. Use <a href=\"https://excalidraw.com\" target=\"_blank\" rel=\"noopener\">Excalidraw</a> (quickest, no sign-up) or <a href=\"https://app.diagrams.net\" target=\"_blank\" rel=\"noopener\">draw.io</a>. It helps to start every board with the same headings: requirements, numbers, API, diagram, deep dive."],
-["Good questions to practise with.","Payment system · Wallet / gift card balance · Notification service · URL shortener · Rate limiter · Order history for Amazon · Invoice/billing system · Distributed cache."],
-["Practise with someone.","Ask a friend to play the interviewer and keep interrupting with things like “what if this fails?” and “why that database?”. Handling those questions calmly is a big part of what's being tested."],
-["Say it out loud.","Reading quietly feels productive, but it doesn't stick the same way. After each module, explain it out loud in your own words, as if you were teaching someone."]],
-say:["“Can I share my screen and draw as I go?”","“Let me write the requirements on the board first so we're aligned.”"],
-quiz:[
-["What is the best way to prepare in the last 2 days?",["Read all 18 long lessons","Short modules plus timed mock designs said out loud","Memorize tool names","Only watch videos"],1,"Mocks build the skill they actually test: talking through a design under time pressure."],
-["Where should you practice drawing designs?",["On paper only","On a shared whiteboard like Excalidraw, the way you'll do it on the call","In your head","In a Word doc"],1,"Practice with the same kind of tool you'll use in the interview so it feels normal."],
-["What's the most useful thing to do 30 minutes before?",["Learn a new topic","Test Zoom, mic, camera, screen share and open a blank board","Read Glassdoor reviews","Skip the call test"],1,"Tech problems eat confidence and minutes. Remove them early."],
-["What should the Result part of a STAR story include?",["Only “it went well”","A measurable outcome, like “cut latency by 40%”","The team's opinion","Nothing"],1,"Write a number into every story tonight."],
-["The night before the interview, what should you do?",["Study until 3 a.m.","Light review of the checklist, then sleep","Try a new mock with a new topic","Rewrite all notes"],1,"Sleep improves recall and calm more than one more hour of reading."],
-["Which practice prompt fits a FinTech team best?",["Design Netflix","Design a payment or wallet system","Design a game engine","Design a compiler"],1,"Practice the domain you're interviewing for."]]});
+      <div class="couple">
+        <article class="person reveal">
+          <div class="person__arch"><svg class="person__mandala" aria-hidden="true"><use href="#mandala"/></svg><span class="person__initial">A</span></div>
+          <p class="person__role"><span lang="hi">वर</span> · The Groom</p>
+          <h3 class="person__name">Amar Kumar</h3>
+        </article>
+        <div class="couple__weds reveal" aria-hidden="true">
+          <span>weds</span>
+          <svg><use href="#lotus"/></svg>
+        </div>
+        <article class="person reveal">
+          <div class="person__arch"><svg class="person__mandala" aria-hidden="true"><use href="#mandala"/></svg><span class="person__initial">G</span></div>
+          <p class="person__role"><span lang="hi">वधू</span> · The Bride</p>
+          <h3 class="person__name">Gurubani Gulati</h3>
+        </article>
+      </div>
+    </div>
+  </section>
 
-const KEY="sd1n-v3";
-let st={cur:0,done:[],ans:{}};
-try{const s=JSON.parse(localStorage.getItem(KEY));if(s)st=Object.assign(st,s)}catch(e){}
-if(!st.ans)st.ans={};
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}};
-const esc=s=>s.replace(/&(?!amp;)/g,"&amp;");
+  <section class="countdown" aria-labelledby="countdown-title" data-host>
+    <svg class="countdown__mandala" data-speed="0.3"><use href="#mandala"/></svg>
+    <div class="wrap">
+      <p class="countdown__eyebrow" id="countdown-title">The countdown has begun</p>
+      <div class="countdown__clock" data-countdown="2026-10-06T00:00:00+05:30" data-ends="2026-10-08T00:00:00+05:30">
+        <div class="unit"><span class="unit__num" data-unit="days">--</span><span class="unit__label">Days</span></div>
+        <div class="unit"><span class="unit__num" data-unit="hours">--</span><span class="unit__label">Hours</span></div>
+        <div class="unit"><span class="unit__num" data-unit="minutes">--</span><span class="unit__label">Minutes</span></div>
+        <div class="unit"><span class="unit__num" data-unit="seconds">--</span><span class="unit__label">Seconds</span></div>
+      </div>
+      <p class="countdown__note" data-countdown-note>until the festivities begin on 6 October</p>
+    </div>
+  </section>
 
-function nav(){
-  const n=document.getElementById("nav");n.innerHTML="";
-  M.forEach((m,i)=>{const b=document.createElement("button");b.id="nav"+i;
-    const sc=score(i);b.innerHTML=`<span class="n">${i+1}</span>${m.t}${sc.a?`<span class="nav-score">${sc.c}/${m.quiz.length}</span>`:""}`;
-    b.setAttribute("aria-current",i===st.cur);if(st.done.includes(i))b.classList.add("done");
-    b.onclick=()=>{st.cur=i;save();render()};n.appendChild(b)});
-  const d=st.done.length;document.getElementById("pct").textContent=`${d} of ${M.length} done`;
-  document.getElementById("barfill").style.width=(d/M.length*100)+"%";
-  tracker();
-}
-function score(i){let a=0,c=0;M[i].quiz.forEach((q,qi)=>{const v=st.ans[i+"-"+qi];if(v!==undefined){a++;if(v===q[2])c++}});return{a,c}}
-function tracker(){
-  let a=0,c=0,t=0;const g=document.getElementById("tgrid");g.innerHTML="";
-  M.forEach((m,i)=>{const s=score(i);a+=s.a;c+=s.c;t+=m.quiz.length;
-    const x=document.createElement("i");x.title=`${i+1}. ${m.t.replace(/<[^>]+>/g,"")} · quiz ${s.c}/${m.quiz.length}${st.done.includes(i)?" · done":""}`;
-    if(st.done.includes(i))x.className="done";else if(s.a)x.className="part";if(i===st.cur)x.classList.add("cur");
-    x.onclick=()=>{st.cur=i;save();render();scrollTo(0,0)};g.appendChild(x)});
-  document.getElementById("tMods").textContent=`${st.done.length}/${M.length}`;
-  document.getElementById("tAns").textContent=`${a}/${t}`;
-  document.getElementById("tAcc").textContent=a?Math.round(c/a*100)+"%":"–";
-}
-function readProg(){const h=document.documentElement,max=h.scrollHeight-innerHeight;
-  document.getElementById("readfill").style.width=(max>0?Math.min(100,scrollY/max*100):0)+"%"}
-addEventListener("scroll",readProg,{passive:true});addEventListener("resize",readProg);
-function render(){
-  nav();const m=M[st.cur],el=document.getElementById("mod");
-  let h=`<div><div class="meta">Module ${st.cur+1} of ${M.length} · ~10 min</div><h2>${m.t}</h2><p class="why">${m.why}</p></div>`;
-  if(m.table)h+=`<div class="tbl"><table><thead><tr>${m.table[0].map(c=>`<th>${c}</th>`).join("")}</tr></thead><tbody>${m.table.slice(1).map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
-  h+=`<ul class="ideas">${m.ideas.map(([a,b])=>`<li><span class="dot"></span><div><b>${a}</b> ${b}</div></li>`).join("")}</ul>`;
-  if(m.diagram)h+=`<div class="diagram-label">Diagram</div><div class="diagram" id="mmd">Loading diagram…</div>`;
-  h+=`<div class="say"><h3>Say this out loud</h3>${m.say.map(s=>`<p>${s}</p>`).join("")}</div>`;
-  if(m.prep)h+=`<div class="prep"><h3>How to practice this</h3><p>${m.prep}</p><p><a href="https://excalidraw.com" target="_blank" rel="noopener">Open a whiteboard on Excalidraw ↗</a></p></div>`;
-  h+=`<div class="quiz">${m.quiz.map((q,qi)=>`<div class="q"><p>${qi+1}. ${q[0]}</p><div class="opts">${q[1].map((o,oi)=>`<button id="q${st.cur}-${qi}-${oi}" data-q="${qi}" data-o="${oi}">${o}</button>`).join("")}</div><div class="expl" hidden id="e${qi}">${q[3]}</div></div>`).join("")}</div>`;
-  const last=st.cur===M.length-1;
-  h+=`<div class="foot"><button id="prev" ${st.cur===0?"hidden":""}>← Previous</button><button id="next" class="primary">${last?"Finish · go sleep":"Mark done · next →"}</button></div>`;
-  el.innerHTML=h;
-  const mark=(qi,oi)=>{const q=m.quiz[qi],box=document.getElementById("q"+st.cur+"-"+qi+"-0").parentNode;
-    box.querySelectorAll("button").forEach((x,i)=>{x.classList.remove("wrong");if(i===q[2])x.classList.add("right")});
-    if(oi!==q[2])document.getElementById("q"+st.cur+"-"+qi+"-"+oi).classList.add("wrong");
-    document.getElementById("e"+qi).hidden=false};
-  m.quiz.forEach((q,qi)=>{const a=st.ans[st.cur+"-"+qi];if(a!==undefined)mark(qi,a)});
-  el.querySelectorAll(".opts button").forEach(b=>b.onclick=()=>{
-    st.ans[st.cur+"-"+b.dataset.q]=+b.dataset.o;save();mark(+b.dataset.q,+b.dataset.o);nav()});
-  document.getElementById("prev").onclick=()=>{st.cur--;save();render();scrollTo(0,0)};
-  document.getElementById("next").onclick=()=>{if(!st.done.includes(st.cur))st.done.push(st.cur);
-    if(!last)st.cur++;save();render();scrollTo(0,0)};
-  if(m.diagram&&window.mermaid){const box=document.getElementById("mmd");mermaid.render("mm"+Date.now(),m.diagram).then(r=>{box.innerHTML=r.svg}).catch(()=>{box.textContent=m.diagram}).finally(readProg)}
-  readProg();
-}
-function curTheme(){const a=document.documentElement.getAttribute("data-theme");return a||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")}
-function setBtn(){document.getElementById("themebtn").textContent=curTheme()==="dark"?"Light mode":"Dark mode"}
-document.getElementById("themebtn").onclick=()=>{const t=curTheme()==="dark"?"light":"dark";
-  document.documentElement.setAttribute("data-theme",t);document.documentElement.style.colorScheme=t;
-  try{localStorage.setItem("sc-theme",t)}catch(e){}
-  if(window.mmInit)mmInit();
-  setBtn();render()};
-resetBtn.onclick=()=>{resetAsk.hidden=false;resetBtn.hidden=true};
-resetNo.onclick=()=>{resetAsk.hidden=true;resetBtn.hidden=false};
-resetYes.onclick=()=>{st={cur:0,done:[],ans:{}};save();resetAsk.hidden=true;resetBtn.hidden=false;render();scrollTo(0,0)};
-setBtn();
-document.getElementById("yr").textContent=new Date().getFullYear();
-render();
-</script>
+  <section class="celebrations" id="celebrations" aria-labelledby="celebrations-title">
+    <div class="wrap section-head reveal">
+      <p class="eyebrow"><span lang="hi">उत्सव</span> · Celebrations</p>
+      <h2 class="title" id="celebrations-title"><span class="title__script">Two days of colour</span></h2>
+      <p class="section-head__lede">Music, marigolds and blessings, all under one sky at Sterling Quinta, Jim Corbett.</p>
+    </div>
+
+    <article class="day day--one">
+      <div class="band" data-host>
+        <img class="band__img" data-speed="0.2" src="assets/img/venue-house.jpg" alt="The main house and sunlit lawns of Sterling Quinta" loading="lazy" decoding="async">
+        <div class="band__label reveal">
+          <p class="band__kicker">Day One</p>
+          <h3 class="band__date"><time datetime="2026-10-06">Tuesday, 6 October 2026</time></h3>
+        </div>
+      </div>
+      <div class="wrap events events--two">
+        <div class="event event--haldi reveal">
+          <div class="event__icon" aria-hidden="true">
+            <svg viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 32H56C56 45 46 54 32 54C18 54 8 45 8 32Z"/>
+              <path d="M13 32C17 24 25 22 32 25C39 22 47 24 51 32"/>
+              <path d="M24 54L22 59H42L40 54"/>
+              <path d="M16 42C22 46 42 46 48 42" stroke-dasharray="2 4"/>
+              <circle cx="47" cy="15" r="7"/><circle cx="47" cy="15" r="3.5"/>
+              <path d="M40 18C36 20 33 24 33 28" /><path d="M36 21C33 19 30 20 29 22"/>
+            </g></svg>
+          </div>
+          <p class="event__hindi" lang="hi">हल्दी</p>
+          <h4 class="event__name">Haldi</h4>
+          <p class="event__date">Tuesday, 6 October</p>
+          <p class="event__text">Turmeric, marigolds and a lot of laughter. Our loved ones anoint us with haldi for a glowing, blessed beginning.</p>
+        </div>
+        <div class="event event--mehndi reveal">
+          <div class="event__icon" aria-hidden="true">
+            <svg viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 60C21 53 19 47 17 42L10 31C8.5 28.5 11.5 25.5 14 27.5L21 34V13C21 9.5 27 9.5 27 13V27V9C27 5.5 33 5.5 33 9V27V11C33 7.5 39 7.5 39 11V29V18C39 14.5 45 14.5 45 18V38C45 48 43 54 42 60"/>
+              <circle cx="33" cy="44" r="5"/>
+              <path d="M22.5 19H25.5M28.5 15H31.5M34.5 17H37.5M40.5 23H43.5" stroke-width="1.6"/>
+            </g><g fill="currentColor"><circle cx="33" cy="44" r="1.6"/><circle cx="33" cy="35.5" r="1.1"/><circle cx="41.5" cy="44" r="1.1"/><circle cx="24.5" cy="44" r="1.1"/><circle cx="33" cy="52.5" r="1.1"/><circle cx="39" cy="38" r="1.1"/><circle cx="27" cy="38" r="1.1"/><circle cx="39" cy="50" r="1.1"/><circle cx="27" cy="50" r="1.1"/></g></svg>
+          </div>
+          <p class="event__hindi" lang="hi">मेहंदी</p>
+          <h4 class="event__name">Mehndi</h4>
+          <p class="event__date">Tuesday, 6 October</p>
+          <p class="event__text">Henna, music and the beat of the dholak. Intricate patterns, happy feet and songs that go on and on.</p>
+        </div>
+      </div>
+      <p class="save reveal">
+        <span>Save the date</span>
+        <a class="save__link" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Haldi%20%26%20Mehndi%20-%20Amar%20%26%20Gurubani&amp;dates=20261006/20261007&amp;details=Haldi%20and%20Mehndi%20celebrations%20for%20the%20wedding%20of%20Amar%20Kumar%20and%20Gurubani%20Gulati.%20https%3A//amarkumar.guru/&amp;location=Sterling%20Quinta%20Jim%20Corbett%2C%2089%20Quinta%20Farmstay%2C%20Post%20Bailporkhra%2C%20Village%20Bandarjurha%2C%20Kaladhungi%2C%20Ramnagar%2C%20Uttarakhand%20262401" target="_blank" rel="noopener">Google Calendar</a>
+        <a class="save__link" href="assets/cal/haldi-mehndi.ics" download>Apple / Outlook</a>
+      </p>
+    </article>
+
+    <article class="day day--two">
+      <div class="band" data-host>
+        <img class="band__img" data-speed="0.2" src="assets/img/venue-gate.jpg" alt="The red-brick gateway of Sterling Quinta at sunset" loading="lazy" decoding="async">
+        <div class="band__label reveal">
+          <p class="band__kicker">Day Two</p>
+          <h3 class="band__date"><time datetime="2026-10-07">Wednesday, 7 October 2026</time></h3>
+        </div>
+      </div>
+      <div class="wrap events events--one">
+        <div class="event event--vivah reveal">
+          <div class="event__icon" aria-hidden="true">
+            <svg viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <ellipse cx="32" cy="15" rx="7" ry="8"/>
+              <path d="M25 22C19 18 12 18 8 21C14 25 20 25 25 23"/>
+              <path d="M39 22C45 18 52 18 56 21C50 25 44 25 39 23"/>
+              <path d="M26 26C22 22 15 23 12 27C17 29 22 29 26 27"/>
+              <path d="M38 26C42 22 49 23 52 27C47 29 42 29 38 27"/>
+              <path d="M24 27H40L38 31H26Z"/>
+              <path d="M26 31C14 36 12 52 22 58H42C52 52 50 36 38 31"/>
+              <path d="M16 44H48"/><path d="M18 49H46" stroke-dasharray="2 3"/>
+            </g></svg>
+          </div>
+          <p class="event__hindi" lang="hi">शुभ विवाह</p>
+          <h4 class="event__name">The Wedding</h4>
+          <p class="event__date">Wednesday, 7 October</p>
+          <p class="event__text">From the baraat and the varmala to the seven pheras around the sacred fire, join us as Amar and Gurubani begin forever, together.</p>
+        </div>
+      </div>
+      <p class="save reveal">
+        <span>Save the date</span>
+        <a class="save__link" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Shubh%20Vivah%20-%20Amar%20%26%20Gurubani&amp;dates=20261007/20261008&amp;details=The%20wedding%20of%20Amar%20Kumar%20and%20Gurubani%20Gulati.%20https%3A//amarkumar.guru/&amp;location=Sterling%20Quinta%20Jim%20Corbett%2C%2089%20Quinta%20Farmstay%2C%20Post%20Bailporkhra%2C%20Village%20Bandarjurha%2C%20Kaladhungi%2C%20Ramnagar%2C%20Uttarakhand%20262401" target="_blank" rel="noopener">Google Calendar</a>
+        <a class="save__link" href="assets/cal/shubh-vivah.ics" download>Apple / Outlook</a>
+      </p>
+    </article>
+  </section>
+
+  <section class="pheras" aria-labelledby="pheras-title" data-host>
+    <svg class="float float--fire" data-speed="0.2"><use href="#mandala"/></svg>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow"><span lang="hi">सात फेरे</span> · Saat Phere</p>
+        <h2 class="title" id="pheras-title"><span class="title__script">Seven vows</span></h2>
+        <p class="section-head__lede">Seven circles around the sacred fire, seven promises for a lifetime.</p>
+      </div>
+      <ol class="vows">
+        <li class="vow reveal"><span class="vow__num" lang="hi">१</span><h3>Nourishment</h3><p>To provide for and care for each other.</p></li>
+        <li class="vow reveal"><span class="vow__num" lang="hi">२</span><h3>Strength</h3><p>Of body, mind and spirit, for one another.</p></li>
+        <li class="vow reveal"><span class="vow__num" lang="hi">३</span><h3>Prosperity</h3><p>To build our home with honesty and hard work.</p></li>
+        <li class="vow reveal"><span class="vow__num" lang="hi">४</span><h3>Happiness</h3><p>To share love, respect and harmony with our families.</p></li>
+        <li class="vow reveal"><span class="vow__num" lang="hi">५</span><h3>Family</h3><p>To cherish the generations that come after us.</p></li>
+        <li class="vow reveal"><span class="vow__num" lang="hi">६</span><h3>Health</h3><p>To stand together through every season of life.</p></li>
+        <li class="vow reveal"><span class="vow__num" lang="hi">७</span><h3>Friendship</h3><p>To be companions, now and for all lifetimes.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="venue" id="venue" aria-labelledby="venue-title" data-host>
+    <svg class="float float--venue" data-speed="0.2"><use href="#mandala"/></svg>
+    <svg class="float float--paisley-l float--low" data-speed="-0.25"><use href="#paisley"/></svg>
+    <div class="wrap">
+      <div class="venue__card reveal">
+        <p class="eyebrow"><span lang="hi">स्थल</span> · The Venue</p>
+        <h2 class="venue__name" id="venue-title"><span class="title__script">Sterling Quinta</span><span class="venue__place">Jim Corbett</span></h2>
+        <address class="venue__address" data-address>89, Quinta Farmstay, Post Bailporkhra,<br>Village Bandarjurha, Kaladhungi,<br>Ramnagar, Uttarakhand 262401</address>
+        <div class="venue__actions">
+          <a class="btn btn--solid" href="https://www.google.com/maps/search/?api=1&amp;query=Sterling%20Quinta%20Jim%20Corbett%2C%20Kaladhungi%2C%20Uttarakhand%20262401" target="_blank" rel="noopener">Get directions</a>
+          <button class="btn btn--ghost" type="button" data-copy-address>Copy address</button>
+        </div>
+      </div>
+
+      <div class="gallery">
+        <figure class="tile tile--pool reveal"><img src="assets/img/venue-poolside.jpg" alt="Poolside garden with an umbrella and hills beyond" loading="lazy" decoding="async"><figcaption>Poolside</figcaption></figure>
+        <figure class="tile tile--night reveal"><img src="assets/img/venue-pool-night.jpg" alt="The pool glowing blue at night" loading="lazy" decoding="async"><figcaption>Evenings by the pool</figcaption></figure>
+        <figure class="tile tile--garden reveal"><img src="assets/img/venue-garden.jpg" alt="Lawns, palms and hills around the pool" loading="lazy" decoding="async"><figcaption>The gardens</figcaption></figure>
+      </div>
+
+      <div class="map reveal">
+        <a class="map__fallback" href="https://www.google.com/maps/search/?api=1&amp;query=Sterling%20Quinta%20Jim%20Corbett%2C%20Kaladhungi%2C%20Uttarakhand%20262401" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
+          Open the map
+        </a>
+        <iframe title="Map showing Sterling Quinta, Jim Corbett" src="https://www.google.com/maps?q=Sterling%20Quinta%20Jim%20Corbett%2C%20Kaladhungi%2C%20Uttarakhand%20262401&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer" data-host>
+  <svg class="footer__mandala" data-speed="0.25"><use href="#mandala"/></svg>
+  <div class="wrap">
+    <p class="eyebrow">With love &amp; blessings</p>
+    <p class="footer__names">Amar <span>&amp;</span> Gurubani</p>
+    <p class="footer__when">6 &amp; 7 October 2026 · Sterling Quinta, Jim Corbett</p>
+    <p class="footer__note">We can't wait to celebrate with you.</p>
+    <div class="footer__actions">
+      <button class="btn btn--gold" type="button" data-bless>Shower blessings</button>
+      <button class="btn btn--line" type="button" data-share>Share invitation</button>
+    </div>
+    <a class="footer__top" href="#top">Back to top</a>
+  </div>
+</footer>
+
+<div class="toast" role="status" aria-live="polite"></div>
 
 </body>
 </html>

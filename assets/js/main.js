@@ -1,0 +1,361 @@
+/* Amar & Gurubani: parallax, petals, countdown and small helpers. */
+(() => {
+  'use strict';
+
+  const root = document.documentElement;
+  const $ = (sel, el = document) => el.querySelector(sel);
+  const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const hero = $('.hero');
+  const heroContent = $('.hero__content');
+  const nav = $('.nav');
+
+  /* ---------------------------------------------------------------- toast */
+  const toastEl = $('.toast');
+  let toastTimer;
+  function toast(message) {
+    if (!toastEl) return;
+    toastEl.textContent = message;
+    toastEl.classList.add('is-shown');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('is-shown'), 2600);
+  }
+
+  /* ---------------------------------------------------------------- parallax */
+  // Each [data-speed] element moves relative to its [data-host] section:
+  // positive speeds lag behind the scroll, negative speeds run ahead of it.
+  const layers = $$('[data-speed]').map((el) => ({
+    el,
+    speed: parseFloat(el.dataset.speed) || 0,
+    host: el.closest('[data-host]') || el.parentElement,
+    isImage: el.tagName === 'IMG',
+    top: 0,
+    height: 0,
+  }));
+
+  let viewH = root.clientHeight;
+  let viewW = root.clientWidth;
+  let heroH = hero ? hero.offsetHeight : 0;
+  let queued = false;
+
+  function measure() {
+    viewH = root.clientHeight;
+    viewW = root.clientWidth;
+    heroH = hero ? hero.offsetHeight : 0;
+    const scrollY = window.scrollY;
+    for (const layer of layers) {
+      const rect = layer.host.getBoundingClientRect();
+      layer.top = rect.top + scrollY;
+      layer.height = rect.height;
+      if (layer.isImage) {
+        // Oversize the photo so it never shows an edge while it drifts.
+        const extra = reduceMotion.matches ? 0 : Math.ceil(Math.abs(layer.speed) * (viewH + layer.height) / 2) + 2;
+        layer.el.style.top = `${-extra}px`;
+        layer.el.style.height = `${layer.height + extra * 2}px`;
+      }
+    }
+    render();
+  }
+
+  function render() {
+    queued = false;
+    const scrollY = window.scrollY;
+
+    if (nav) nav.classList.toggle('is-visible', scrollY > heroH * 0.75);
+
+    if (reduceMotion.matches) return;
+
+    for (const layer of layers) {
+      const offset = layer.top + layer.height / 2 - scrollY - viewH / 2;
+      if (Math.abs(offset) > viewH + layer.height) continue;
+      layer.el.style.setProperty('--py', `${(-offset * layer.speed).toFixed(1)}px`);
+    }
+
+    if (heroContent && heroH) {
+      const progress = Math.min(Math.max(scrollY / heroH, 0), 1);
+      heroContent.style.opacity = String(1 - progress * 1.15);
+    }
+  }
+
+  function queue() {
+    if (!queued) {
+      queued = true;
+      requestAnimationFrame(render);
+    }
+  }
+
+  let resizeTimer;
+  function onResize() {
+    // Mobile browsers resize the viewport as the address bar slides; skip small height-only changes.
+    const widthChanged = root.clientWidth !== viewW;
+    const heightJump = Math.abs(root.clientHeight - viewH) > 120;
+    if (!widthChanged && !heightJump) return;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(measure, 120);
+  }
+
+  window.addEventListener('scroll', queue, { passive: true });
+  window.addEventListener('resize', onResize);
+  window.addEventListener('load', measure);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
+  if ('ResizeObserver' in window) {
+    let lastBodyH = 0;
+    new ResizeObserver((entries) => {
+      const h = entries[0].contentRect.height;
+      if (Math.abs(h - lastBodyH) > 1) {
+        lastBodyH = h;
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(measure, 80);
+      }
+    }).observe(document.body);
+  }
+  reduceMotion.addEventListener?.('change', () => {
+    if (reduceMotion.matches) {
+      for (const layer of layers) layer.el.style.removeProperty('--py');
+      if (heroContent) heroContent.style.opacity = '';
+    }
+    measure();
+  });
+  measure();
+
+  /* pointer depth on the hero (mouse and trackpad only) */
+  if (hero && window.matchMedia('(pointer: fine)').matches) {
+    const deep = $$('[data-depth]', hero).map((el) => ({ el, depth: parseFloat(el.dataset.depth) || 0 }));
+    let targetX = 0, targetY = 0, x = 0, y = 0, raf = 0;
+    const step = () => {
+      x += (targetX - x) * 0.07;
+      y += (targetY - y) * 0.07;
+      for (const d of deep) {
+        d.el.style.setProperty('--mx', `${(x * d.depth).toFixed(2)}px`);
+        d.el.style.setProperty('--my', `${(y * d.depth).toFixed(2)}px`);
+      }
+      raf = Math.abs(targetX - x) + Math.abs(targetY - y) > 0.001 ? requestAnimationFrame(step) : 0;
+    };
+    hero.addEventListener('pointermove', (e) => {
+      if (reduceMotion.matches) return;
+      targetX = (e.clientX / viewW - 0.5) * 2;
+      targetY = (e.clientY / viewH - 0.5) * 2;
+      if (!raf) raf = requestAnimationFrame(step);
+    });
+    hero.addEventListener('pointerleave', () => {
+      targetX = 0;
+      targetY = 0;
+      if (!raf) raf = requestAnimationFrame(step);
+    });
+  }
+
+  /* ---------------------------------------------------------------- reveal on scroll */
+  const reveals = $$('.reveal');
+  if ('IntersectionObserver' in window) {
+    for (const el of reveals) {
+      const siblings = Array.from(el.parentElement.children).filter((c) => c.classList.contains('reveal'));
+      const index = siblings.indexOf(el);
+      if (index > 0) el.style.setProperty('--rd', `${Math.min(index * 0.12, 0.6)}s`);
+    }
+    const io = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-in');
+          io.unobserve(entry.target);
+        }
+      }
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+    reveals.forEach((el) => io.observe(el));
+  } else {
+    reveals.forEach((el) => el.classList.add('is-in'));
+  }
+
+  /* ---------------------------------------------------------------- falling petals */
+  const petals = (() => {
+    const canvas = $('.petals');
+    const ctx = canvas && canvas.getContext && canvas.getContext('2d');
+    if (!ctx) return null;
+
+    const COLOURS = ['#c8232c', '#d63a4c', '#a3162a', '#f29a12', '#f7b72a', '#e8650a', '#f4c430'];
+    let width = 0, height = 0, list = [], ambient = false, raf = 0;
+
+    function size() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = canvas.clientWidth;
+      height = canvas.clientHeight;
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function make(y, fast) {
+      return {
+        x: Math.random() * width,
+        y,
+        r: 5 + Math.random() * 7,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: fast ? 1.4 + Math.random() * 1.6 : 0.45 + Math.random() * 0.75,
+        rot: Math.random() * Math.PI * 2,
+        spin: (Math.random() - 0.5) * 0.05,
+        phase: Math.random() * Math.PI * 2,
+        flip: Math.random() * Math.PI * 2,
+        colour: COLOURS[(Math.random() * COLOURS.length) | 0],
+        shower: fast,
+        alpha: 1,
+      };
+    }
+
+    function draw(p) {
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.scale(1, 0.35 + 0.65 * Math.abs(Math.cos(p.flip)));
+      ctx.globalAlpha = 0.92 * p.alpha;
+      ctx.fillStyle = p.colour;
+      ctx.beginPath();
+      ctx.moveTo(0, -p.r);
+      ctx.bezierCurveTo(p.r * 0.95, -p.r * 0.55, p.r * 0.6, p.r * 0.75, 0, p.r);
+      ctx.bezierCurveTo(-p.r * 0.6, p.r * 0.75, -p.r * 0.95, -p.r * 0.55, 0, -p.r);
+      ctx.fill();
+      ctx.globalAlpha = 0.3 * p.alpha;
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(0, -p.r * 0.7);
+      ctx.lineTo(0, p.r * 0.7);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    const quota = () => (width < 600 ? 12 : 24);
+
+    function frame() {
+      ctx.clearRect(0, 0, width, height);
+      if (ambient && Math.random() < 0.07 && list.filter((p) => !p.shower).length < quota()) {
+        list.push(make(-20, false));
+      }
+      for (let i = list.length - 1; i >= 0; i--) {
+        const p = list[i];
+        p.phase += 0.02;
+        p.flip += 0.04;
+        p.rot += p.spin;
+        p.x += p.vx + Math.sin(p.phase) * 0.55;
+        p.y += p.vy;
+        if (!ambient && !p.shower) p.alpha -= 0.03;
+        if (p.y > height + 30 || p.alpha <= 0) { list.splice(i, 1); continue; }
+        if (p.y > -20) draw(p);
+      }
+      raf = (ambient || list.length) && !document.hidden ? requestAnimationFrame(frame) : 0;
+    }
+
+    const start = () => { if (!raf && !document.hidden) raf = requestAnimationFrame(frame); };
+
+    size();
+    window.addEventListener('resize', size);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) { cancelAnimationFrame(raf); raf = 0; } else start();
+    });
+
+    return {
+      setAmbient(on) {
+        if (on && !ambient && !list.length) {
+          for (let i = 0; i < quota() / 2; i++) list.push(make(Math.random() * height * 0.8, false));
+        }
+        ambient = on;
+        if (on) start();
+      },
+      shower(count) {
+        for (let i = 0; i < count; i++) list.push(make(-20 - Math.random() * height * 0.9, true));
+        start();
+      },
+    };
+  })();
+
+  if (petals && hero && !reduceMotion.matches && 'IntersectionObserver' in window) {
+    new IntersectionObserver(([entry]) => petals.setAmbient(entry.isIntersecting && !reduceMotion.matches), { threshold: 0.45 }).observe(hero);
+  }
+
+  /* ---------------------------------------------------------------- countdown */
+  const clock = $('[data-countdown]');
+  if (clock) {
+    const start = Date.parse(clock.dataset.countdown);
+    const end = Date.parse(clock.dataset.ends);
+    const weddingDay = Date.parse('2026-10-07T00:00:00+05:30');
+    const title = $('#countdown-title');
+    const note = $('[data-countdown-note]');
+    const units = {};
+    $$('[data-unit]', clock).forEach((el) => { units[el.dataset.unit] = el; });
+    const pad = (n) => String(n).padStart(2, '0');
+
+    const tick = () => {
+      const now = Date.now();
+      if (now >= end) {
+        clock.hidden = true;
+        title.textContent = 'Happily ever after';
+        note.textContent = 'Thank you for celebrating with us and for all your blessings.';
+        return;
+      }
+      if (now >= start) {
+        clock.hidden = true;
+        if (now < weddingDay) {
+          title.textContent = 'The celebrations have begun';
+          note.textContent = 'Haldi & Mehndi are happening today. Shubh Vivah tomorrow, 7 October.';
+        } else {
+          title.textContent = 'Today is the day';
+          note.textContent = 'Shubh Vivah is happening today, 7 October, at Sterling Quinta.';
+        }
+        setTimeout(tick, 30000);
+        return;
+      }
+      let s = Math.floor((start - now) / 1000);
+      const days = Math.floor(s / 86400); s -= days * 86400;
+      const hours = Math.floor(s / 3600); s -= hours * 3600;
+      const minutes = Math.floor(s / 60); s -= minutes * 60;
+      units.days.textContent = pad(days);
+      units.hours.textContent = pad(hours);
+      units.minutes.textContent = pad(minutes);
+      units.seconds.textContent = pad(s);
+      setTimeout(tick, 1000 - (now % 1000) + 5);
+    };
+    tick();
+  }
+
+  /* ---------------------------------------------------------------- copy, share, blessings */
+  const copyBtn = $('[data-copy-address]');
+  const addressEl = $('[data-address]');
+  if (copyBtn && addressEl) {
+    copyBtn.addEventListener('click', async () => {
+      const text = 'Sterling Quinta Jim Corbett, ' + addressEl.innerText.replace(/\s+/g, ' ').trim();
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (e) {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+        try { document.execCommand('copy'); } catch (err) { /* nothing else to try */ }
+        area.remove();
+      }
+      toast('Address copied');
+    });
+  }
+
+  const shareBtn = $('[data-share]');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', async () => {
+      const url = window.location.href.split('#')[0];
+      const text = 'You are invited to the wedding of Amar Kumar & Gurubani Gulati: Haldi & Mehndi on 6 October and Shubh Vivah on 7 October 2026 at Sterling Quinta, Jim Corbett.';
+      if (navigator.share) {
+        try { await navigator.share({ title: 'Amar weds Gurubani', text, url }); } catch (e) { /* share sheet dismissed */ }
+      } else {
+        window.open('https://wa.me/?text=' + encodeURIComponent(text + ' ' + url), '_blank', 'noopener');
+      }
+    });
+  }
+
+  const blessBtn = $('[data-bless]');
+  if (blessBtn) {
+    blessBtn.addEventListener('click', () => {
+      if (petals && !reduceMotion.matches) petals.shower(window.innerWidth < 600 ? 70 : 140);
+      toast('Thank you for your blessings');
+    });
+  }
+})();
