@@ -339,6 +339,32 @@
     function restart() { stop(); start(); }
     root.addEventListener('pointerenter', stop);
     root.addEventListener('pointerleave', start);
+    // Manual control: arrows, swipe/drag, sideways scroll, keyboard.
+    $('[data-prev]', root)?.addEventListener('click', () => { show(index - 1); restart(); });
+    $('[data-next]', root)?.addEventListener('click', () => { show(index + 1); restart(); });
+    const track = $('.carousel__track', root);
+    let downX = null, downY = null;
+    track.addEventListener('pointerdown', (e) => { downX = e.clientX; downY = e.clientY; }, { passive: true });
+    track.addEventListener('pointerup', (e) => {
+      if (downX === null) return;
+      const dx = e.clientX - downX, dy = e.clientY - downY;
+      downX = downY = null;
+      if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) { show(index + (dx < 0 ? 1 : -1)); restart(); }
+    });
+    track.addEventListener('pointercancel', () => { downX = downY = null; });
+    let wheelLock = 0;
+    track.addEventListener('wheel', (e) => {
+      if (Math.abs(e.deltaX) < 20 || Math.abs(e.deltaX) < Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      const now = Date.now();
+      if (now - wheelLock < 600) return;
+      wheelLock = now;
+      show(index + (e.deltaX > 0 ? 1 : -1)); restart();
+    }, { passive: false });
+    root.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { show(index + 1); restart(); }
+      if (e.key === 'ArrowLeft') { show(index - 1); restart(); }
+    });
     root.addEventListener('focusin', stop);
     root.addEventListener('focusout', start);
     document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
