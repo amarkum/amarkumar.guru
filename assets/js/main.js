@@ -346,6 +346,34 @@
     start();
   }
 
+  /* ---------------------------------------------------------------- background music */
+  // Optional: shows a toggle only when assets/audio/theme.mp3 exists. Browsers need a tap before sound.
+  const music = $('[data-music]');
+  const musicBtn = $('[data-music-toggle]');
+  if (music && musicBtn) {
+    const setState = (on) => {
+      musicBtn.setAttribute('aria-pressed', String(on));
+      musicBtn.setAttribute('aria-label', on ? 'Pause background music' : 'Play background music');
+      musicBtn.classList.toggle('is-playing', on);
+      try { localStorage.setItem('ag-music', on ? '1' : '0'); } catch (e) {}
+    };
+    const play = () => { music.volume = 0.45; music.play().then(() => setState(true)).catch(() => setState(false)); };
+    const pause = () => { music.pause(); setState(false); };
+    fetch(music.getAttribute('src'), { method: 'HEAD' }).then((r) => {
+      if (!r.ok) return;
+      musicBtn.hidden = false;
+      let wanted = '1';
+      try { wanted = localStorage.getItem('ag-music') ?? '1'; } catch (e) {}
+      if (wanted === '1' && !reduceMotion.matches) {
+        // Start on the first gesture anywhere on the page.
+        const kick = () => { if (music.paused) play(); };
+        for (const type of ['pointerdown', 'touchstart', 'keydown']) window.addEventListener(type, kick, { once: true, passive: true });
+      }
+    }).catch(() => {});
+    musicBtn.addEventListener('click', (e) => { e.stopPropagation(); music.paused ? play() : pause(); });
+    document.addEventListener('visibilitychange', () => { if (document.hidden && !music.paused) { music.pause(); } else if (!document.hidden && musicBtn.classList.contains('is-playing')) { music.play().catch(() => {}); } });
+  }
+
   /* ---------------------------------------------------------------- countdown */
   const clock = $('[data-countdown]');
   if (clock) {

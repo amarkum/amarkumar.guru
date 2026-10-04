@@ -2646,3 +2646,38 @@ body { background: var(--night); }
   .pair--diag .pair__caption { max-width: 60%; }
   .pair__parents { font-size: .68rem; }
 }
+
+/* ------------------------------------------------------------------ music toggle */
+.music-toggle {
+  position: fixed;
+  right: calc(18px + env(safe-area-inset-right));
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 70;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 10px 14px;
+  border: 1px solid rgba(232, 207, 152, .5);
+  border-radius: 999px;
+  background: rgba(22, 16, 14, .82);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--gold-2);
+  font-size: .62rem;
+  font-weight: 500;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 14px 30px -14px rgba(0, 0, 0, .8);
+  transition: border-color .3s, color .3s;
+}
+.music-toggle:hover { border-color: var(--gold-2); color: var(--cream); }
+.music-toggle__bars { display: inline-flex; align-items: flex-end; gap: 2px; width: 16px; height: 14px; }
+.music-toggle__bars i { flex: 1; height: 30%; background: currentColor; border-radius: 1px; transform-origin: bottom; }
+.music-toggle.is-playing .music-toggle__bars i { animation: eq 1s ease-in-out infinite; }
+.music-toggle.is-playing .music-toggle__bars i:nth-child(2) { animation-delay: .15s; }
+.music-toggle.is-playing .music-toggle__bars i:nth-child(3) { animation-delay: .3s; }
+.music-toggle.is-playing .music-toggle__bars i:nth-child(4) { animation-delay: .45s; }
+@keyframes eq { 0%, 100% { height: 30%; } 50% { height: 100%; } }
+.music-toggle[hidden] { display: none; }
+@media (max-width: 520px) { .music-toggle__label { display: none; } .music-toggle { padding: 12px; } }
