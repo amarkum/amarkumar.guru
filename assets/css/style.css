@@ -2102,6 +2102,7 @@ body { background: var(--night); }
   mask-image: none;
 }
 .pair--diag .pair__side--bride img { object-position: 45% 15%; }
+.pair--diag .pair__side--groom img { object-position: 50% 0%; }
 /* soft darkening at the top and bottom edges so the block sits in the page */
 .pair--diag::after {
   content: "";
