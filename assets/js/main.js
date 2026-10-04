@@ -1,4 +1,4 @@
-/* Amar & Gurubani: parallax, petals, countdown and small helpers. */
+/* Amar Weds Gurubani: parallax, petals, countdown and small helpers. */
 (() => {
   'use strict';
 

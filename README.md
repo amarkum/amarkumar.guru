@@ -1,6 +1,6 @@
 # amarkumar.guru
 
-Wedding invitation for **Amar Kumar & Gurubani Gulati**, live at [amarkumar.guru](https://amarkumar.guru).
+Wedding invitation for **Amar Kumar Weds Gurubani Gulati**, live at [amarkumar.guru](https://amarkumar.guru).
 
 - Haldi & Sangeet: Saturday, 6 February 2027
 - Shubh Vivah: Sunday, 7 February 2027
