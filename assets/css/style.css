@@ -2478,3 +2478,43 @@ body { background: var(--night); }
 .event__media, .event--flip .event__media,
 .event--haldi .event__media, .event--sangeet .event__media { -webkit-mask-image: var(--fade-v-long); mask-image: var(--fade-v-long); }
 @media (max-width: 1000px) { .event__media, .event--flip .event__media { -webkit-mask-image: var(--fade-v-long); mask-image: var(--fade-v-long); } }
+
+/* Carousel: box matches the lawn photo's shape; every slide shown whole, never cropped */
+.carousel__track { aspect-ratio: 1292 / 760; }
+.carousel__slide img { object-fit: contain; object-position: 50% 50%; }
+@media (max-width: 760px) { .carousel__track { aspect-ratio: 1292 / 760; } }
+
+/* Map sits between the address and the photos, inside the content width, dimmed to the theme */
+.wrap.location { width: min(1440px, 100% - var(--gutter) * 2); margin: clamp(32px, 4vw, 56px) auto clamp(48px, 6vw, 88px); }
+.location__map { height: clamp(320px, 42vh, 520px); border: 1px solid var(--line-light); border-radius: 0; }
+.location__map iframe { filter: grayscale(.4) sepia(.35) brightness(.72) contrast(1.08); }
+.carousel__slide:not(.is-active) figcaption { opacity: 0; transition: opacity .25s; }
+.carousel__slide figcaption { transition: opacity .6s .5s; }
+
+/* Carousel photos fill the width (cropped to fit); directions button carries a pin */
+.carousel__slide img { object-fit: cover; object-position: 50% 45%; }
+.btn--pin { gap: .6em; }
+.btn--pin svg { width: 16px; height: 16px; }
+.venue__title { padding-bottom: clamp(48px, 6vw, 88px); }
+
+/* ------------------------------------------------------------------ your stay */
+.stay { padding: var(--section) 0 clamp(40px, 5vw, 72px); }
+.stay__title {
+  margin: 0 0 clamp(24px, 3vw, 40px);
+  font-family: var(--serif);
+  font-size: clamp(2.6rem, 1.6rem + 3.4vw, 5.2rem);
+  font-weight: 300;
+  line-height: 1;
+  color: var(--cream);
+}
+.stay__title em { font-style: italic; color: var(--gold-2); }
+.stay__cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 4vw, 64px); max-width: 1100px; }
+.stay__cols p { margin: 0; font-size: 1.05rem; line-height: 1.75; color: rgba(243, 237, 227, .8); }
+@media (max-width: 760px) { .stay__cols { grid-template-columns: minmax(0, 1fr); } }
+
+/* ------------------------------------------------------------------ footer: quiet typographic close */
+.footer::before { display: none; }
+.footer { border-top: 1px solid var(--line-light); background: radial-gradient(ellipse 70% 60% at 50% 100%, var(--night-3), var(--night) 70%); }
+.footer__mandala { display: block; opacity: .06; }
+.footer__names { text-shadow: none; }
+.footer__note { max-width: 34rem; margin-inline: auto; }
