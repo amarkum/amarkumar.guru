@@ -365,9 +365,12 @@
       let wanted = '1';
       try { wanted = localStorage.getItem('ag-music') ?? '1'; } catch (e) {}
       if (wanted === '1' && !reduceMotion.matches) {
-        // Start on the first gesture anywhere on the page.
+        // Try straight away (allowed where the browser trusts the site); otherwise the first gesture starts it.
+        play();
         const kick = () => { if (music.paused) play(); };
-        for (const type of ['pointerdown', 'touchstart', 'keydown']) window.addEventListener(type, kick, { once: true, passive: true });
+        for (const type of ['pointerdown', 'touchstart', 'keydown', 'scroll', 'wheel']) window.addEventListener(type, kick, { once: true, passive: true });
+      } else {
+        music.pause();
       }
     }).catch(() => {});
     musicBtn.addEventListener('click', (e) => { e.stopPropagation(); music.paused ? play() : pause(); });
