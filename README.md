@@ -15,7 +15,7 @@ A single static page with no build step:
 | `assets/js/main.js` | Scroll and pointer parallax, falling petals, countdown, copy / share buttons |
 | `assets/img/` | Venue photos, favicon and the social preview image (`og-invite.jpg`) |
 | `assets/cal/` | `.ics` files behind the "Apple / Outlook" save-the-date links |
-| `assets/fonts/` | Great Vibes, Cormorant Garamond, Cinzel and Tiro Devanagari Hindi (SIL Open Font License) |
+| `assets/fonts/` | Cormorant Garamond, Jost and Tiro Devanagari Hindi (SIL Open Font License) |
 
 Parallax layers are any element with `data-speed` (positive lags the scroll, negative runs ahead) inside a `data-host` section. Motion is switched off for visitors who ask for reduced motion.
 

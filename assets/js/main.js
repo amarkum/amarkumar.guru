@@ -47,9 +47,13 @@
       const rect = layer.host.getBoundingClientRect();
       layer.top = rect.top + scrollY;
       layer.height = rect.height;
+      // Layers rest when their section is centred on screen; anything already
+      // on screen at load rests at the top of the page instead.
+      layer.rest = layer.top < viewH ? 0 : layer.top + layer.height / 2 - viewH / 2;
       if (layer.isImage) {
         // Oversize the photo so it never shows an edge while it drifts.
-        const extra = reduceMotion.matches ? 0 : Math.ceil(Math.abs(layer.speed) * (viewH + layer.height) / 2) + 2;
+        const reach = Math.max(layer.rest - (layer.top - viewH), layer.top + layer.height - layer.rest);
+        const extra = reduceMotion.matches ? 0 : Math.ceil(Math.abs(layer.speed) * reach) + 2;
         layer.el.style.top = `${-extra}px`;
         layer.el.style.height = `${layer.height + extra * 2}px`;
       }
@@ -66,14 +70,15 @@
     if (reduceMotion.matches) return;
 
     for (const layer of layers) {
-      const offset = layer.top + layer.height / 2 - scrollY - viewH / 2;
-      if (Math.abs(offset) > viewH + layer.height) continue;
-      layer.el.style.setProperty('--py', `${(-offset * layer.speed).toFixed(1)}px`);
+      if (scrollY + viewH < layer.top - 200 || scrollY > layer.top + layer.height + 200) continue;
+      layer.el.style.setProperty('--py', `${((scrollY - layer.rest) * layer.speed).toFixed(1)}px`);
     }
 
     if (heroContent && heroH) {
-      const progress = Math.min(Math.max(scrollY / heroH, 0), 1);
-      heroContent.style.opacity = String(1 - progress * 1.15);
+      // Fade the hero text as it leaves, but only when the hero fits on one screen;
+      // on phones the text sits low in a tall hero and is still being read.
+      const progress = heroH > viewH * 1.1 ? 0 : Math.min(Math.max(scrollY / (viewH * 0.75), 0), 1);
+      heroContent.style.opacity = String(1 - progress);
     }
   }
 
@@ -171,7 +176,7 @@
     const ctx = canvas && canvas.getContext && canvas.getContext('2d');
     if (!ctx) return null;
 
-    const COLOURS = ['#c8232c', '#d63a4c', '#a3162a', '#f29a12', '#f7b72a', '#e8650a', '#f4c430'];
+    const COLOURS = ['#e9a23b', '#f2c14e', '#e07b24', '#f5c86a', '#d9b36c', '#9fb38a'];
     let width = 0, height = 0, list = [], ambient = false, raf = 0;
 
     function size() {
