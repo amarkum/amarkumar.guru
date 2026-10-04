@@ -377,14 +377,15 @@
   const music = $('[data-music]');
   const musicBtn = $('[data-music-toggle]');
   if (music && musicBtn) {
-    const setState = (on) => {
+    const setState = (on, remember) => {
       musicBtn.setAttribute('aria-pressed', String(on));
       musicBtn.setAttribute('aria-label', on ? 'Pause background music' : 'Play background music');
       musicBtn.classList.toggle('is-playing', on);
-      try { localStorage.setItem('ag-music', on ? '1' : '0'); } catch (e) {}
+      if (remember) { try { localStorage.setItem('ag-music', on ? '1' : '0'); } catch (e) {} }
     };
-    const play = () => { music.volume = 0.45; music.play().then(() => setState(true)).catch(() => setState(false)); };
-    const pause = () => { music.pause(); setState(false); };
+    // Only the visitor's own toggle is remembered; a blocked autoplay attempt is not a choice.
+    const play = (remember) => { music.volume = 0.45; music.play().then(() => setState(true, remember)).catch(() => setState(false, false)); };
+    const pause = () => { music.pause(); setState(false, true); };
     fetch(music.getAttribute('src'), { method: 'HEAD' }).then((r) => {
       if (!r.ok) return;
       musicBtn.hidden = false;
@@ -399,8 +400,31 @@
         music.pause();
       }
     }).catch(() => {});
-    musicBtn.addEventListener('click', (e) => { e.stopPropagation(); music.paused ? play() : pause(); });
+    musicBtn.addEventListener('click', (e) => { e.stopPropagation(); music.paused ? play(true) : pause(); });
     document.addEventListener('visibilitychange', () => { if (document.hidden && !music.paused) { music.pause(); } else if (!document.hidden && musicBtn.classList.contains('is-playing')) { music.play().catch(() => {}); } });
+  }
+
+  /* ---------------------------------------------------------------- opening screen */
+  // The intro waits for a tap; that tap counts as the gesture browsers need, so the music can start.
+  const intro = $('[data-intro]');
+  if (intro && !root.classList.contains('no-intro')) {
+    const open = () => {
+      if (intro.classList.contains('is-done')) return;
+      intro.classList.add('is-done');
+      root.classList.remove('intro-open');
+      root.classList.add('no-intro');
+      if (music) {
+        let wanted = '1';
+        try { wanted = localStorage.getItem('ag-music') ?? '1'; } catch (e) {}
+        if (wanted === '1') { music.volume = 0.45; music.play().then(() => { musicBtn?.setAttribute('aria-pressed', 'true'); musicBtn?.classList.add('is-playing'); }).catch(() => {}); }
+      }
+      setTimeout(() => intro.remove(), 1000);
+    };
+    intro.addEventListener('click', open);
+    intro.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') open(); });
+    if (reduceMotion.matches) open();
+  } else if (intro) {
+    intro.remove();
   }
 
   /* ---------------------------------------------------------------- countdown */
