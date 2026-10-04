@@ -2518,3 +2518,56 @@ body { background: var(--night); }
 .footer__mandala { display: block; opacity: .06; }
 .footer__names { text-shadow: none; }
 .footer__note { max-width: 34rem; margin-inline: auto; }
+
+/* ------------------------------------------------------------------ sanskrit verses */
+[lang="sa"] { font-family: var(--hindi); letter-spacing: normal; text-transform: none; }
+.verse {
+  position: relative;
+  max-width: 46rem;
+  margin: clamp(48px, 6vw, 96px) auto 0;
+  padding: 0;
+  text-align: center;
+  color: var(--cream);
+}
+.verse::before {
+  content: "";
+  display: block;
+  width: 72px;
+  height: 1px;
+  margin: 0 auto clamp(24px, 3vw, 40px);
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.verse__text { margin: 0 0 .9rem; font-size: clamp(1.15rem, 1rem + .6vw, 1.55rem); line-height: 1.95; color: var(--gold-2); }
+.verse__meaning { max-width: 38rem; margin: 0 auto; font-family: var(--serif); font-size: clamp(1.05rem, .95rem + .4vw, 1.3rem); font-style: italic; line-height: 1.5; color: rgba(243, 237, 227, .72); }
+.verse__meaning span { display: block; margin-top: .5rem; font-family: var(--sans); font-size: .68rem; font-style: normal; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+.verse__source { margin: 1rem 0 0; font-size: .66rem; font-weight: 500; letter-spacing: .28em; text-transform: uppercase; color: var(--gold); }
+
+.verse--light { margin-top: clamp(24px, 3vw, 40px); max-width: 36rem; }
+.verse--light .verse__text { font-size: clamp(1rem, .95rem + .4vw, 1.3rem); text-shadow: 0 2px 14px rgba(0, 0, 0, .7); }
+.verse--light .verse__meaning { font-size: 1.05rem; color: rgba(243, 237, 227, .8); text-shadow: 0 2px 14px rgba(0, 0, 0, .7); }
+.verse--light::before { width: 48px; margin-bottom: 1.2rem; }
+
+.verse--inline { margin-top: clamp(24px, 3vw, 40px); }
+.verse--inline::before { display: none; }
+.verse--inline .verse__text { font-size: clamp(1.1rem, 1rem + .5vw, 1.45rem); }
+
+.verse--footer { margin: 0 auto clamp(32px, 4vw, 56px); }
+.verse--footer::before { display: none; }
+.verse--footer .verse__text { font-size: clamp(1rem, .95rem + .4vw, 1.3rem); }
+.verse--footer .verse__meaning { font-size: 1rem; color: rgba(243, 237, 227, .6); }
+
+.finale__copy .verse { margin-inline: auto; }
+.finale { padding-bottom: clamp(72px, 9vw, 130px); }
+
+.hero__scroll { display: none; }
+.hero { padding-bottom: clamp(72px, 10vh, 120px); }
+
+/* Day Two: video carries only the label; the wedding text sits below it */
+.finale { justify-content: flex-start; min-height: clamp(420px, 56vw, 760px); padding-bottom: 0; }
+.finale::before { background: linear-gradient(180deg, rgba(22, 16, 14, .35) 0%, rgba(22, 16, 14, 0) 30%, rgba(22, 16, 14, 0) 70%, rgba(22, 16, 14, .6) 100%); }
+.finale__copy--below { margin-top: clamp(32px, 4vw, 56px); text-align: center; }
+.finale__copy--below > * { max-width: 36rem; margin-inline: auto; }
+.finale__copy--below .event__name { text-shadow: none; }
+.finale__copy--below .event__text { text-shadow: none; }
+.finale__copy--below .verse__text, .finale__copy--below .verse__meaning { text-shadow: none; }
+@media (max-width: 760px) { .finale__copy { margin-top: 0; } .finale__copy--below { margin-top: 32px; } }
