@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Amar &amp; Gurubani · Wedding Invitation</title>
   <meta name="description" content="Amar Kumar and Gurubani Gulati invite you to their wedding: Haldi &amp; Sangeet on 6 February and Shubh Vivah on 7 February 2027 at Sterling Quinta, Jim Corbett.">
-  <meta name="theme-color" content="#faf7f2">
+  <meta name="theme-color" content="#16100e">
   <link rel="canonical" href="https://amarkumar.guru/">
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
@@ -101,94 +101,110 @@
   <div class="nav__links">
     <a href="#invite">Invitation</a>
     <a href="#celebrations">Events</a>
+    <a href="#guide">Guide</a>
     <a href="#venue">Venue</a>
   </div>
 </nav>
 
 <header class="hero" id="top" data-host>
-  <svg class="hero__mandala" data-speed="0.4" data-depth="10"><use href="#mandala"/></svg>
-  <svg class="hero__paisley" data-speed="-0.2" data-depth="-16"><use href="#paisley"/></svg>
+  <div class="hero__bg" data-speed="0.3" aria-hidden="true">
+    <video class="cine" autoplay muted loop playsinline preload="auto" poster="assets/img/couple-poster.jpg">
+      <source src="assets/video/couple.mp4" type="video/mp4">
+    </video>
+  </div>
+  <svg class="hero__mandala" data-speed="0.2" data-depth="10" aria-hidden="true"><use href="#mandala"/></svg>
 
-  <div class="hero__inner wrap">
-    <div class="hero__content" data-speed="0.14" data-depth="-5">
-      <p class="hero__invocation" lang="hi">॥ श्री गणेशाय नमः ॥</p>
-      <p class="kicker">Together with their families</p>
-      <h1 class="hero__names">
-        <span class="hero__name">Amar Kumar</span>
-        <span class="hero__amp">&amp;</span>
-        <span class="hero__name">Gurubani Gulati</span>
-      </h1>
-      <p class="hero__lede">joyfully invite you to celebrate their wedding</p>
-      <dl class="facts">
-        <div class="facts__item"><dt>Haldi &amp; Sangeet</dt><dd>Sat, 6 February 2027</dd></div>
-        <div class="facts__item"><dt>Shubh Vivah</dt><dd>Sun, 7 February 2027</dd></div>
-        <div class="facts__item"><dt>Venue</dt><dd>Sterling Quinta, Jim Corbett</dd></div>
-      </dl>
-      <div class="hero__cta">
-        <a class="btn btn--dark" href="#celebrations">See the celebrations</a>
-        <a class="btn btn--ghost" href="#venue">Venue &amp; map</a>
-      </div>
+  <div class="hero__content wrap" data-depth="-6">
+    <p class="hero__invocation" lang="hi">॥ श्री गणेशाय नमः ॥</p>
+    <p class="hero__kicker">Together with their families</p>
+    <h1 class="hero__names">
+      <span class="hero__name">Amar</span>
+      <span class="hero__amp" aria-label="and">&amp;</span>
+      <span class="hero__name">Gurubani</span>
+    </h1>
+    <p class="hero__lede">invite you to celebrate their wedding</p>
+    <div class="hero__dates">
+      <span><b>06</b> February <small>Haldi &amp; Sangeet</small></span>
+      <i aria-hidden="true"></i>
+      <span><b>07</b> February <small>Shubh Vivah</small></span>
     </div>
-
-    <div class="hero__visual">
-      <div class="hero__outline" data-speed="0.06" data-depth="8" aria-hidden="true"></div>
-      <figure class="hero__arch" data-host data-depth="4">
-        <img data-speed="0.12" src="assets/img/bride.jpg" alt="Gurubani Gulati, the bride, in a blush pink lehenga" fetchpriority="high" decoding="async">
-      </figure>
-      <svg class="bloom bloom--1" data-speed="-0.45" data-depth="-22" color="#e9a23b" aria-hidden="true"><use href="#marigold"/></svg>
-      <svg class="bloom bloom--2" data-speed="-0.25" data-depth="-14" color="#f2c14e" aria-hidden="true"><use href="#marigold"/></svg>
-      <svg class="bloom bloom--3" data-speed="-0.6" data-depth="-28" color="#e07b24" aria-hidden="true"><use href="#marigold"/></svg>
-      <svg class="bloom bloom--4" data-speed="-0.35" data-depth="-18" color="#f2c14e" aria-hidden="true"><use href="#marigold"/></svg>
-      <svg class="sprig sprig--1" data-speed="-0.3" data-depth="-16" viewBox="-22 -22 44 44" color="#7d9068" aria-hidden="true"><use href="#leaf" x="-10" y="-20" width="20" height="40" transform="rotate(-36)"/></svg>
-      <svg class="sprig sprig--2" data-speed="-0.5" data-depth="-24" viewBox="-22 -22 44 44" color="#95a682" aria-hidden="true"><use href="#leaf" x="-10" y="-20" width="20" height="40" transform="rotate(48)"/></svg>
+    <p class="hero__place">2027 · Sterling Quinta, Jim Corbett</p>
+    <div class="hero__cta">
+      <a class="btn btn--gold" href="#celebrations">See the celebrations</a>
+      <a class="btn btn--line" href="#venue">Venue &amp; map</a>
     </div>
   </div>
 
-  <a class="hero__scroll" href="#invite"><span>Scroll</span><i aria-hidden="true"></i></a>
+  <a class="hero__scroll" href="#invite" aria-label="Scroll to the invitation"><span>Scroll</span><i aria-hidden="true"></i></a>
 </header>
+
+<div class="marquee" aria-hidden="true">
+  <div class="marquee__track">
+    <span>Haldi</span><svg><use href="#lotus"/></svg><span>Sangeet</span><svg><use href="#lotus"/></svg><span>Shubh Vivah</span><svg><use href="#lotus"/></svg><span>Jim Corbett</span><svg><use href="#lotus"/></svg><span>6 &amp; 7 February 2027</span><svg><use href="#lotus"/></svg>
+    <span>Haldi</span><svg><use href="#lotus"/></svg><span>Sangeet</span><svg><use href="#lotus"/></svg><span>Shubh Vivah</span><svg><use href="#lotus"/></svg><span>Jim Corbett</span><svg><use href="#lotus"/></svg><span>6 &amp; 7 February 2027</span><svg><use href="#lotus"/></svg>
+  </div>
+</div>
 
 <main>
 
   <section class="invite" id="invite" data-host>
-    <svg class="float float--paisley-l" data-speed="-0.3"><use href="#paisley"/></svg>
-    <svg class="float float--paisley-r" data-speed="0.25"><use href="#paisley"/></svg>
-    <svg class="float float--mandala" data-speed="0.15"><use href="#mandala"/></svg>
+    <svg class="float float--mandala" data-speed="0.15" aria-hidden="true"><use href="#mandala"/></svg>
+
+    <div class="wrap invite__head">
+      <p class="eyebrow reveal"><span lang="hi">निमंत्रण</span> · The Invitation</p>
+      <h2 class="display reveal">With joy <em>in our hearts</em></h2>
+      <p class="invite__text reveal">With the blessings of Lord Ganesha and the love of our families, we request the pleasure of your company as two hearts become one. Come laugh with us through the haldi, dance with us at the sangeet, and bless us as we take our seven pheras.</p>
+    </div>
+
+    <div class="pair">
+      <figure class="pair__side pair__side--groom reveal">
+        <img src="assets/img/groom.jpg" alt="Amar Kumar, the groom, in a sage sherwani and jasmine garland" loading="lazy" decoding="async">
+        <figcaption class="pair__caption">
+          <span class="pair__role"><span lang="hi">वर</span> · The Groom</span>
+          <span class="pair__name">Amar <em>Kumar</em></span>
+        </figcaption>
+      </figure>
+
+      <div class="pair__amp reveal" aria-hidden="true">
+        <span>&amp;</span>
+        <svg><use href="#lotus"/></svg>
+      </div>
+
+      <figure class="pair__side pair__side--bride reveal">
+        <img src="assets/img/bride.jpg" alt="Gurubani Gulati, the bride, in a blush pink lehenga" loading="lazy" decoding="async">
+        <figcaption class="pair__caption">
+          <span class="pair__role"><span lang="hi">वधू</span> · The Bride</span>
+          <span class="pair__name">Gurubani <em>Gulati</em></span>
+        </figcaption>
+      </figure>
+    </div>
 
     <div class="wrap">
-      <div class="shloka reveal">
-        <svg class="ornament" aria-hidden="true"><use href="#lotus"/></svg>
+      <blockquote class="shloka reveal">
+        <svg class="shloka__lotus" aria-hidden="true"><use href="#lotus"/></svg>
         <p class="shloka__text" lang="hi">वक्रतुण्ड महाकाय सूर्यकोटि समप्रभ।<br>निर्विघ्नं कुरु मे देव सर्वकार्येषु सर्वदा॥</p>
         <p class="shloka__meaning">O Lord Ganesha, of the curved trunk and mighty form, radiant as a million suns, keep every path we walk free of obstacles, always.</p>
-      </div>
+      </blockquote>
+    </div>
+  </section>
 
-      <h2 class="title reveal">With joy in our hearts</h2>
-      <p class="invite__text reveal">With the blessings of Lord Ganesha and the love of our families, we request the pleasure of your company as two hearts become one. Come laugh with us through the haldi, dance with us at the sangeet, and bless us as we take our seven pheras.</p>
-
-      <div class="couple">
-        <article class="person reveal">
-          <div class="person__arch"><svg class="person__mandala" aria-hidden="true"><use href="#mandala"/></svg><span class="person__initial">A</span></div>
-          <p class="person__role"><span lang="hi">वर</span> · The Groom</p>
-          <h3 class="person__name">Amar Kumar</h3>
-        </article>
-        <div class="couple__weds reveal" aria-hidden="true">
-          <span>weds</span>
-          <svg><use href="#lotus"/></svg>
-        </div>
-        <article class="person reveal">
-          <div class="person__arch person__arch--photo">
-            <img src="assets/img/bride.jpg" alt="Gurubani Gulati" loading="lazy" decoding="async">
-          </div>
-          <p class="person__role"><span lang="hi">वधू</span> · The Bride</p>
-          <h3 class="person__name">Gurubani Gulati</h3>
-        </article>
-      </div>
+  <section class="entrance" aria-labelledby="entrance-title" data-host>
+    <div class="entrance__media" data-speed="0.18" aria-hidden="true">
+      <video class="cine" muted loop playsinline preload="metadata" poster="assets/img/bride-entrance-poster.jpg" data-autoplay>
+        <source src="assets/video/bride-entrance.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="wrap entrance__copy reveal">
+      <p class="eyebrow eyebrow--light"><span lang="hi">दुल्हन</span> · Her Entrance</p>
+      <h2 class="display display--light" id="entrance-title">Here comes <em>the bride</em></h2>
+      <p class="entrance__text">Under the chandeliers and through the drapes, Gurubani walks in to begin forever.</p>
     </div>
   </section>
 
   <section class="countdown" aria-labelledby="countdown-title" data-host>
-    <svg class="countdown__mandala" data-speed="0.3"><use href="#mandala"/></svg>
+    <svg class="countdown__mandala" data-speed="0.3" aria-hidden="true"><use href="#mandala"/></svg>
     <div class="wrap">
-      <p class="countdown__eyebrow" id="countdown-title">The countdown has begun</p>
+      <p class="eyebrow eyebrow--light" id="countdown-title">The countdown has begun</p>
       <div class="countdown__clock" data-countdown="2027-02-06T00:00:00+05:30" data-ends="2027-02-08T00:00:00+05:30">
         <div class="unit"><span class="unit__num" data-unit="days">--</span><span class="unit__label">Days</span></div>
         <div class="unit"><span class="unit__num" data-unit="hours">--</span><span class="unit__label">Hours</span></div>
@@ -200,21 +216,26 @@
   </section>
 
   <section class="celebrations" id="celebrations" aria-labelledby="celebrations-title">
-    <div class="wrap section-head reveal">
-      <p class="eyebrow"><span lang="hi">उत्सव</span> · Celebrations</p>
-      <h2 class="title" id="celebrations-title">Two days of colour</h2>
-      <p class="section-head__lede">Music, marigolds and blessings, all under one sky at Sterling Quinta, Jim Corbett.</p>
+    <div class="wrap section-head section-head--split reveal">
+      <div>
+        <p class="eyebrow"><span lang="hi">उत्सव</span> · Celebrations</p>
+        <h2 class="display" id="celebrations-title">Two days <em>of colour</em></h2>
+      </div>
+      <p class="section-head__lede">Turmeric and marigolds by day, fairy lights and dholak by night, and seven sacred pheras to close it all.</p>
     </div>
 
     <article class="day day--one">
       <div class="band" data-host>
-        <img class="band__img" data-speed="0.2" src="assets/img/venue-pool-aerial.jpg" alt="Aerial view of the pool, terrace and lawns at Sterling Quinta" loading="lazy" decoding="async">
-        <div class="band__label reveal">
-          <p class="band__kicker">Day One</p>
-          <h3 class="band__date"><time datetime="2027-02-06">Saturday, 6 February 2027</time></h3>
+        <img class="band__img" data-speed="0.2" src="assets/img/venue-house.jpg" alt="The main house and sunlit lawns at Sterling Quinta" loading="lazy" decoding="async">
+        <div class="band__label wrap reveal">
+          <p class="band__num">01</p>
+          <div>
+            <p class="band__kicker">Day One</p>
+            <h3 class="band__date"><time datetime="2027-02-06">Saturday, 6 February 2027</time></h3>
+          </div>
         </div>
       </div>
-      <div class="wrap events events--two">
+      <div class="wrap events">
         <div class="event event--haldi reveal">
           <div class="event__media">
             <img src="assets/img/haldi.jpg" alt="Haldi ceremony — turmeric, marigolds and laughter" loading="lazy" decoding="async">
@@ -224,7 +245,7 @@
           <p class="event__date">Saturday, 6 February</p>
           <p class="event__text">Turmeric, marigolds and a lot of laughter. Our loved ones anoint us with haldi for a glowing, blessed beginning.</p>
         </div>
-        <div class="event event--sangeet reveal">
+        <div class="event event--sangeet event--flip reveal">
           <div class="event__media">
             <img src="assets/img/sangeet.jpg" alt="Sangeet night — music, dance and celebration" loading="lazy" decoding="async">
           </div>
@@ -244,15 +265,18 @@
     <article class="day day--two">
       <div class="band" data-host>
         <img class="band__img band__img--evening" data-speed="0.2" src="assets/img/venue-lawn-evening.jpg" alt="The lawns set for an evening celebration, with string lights beside the pool" loading="lazy" decoding="async">
-        <div class="band__label reveal">
-          <p class="band__kicker">Day Two</p>
-          <h3 class="band__date"><time datetime="2027-02-07">Sunday, 7 February 2027</time></h3>
+        <div class="band__label wrap reveal">
+          <p class="band__num">02</p>
+          <div>
+            <p class="band__kicker">Day Two</p>
+            <h3 class="band__date"><time datetime="2027-02-07">Sunday, 7 February 2027</time></h3>
+          </div>
         </div>
       </div>
-      <div class="wrap events events--one">
+      <div class="wrap events">
         <div class="event event--vivah reveal">
           <div class="event__media">
-            <img src="assets/img/shadi.jpg" alt="Shubh Vivah — the wedding celebration" loading="lazy" decoding="async">
+            <img src="assets/img/shadi.jpg" alt="Shubh Vivah — the varmala, surrounded by family" loading="lazy" decoding="async">
           </div>
           <p class="event__hindi" lang="hi">शुभ विवाह</p>
           <h4 class="event__name">The Wedding</h4>
@@ -269,11 +293,11 @@
   </section>
 
   <section class="pheras" aria-labelledby="pheras-title" data-host>
-    <svg class="float float--fire" data-speed="0.2"><use href="#mandala"/></svg>
+    <svg class="float float--fire" data-speed="0.2" aria-hidden="true"><use href="#mandala"/></svg>
     <div class="wrap">
-      <div class="section-head reveal">
-        <p class="eyebrow"><span lang="hi">सात फेरे</span> · Saat Phere</p>
-        <h2 class="title" id="pheras-title">Seven vows</h2>
+      <div class="section-head section-head--center reveal">
+        <p class="eyebrow eyebrow--light"><span lang="hi">सात फेरे</span> · Saat Phere</p>
+        <h2 class="display display--light" id="pheras-title">Seven <em>vows</em></h2>
         <p class="section-head__lede">Seven circles around the sacred fire, seven promises for a lifetime.</p>
       </div>
       <ol class="vows">
@@ -288,30 +312,83 @@
     </div>
   </section>
 
+  <section class="guide" id="guide" aria-labelledby="guide-title">
+    <div class="wrap">
+      <div class="section-head section-head--split reveal">
+        <div>
+          <p class="eyebrow"><span lang="hi">जानकारी</span> · Good to know</p>
+          <h2 class="display" id="guide-title">Plan your <em>trip</em></h2>
+        </div>
+        <p class="section-head__lede">A few notes to help you arrive relaxed, dress for every moment and make the most of a weekend in the hills.</p>
+      </div>
+      <div class="guide__grid">
+        <article class="guide__item reveal">
+          <p class="guide__num">i</p>
+          <h3>Getting there</h3>
+          <ul>
+            <li><b>By road</b>About 5–6 hours from Delhi via Moradabad and Kashipur.</li>
+            <li><b>By train</b>Ramnagar station is a short drive away; Kathgodam is the other option.</li>
+            <li><b>By air</b>Pantnagar is the nearest airport, roughly 2 hours by car.</li>
+          </ul>
+        </article>
+        <article class="guide__item reveal">
+          <p class="guide__num">ii</p>
+          <h3>February weather</h3>
+          <p>Crisp, sunny days and cold nights in the Kumaon foothills. Pack a warm shawl or jacket for the evening celebrations under the stars.</p>
+        </article>
+        <article class="guide__item reveal">
+          <p class="guide__num">iii</p>
+          <h3>What to wear</h3>
+          <ul>
+            <li><b>Haldi</b>Sunny yellows and florals you don't mind getting a little turmeric on.</li>
+            <li><b>Sangeet</b>Your most festive, dance-ready glam.</li>
+            <li><b>Shubh Vivah</b>Traditional Indian wear in soft pastels and gold.</li>
+          </ul>
+        </article>
+        <article class="guide__item reveal">
+          <p class="guide__num">iv</p>
+          <h3>Around Corbett</h3>
+          <ul>
+            <li><b>Jungle safari</b>Jim Corbett National Park, India's oldest, is next door.</li>
+            <li><b>Garjia Devi</b>A temple perched on a rock in the Kosi river.</li>
+            <li><b>Corbett Falls</b>A peaceful waterfall walk near Kaladhungi.</li>
+          </ul>
+        </article>
+      </div>
+      <div class="guide__note reveal">
+        <p>Your presence is the only gift we need. <span>Come with love, leave with memories.</span></p>
+        <a class="btn btn--gold" href="#venue">Find the venue</a>
+      </div>
+    </div>
+  </section>
+
   <section class="venue" id="venue" aria-labelledby="venue-title" data-host>
     <div class="venue__band" data-host>
-      <img class="band__img" data-speed="0.15" src="assets/img/venue-pool-dusk.jpg" alt="The pool and stone terrace at dusk" loading="lazy" decoding="async">
-    </div>
-    <svg class="float float--venue" data-speed="0.2"><use href="#mandala"/></svg>
-    <svg class="float float--paisley-l float--low" data-speed="-0.25"><use href="#paisley"/></svg>
-    <div class="wrap">
-      <div class="venue__card reveal">
-        <p class="eyebrow"><span lang="hi">स्थल</span> · The Venue</p>
+      <img class="band__img" data-speed="0.15" src="assets/img/venue-lawn-night.jpg" alt="The main lawn at night, set with candlelit tables in front of the lit-up villa" loading="lazy" decoding="async">
+      <div class="venue__title wrap reveal">
+        <p class="eyebrow eyebrow--light"><span lang="hi">स्थल</span> · The Venue</p>
         <h2 class="venue__name" id="venue-title">Sterling Quinta<span class="venue__place">Jim Corbett</span></h2>
-        <address class="venue__address" data-address>89, Quinta Farmstay, Post Bailporkhra,<br>Village Bandarjurha, Kaladhungi,<br>Ramnagar, Uttarakhand 262401</address>
-        <div class="venue__actions">
-          <a class="btn btn--dark" href="https://www.google.com/maps/search/?api=1&amp;query=Sterling%20Quinta%20Jim%20Corbett%2C%20Kaladhungi%2C%20Uttarakhand%20262401" target="_blank" rel="noopener">Get directions</a>
-          <button class="btn btn--ghost" type="button" data-copy-address>Copy address</button>
+      </div>
+    </div>
+
+    <div class="wrap location">
+      <div class="location__info reveal">
+        <p class="eyebrow"><span lang="hi">पता</span> · Location</p>
+        <h3 class="location__title">Find your way <em>to us</em></h3>
+        <p class="location__intro">A farmstay tucked into the Kumaon foothills near Kaladhungi, with open lawns, a pool and sal forests all around, right at the edge of Corbett country.</p>
+        <address class="location__address" data-address>89, Quinta Farmstay, Post Bailporkhra,<br>Village Bandarjurha, Kaladhungi,<br>Ramnagar, Uttarakhand 262401</address>
+        <dl class="location__distances">
+          <div><dt>Ramnagar</dt><dd>~25 km</dd></div>
+          <div><dt>Kathgodam station</dt><dd>~45 km</dd></div>
+          <div><dt>Pantnagar airport</dt><dd>~75 km</dd></div>
+          <div><dt>New Delhi</dt><dd>~260 km</dd></div>
+        </dl>
+        <div class="location__actions">
+          <a class="btn btn--gold" href="https://www.google.com/maps/search/?api=1&amp;query=Sterling%20Quinta%20Jim%20Corbett%2C%20Kaladhungi%2C%20Uttarakhand%20262401" target="_blank" rel="noopener">Get directions</a>
+          <button class="btn btn--line" type="button" data-copy-address>Copy address</button>
         </div>
       </div>
-
-      <div class="gallery">
-        <figure class="tile reveal"><img src="assets/img/venue-room.jpg" alt="A guest room with a wooden ceiling and garden window" loading="lazy" decoding="async"><figcaption>The rooms</figcaption></figure>
-        <figure class="tile reveal"><img src="assets/img/venue-dining.jpg" alt="The dining room with a balcony over the trees" loading="lazy" decoding="async"><figcaption>Dining</figcaption></figure>
-        <figure class="tile reveal"><img src="assets/img/venue-house.jpg" alt="The main house and sunlit lawns" loading="lazy" decoding="async"><figcaption>The lawns</figcaption></figure>
-      </div>
-
-      <div class="map reveal">
+      <div class="map location__map reveal">
         <a class="map__fallback" href="https://www.google.com/maps/search/?api=1&amp;query=Sterling%20Quinta%20Jim%20Corbett%2C%20Kaladhungi%2C%20Uttarakhand%20262401" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"/></svg>
           Open the map
@@ -319,19 +396,25 @@
         <iframe title="Map showing Sterling Quinta, Jim Corbett" src="https://www.google.com/maps?q=Sterling%20Quinta%20Jim%20Corbett%2C%20Kaladhungi%2C%20Uttarakhand%20262401&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
       </div>
     </div>
+
+    <div class="wrap gallery">
+      <figure class="tile reveal"><img src="assets/img/venue-room.jpg" alt="A guest room with a wooden ceiling and garden window" loading="lazy" decoding="async"><figcaption>The rooms</figcaption></figure>
+      <figure class="tile tile--tall reveal"><img src="assets/img/venue-house.jpg" alt="The main house and sunlit lawns" loading="lazy" decoding="async"><figcaption>The lawns</figcaption></figure>
+      <figure class="tile reveal"><img src="assets/img/venue-dining.jpg" alt="The dining room with a balcony over the trees" loading="lazy" decoding="async"><figcaption>Dining</figcaption></figure>
+    </div>
   </section>
 
 </main>
 
 <footer class="footer" data-host>
-  <svg class="footer__mandala" data-speed="0.25"><use href="#mandala"/></svg>
+  <svg class="footer__mandala" data-speed="0.25" aria-hidden="true"><use href="#mandala"/></svg>
   <div class="wrap">
-    <p class="eyebrow">With love &amp; blessings</p>
+    <p class="eyebrow eyebrow--light">With love &amp; blessings</p>
     <p class="footer__names">Amar <span>&amp;</span> Gurubani</p>
     <p class="footer__when">6 &amp; 7 February 2027 · Sterling Quinta, Jim Corbett</p>
     <p class="footer__note">We can't wait to celebrate with you.</p>
     <div class="footer__actions">
-      <button class="btn btn--light" type="button" data-bless>Shower blessings</button>
+      <button class="btn btn--gold" type="button" data-bless>Shower blessings</button>
       <button class="btn btn--line" type="button" data-share>Share invitation</button>
     </div>
     <a class="footer__top" href="#top">Back to top</a>

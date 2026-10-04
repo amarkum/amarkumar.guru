@@ -275,6 +275,21 @@
     new IntersectionObserver(([entry]) => petals.setAmbient(entry.isIntersecting && !reduceMotion.matches), { threshold: 0.45 }).observe(hero);
   }
 
+  /* ---------------------------------------------------------------- video */
+  // Background clips are silent loops; they only play while on screen, and not at all for reduced motion.
+  const videos = $$('video.cine');
+  const syncVideo = (video, visible) => {
+    if (visible && !reduceMotion.matches) video.play().catch(() => {});
+    else video.pause();
+  };
+  if ('IntersectionObserver' in window) {
+    const vio = new IntersectionObserver((entries) => {
+      for (const entry of entries) syncVideo(entry.target, entry.isIntersecting);
+    }, { threshold: 0.15 });
+    videos.forEach((v) => vio.observe(v));
+  }
+  reduceMotion.addEventListener?.('change', () => videos.forEach((v) => syncVideo(v, !reduceMotion.matches)));
+
   /* ---------------------------------------------------------------- countdown */
   const clock = $('[data-countdown]');
   if (clock) {
