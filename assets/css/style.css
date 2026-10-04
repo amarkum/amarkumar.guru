@@ -269,6 +269,12 @@ button { font: inherit; color: inherit; }
   .nav { background: rgba(250, 247, 242, .8); -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%); }
 }
 .js .nav:not(.is-visible) { transform: translateY(-110%); opacity: 0; }
+/* over the dark sections the bar turns to dark glass */
+.nav { transition: transform .45s var(--ease), opacity .45s, background-color .35s, color .35s, box-shadow .35s; }
+.nav--dark { background: rgba(20, 28, 24, .94); box-shadow: 0 1px 0 rgba(243, 237, 227, .12); color: var(--cream); }
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .nav--dark { background: rgba(20, 28, 24, .72); }
+}
 
 .nav__mark {
   font-family: var(--serif);
@@ -797,12 +803,154 @@ button { font: inherit; color: inherit; }
 .bloom--m2 { right: 16%; top: 14%; width: 48px; height: 48px; }
 .bloom--m2 svg { animation-delay: -4s; }
 
+/* ------------------------------------------------------------------ Day Two opens at night: the bride's entrance */
+.bride {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(90px, 11vw, 140px) 0 clamp(80px, 10vw, 130px);
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 60%, rgba(255, 196, 120, .12), rgba(255, 196, 120, 0) 70%),
+    linear-gradient(180deg, var(--forest) 0%, #18221d 100%);
+  color: var(--cream);
+  text-align: center;
+}
+.bride__mandala {
+  position: absolute;
+  left: 50%;
+  top: 58%;
+  width: min(150vw, 1100px);
+  height: min(150vw, 1100px);
+  margin: calc(min(150vw, 1100px) / -2) 0 0 calc(min(150vw, 1100px) / -2);
+  color: var(--gold);
+  opacity: .12;
+}
+.bokeh i {
+  position: absolute;
+  width: var(--s);
+  height: var(--s);
+  margin: calc(var(--s) / -2) 0 0 calc(var(--s) / -2);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 214, 150, .5) 0%, rgba(255, 214, 150, .16) 45%, rgba(255, 214, 150, 0) 70%);
+  pointer-events: none;
+  animation: twinkle 5s ease-in-out infinite alternate;
+}
+.bokeh i:nth-child(2n) { animation-duration: 7s; animation-delay: -2s; }
+.bokeh i:nth-child(3n) { animation-duration: 6s; animation-delay: -4s; }
+.bride__echo {
+  position: absolute;
+  left: 50%;
+  top: 56%;
+  z-index: 0;
+  width: 100vw;
+  margin: -.5em 0 0 -50vw;
+  font-family: var(--serif);
+  font-size: clamp(6rem, 22vw, 19rem);
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--gold);
+  opacity: .1;
+  pointer-events: none;
+}
+.day-label--light { margin-bottom: 0; }
+.day-label--light .day-label__kicker { color: var(--cream); }
+.day-label--light .day-label__date { color: var(--gold-soft); }
+.day-label--light .day-label__events { color: rgba(243, 237, 227, .85); }
+
+.bride__stage { position: relative; z-index: 1; width: min(74vw, 400px); margin: clamp(44px, 6vw, 68px) auto clamp(36px, 4vw, 52px); }
+.bride__outline {
+  position: absolute;
+  inset: 18px -18px -18px 18px;
+  border: 1px solid var(--gold);
+  border-radius: 999px 999px 28px 28px;
+  opacity: .7;
+}
+.bride__arch {
+  position: relative;
+  isolation: isolate;
+  margin: 0;
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+  border: 6px solid rgba(255, 253, 249, .92);
+  border-radius: 999px 999px 22px 22px;
+  background: #2a2224 url(../video/bride-twirl.jpg) center / cover;
+  box-shadow: 0 0 0 1px rgba(184, 151, 90, .4), 0 0 90px rgba(255, 190, 110, .22), 0 50px 80px -40px rgba(0, 0, 0, .7);
+  -webkit-mask-image: -webkit-radial-gradient(white, black); /* keeps Safari clipping the video to the arch */
+}
+.bride__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.bride__toggle {
+  display: none;
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  z-index: 3;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 253, 249, .5);
+  border-radius: 50%;
+  background: rgba(20, 28, 24, .55);
+  color: var(--cream);
+  cursor: pointer;
+  transition: background-color .2s, transform .2s var(--ease);
+}
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .bride__toggle { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+}
+.js .bride__toggle { display: grid; }
+.bride__toggle:hover { background: rgba(20, 28, 24, .78); transform: scale(1.06); }
+.bride__toggle svg { width: 18px; height: 18px; fill: currentColor; }
+.bride__toggle .i-play,
+.bride__toggle.is-paused .i-pause { display: none; }
+.bride__toggle.is-paused .i-play { display: inline; }
+.bloom--b1 { left: -36px; top: 24%; width: 72px; height: 72px; }
+.bloom--b2 { right: -24px; top: 5%; width: 50px; height: 50px; }
+.bloom--b2 svg { animation-delay: -3s; }
+.sprig--b1 { right: -42px; bottom: 15%; }
+.bride__text { position: relative; z-index: 1; }
+.bride__text .kicker { color: var(--gold-soft); }
+.bride__title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(2.6rem, 2rem + 2.6vw, 4rem);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--cream);
+}
+.bride__line {
+  margin: .7rem 0 0;
+  font-family: var(--serif);
+  font-size: clamp(1.15rem, 1.05rem + .4vw, 1.35rem);
+  font-style: italic;
+  color: rgba(243, 237, 227, .8);
+}
+
 /* ------------------------------------------------------------------ wedding: the arch window opens as you scroll */
-.vivah { position: relative; padding-top: clamp(20px, 3vw, 40px); }
+.vivah { position: relative; padding-top: clamp(20px, 3vw, 40px); background: #18221d; }
 .vivah__stage { position: relative; }
 .vivah__mandala { display: none; }
 .vivah__intro { padding: 0 var(--gutter) 32px; text-align: center; }
-.vivah__intro .day-label__date { margin-bottom: 0; }
+.vivah__kicker {
+  margin: 0 0 .5rem;
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+}
+.vivah__kicker [lang="hi"] { font-size: 1.35em; font-weight: 400; }
+.vivah__title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(2.4rem, 1.8rem + 2.6vw, 4rem);
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--cream);
+}
 .vivah__frame { position: relative; height: clamp(380px, 82vh, 800px); overflow: hidden; background: #eadfcb; }
 .vivah__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 53% 40%; }
 .vivah__shade {
@@ -833,7 +981,7 @@ button { font: inherit; color: inherit; }
   top: 0;
   height: 100vh;
   overflow: hidden;
-  background: var(--bg);
+  background: #18221d;
 }
 .has-reveal .vivah__mandala {
   display: block;
@@ -844,7 +992,7 @@ button { font: inherit; color: inherit; }
   height: min(150vw, 1100px);
   margin: calc(min(150vw, 1100px) / -2) 0 0 calc(min(150vw, 1100px) / -2);
   color: var(--gold);
-  opacity: .16;
+  opacity: .12;
 }
 .has-reveal .vivah__intro { position: absolute; left: 0; right: 0; top: clamp(64px, 10vh, 120px); z-index: 3; padding-bottom: 0; }
 .has-reveal .vivah__frame { position: absolute; inset: 0; z-index: 2; height: auto; background: transparent; }
@@ -1067,6 +1215,7 @@ button { font: inherit; color: inherit; }
 @keyframes intro-out { to { opacity: 0; visibility: hidden; } }
 @keyframes draw { to { stroke-dashoffset: 0; } }
 @keyframes fade-to { to { opacity: .22; } }
+@keyframes twinkle { from { opacity: .35; } to { opacity: 1; } }
 
 /* ------------------------------------------------------------------ responsive */
 @media (max-width: 900px) {
@@ -1087,6 +1236,9 @@ button { font: inherit; color: inherit; }
   .bloom--s1 { width: 54px; height: 54px; left: 3%; }
   .bloom--s2 { width: 40px; height: 40px; right: 3%; }
   .sprig--s1 { left: 6%; }
+  .bloom--b1 { width: 56px; height: 56px; left: -26px; }
+  .bloom--b2 { width: 40px; height: 40px; right: -16px; }
+  .sprig--b1 { right: -30px; }
 }
 
 @media (max-width: 560px) {

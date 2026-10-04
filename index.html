@@ -257,12 +257,54 @@
       </div>
     </article>
 
-    <article class="vivah" id="wedding" aria-labelledby="vivah-title">
+    <article class="bride" id="wedding" aria-labelledby="bride-title" data-host>
+      <div class="bride__mandala" data-speed="0.3" aria-hidden="true"><div class="spin spin--slow"><svg><use href="#mandala"/></svg></div></div>
+      <div class="bokeh" aria-hidden="true">
+        <i style="left:7%;top:16%;--s:110px" data-speed="0.55"></i>
+        <i style="left:86%;top:12%;--s:70px" data-speed="0.35"></i>
+        <i style="left:15%;top:64%;--s:54px" data-speed="0.2"></i>
+        <i style="left:80%;top:60%;--s:130px" data-speed="0.6"></i>
+        <i style="left:28%;top:36%;--s:26px" data-speed="0.1"></i>
+        <i style="left:70%;top:32%;--s:34px" data-speed="0.15"></i>
+        <i style="left:40%;top:88%;--s:80px" data-speed="0.45"></i>
+        <i style="left:93%;top:84%;--s:40px" data-speed="0.25"></i>
+      </div>
+      <p class="bride__echo" data-speed-x="-0.3" aria-hidden="true">Gurubani</p>
+      <div class="wrap">
+        <div class="day-label day-label--light reveal">
+          <p class="day-label__kicker">Day Two</p>
+          <h3 class="day-label__date"><time datetime="2026-10-07">Wednesday, 7 October 2026</time></h3>
+          <p class="day-label__events">Baraat <i></i> Varmala <i></i> Pheras</p>
+        </div>
+        <div class="bride__stage">
+          <div class="bride__outline" data-speed="0.1" aria-hidden="true"></div>
+          <figure class="bride__arch">
+            <video class="bride__video" poster="assets/video/bride-twirl.jpg" width="400" height="400" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback aria-label="Animated illustration of Gurubani twirling slowly in her pink wedding lehenga">
+              <source src="assets/video/bride-twirl.mp4" type="video/mp4">
+              <source src="assets/video/bride-twirl.webm" type="video/webm">
+            </video>
+          </figure>
+          <button class="bride__toggle" type="button" aria-label="Pause the video">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path class="i-pause" d="M7.5 5.5h3.2v13H7.5zM13.3 5.5h3.2v13h-3.2z"/><path class="i-play" d="M8 5.2v13.6L18.8 12z"/></svg>
+          </button>
+          <span class="bloom bloom--b1" data-speed="-0.45" aria-hidden="true"><svg><use href="#marigold"/></svg></span>
+          <span class="bloom bloom--b2" data-speed="-0.3" aria-hidden="true"><svg><use href="#marigold"/></svg></span>
+          <span class="sprig sprig--b1" data-speed="-0.55" aria-hidden="true"><svg viewBox="0 0 60 60"><use href="#leaf" x="17" y="1" width="26" height="58" transform="rotate(40 30 30)"/></svg></span>
+        </div>
+        <div class="bride__text reveal">
+          <p class="kicker"><span lang="hi">वधू</span> · The bride</p>
+          <h4 class="bride__title" id="bride-title">Here comes the bride</h4>
+          <p class="bride__line">Gurubani, ready for her pheras.</p>
+        </div>
+      </div>
+    </article>
+
+    <article class="vivah" aria-labelledby="vivah-title">
       <div class="vivah__stage">
         <div class="vivah__mandala" aria-hidden="true"><div class="spin spin--slow"><svg><use href="#mandala"/></svg></div></div>
         <div class="vivah__intro">
-          <p class="day-label__kicker">Day Two</p>
-          <h3 class="day-label__date"><time datetime="2026-10-07">Wednesday, 7 October 2026</time></h3>
+          <p class="vivah__kicker"><span lang="hi">वरमाला</span> · Varmala</p>
+          <p class="vivah__title">Two garlands, one promise</p>
         </div>
         <div class="vivah__frame">
           <img class="vivah__img" src="assets/img/wedding.jpg" alt="Illustration of Amar and Gurubani exchanging varmala garlands as their families cheer" width="1792" height="936" loading="lazy" decoding="async">

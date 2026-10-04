@@ -234,6 +234,17 @@
   });
   measure();
 
+  /* nav turns dark while a dark section sits under it */
+  const darkSections = $$('.countdown, .bride, .vivah, .footer');
+  if (nav && darkSections.length && 'IntersectionObserver' in window) {
+    const underNav = new Map();
+    const navWatch = new IntersectionObserver((entries) => {
+      for (const entry of entries) underNav.set(entry.target, entry.isIntersecting);
+      nav.classList.toggle('nav--dark', Array.from(underNav.values()).some(Boolean));
+    }, { rootMargin: '0px 0px -94% 0px' });
+    darkSections.forEach((section) => navWatch.observe(section));
+  }
+
   /* pointer depth on the hero (mouse and trackpad only) */
   if (hero && window.matchMedia('(pointer: fine)').matches) {
     const deep = $$('[data-depth]', hero).map((el) => ({ el, depth: parseFloat(el.dataset.depth) || 0 }));
@@ -411,9 +422,60 @@
     };
   })();
 
-  if (petals && hero && !reduceMotion.matches && 'IntersectionObserver' in window) {
-    new IntersectionObserver(([entry]) => petals.setAmbient(entry.isIntersecting && !reduceMotion.matches), { threshold: 0.45 }).observe(hero);
+  // Petals drift down over the opening screen and again for the bride's entrance.
+  const petalZones = [hero, $('.bride')].filter(Boolean);
+  if (petals && petalZones.length && !reduceMotion.matches && 'IntersectionObserver' in window) {
+    const inZone = new Map();
+    const zoneWatch = new IntersectionObserver((entries) => {
+      for (const entry of entries) inZone.set(entry.target, entry.isIntersecting);
+      petals.setAmbient(!reduceMotion.matches && Array.from(inZone.values()).some(Boolean));
+    }, { threshold: 0.3 });
+    petalZones.forEach((zone) => zoneWatch.observe(zone));
   }
+
+  /* ---------------------------------------------------------------- the bride's twirl */
+  // Plays only while on screen; a reduced-motion preference starts it paused on its poster.
+  (() => {
+    const video = $('.bride__video');
+    const toggle = $('.bride__toggle');
+    if (!video || !toggle) return;
+    video.muted = true;
+    let held = reduceMotion.matches;
+    let inView = !('IntersectionObserver' in window);
+
+    const show = () => {
+      toggle.classList.toggle('is-paused', held);
+      toggle.setAttribute('aria-label', held ? 'Play the video' : 'Pause the video');
+    };
+    const sync = () => {
+      if (inView && !held && !document.hidden) {
+        if (video.paused) {
+          const attempt = video.play();
+          // Autoplay can be refused (iOS Low Power Mode, for one): wait for a tap instead.
+          if (attempt && attempt.catch) {
+            attempt.catch((err) => {
+              if (err && err.name === 'NotAllowedError') { held = true; show(); }
+            });
+          }
+        }
+      } else if (!video.paused) {
+        video.pause();
+      }
+      show();
+    };
+
+    toggle.addEventListener('click', () => { held = !held; sync(); });
+    document.addEventListener('visibilitychange', sync);
+    reduceMotion.addEventListener?.('change', () => {
+      if (reduceMotion.matches) { held = true; sync(); }
+    });
+    if (inView) {
+      sync();
+    } else {
+      new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; sync(); }, { rootMargin: '150px 0px' }).observe(video);
+    }
+    show();
+  })();
 
   /* ---------------------------------------------------------------- countdown */
   const clock = $('[data-countdown]');
