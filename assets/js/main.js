@@ -514,7 +514,7 @@
       const url = window.location.href.split('#')[0];
       const text = 'You are invited to the wedding of Amar Kumar & Gurubani Gulati: Haldi & Sangeet on 6 February and Shubh Vivah on 7 February 2027 at Sterling Quinta, Jim Corbett.';
       if (navigator.share) {
-        try { await navigator.share({ title: 'Amar weds Gurubani', text, url }); } catch (e) { /* share sheet dismissed */ }
+        try { await navigator.share({ title: 'Amar Weds Gurubani', text, url }); } catch (e) { /* share sheet dismissed */ }
       } else {
         window.open('https://wa.me/?text=' + encodeURIComponent(text + ' ' + url), '_blank', 'noopener');
       }
