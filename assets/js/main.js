@@ -9,6 +9,19 @@
   const hero = $('.hero');
   const heroContent = $('.hero__content');
   const nav = $('.nav');
+  const burger = $('[data-nav-toggle]');
+  if (nav && burger) {
+    const setOpen = (on) => {
+      nav.classList.toggle('is-open', on);
+      burger.setAttribute('aria-expanded', String(on));
+      burger.setAttribute('aria-label', on ? 'Close menu' : 'Open menu');
+    };
+    burger.addEventListener('click', () => setOpen(!nav.classList.contains('is-open')));
+    nav.querySelectorAll('.nav__links a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('click', (e) => { if (nav.classList.contains('is-open') && !nav.contains(e.target)) setOpen(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+    window.addEventListener('resize', () => { if (window.innerWidth > 760) setOpen(false); });
+  }
 
   /* ---------------------------------------------------------------- toast */
   const toastEl = $('.toast');
