@@ -2763,8 +2763,17 @@ body { background: var(--night); }
 .nav__music .music-toggle__bars { width: 16px; height: 14px; }
 @media (max-width: 760px) {
   .nav__mark { font-size: 1.5rem; }
-  .nav__links a { font-size: .62rem; letter-spacing: .14em; }
+  .nav__links { flex: 1 1 auto; justify-content: center; gap: 12px; }
+  .nav__links a { font-size: .62rem; letter-spacing: .14em; white-space: nowrap; }
   .nav__music { padding: 8px 9px; }
+}
+@media (max-width: 400px) {
+  .nav__links { gap: 8px; }
+  .nav__links a { font-size: .56rem; letter-spacing: .1em; }
+}
+@media (max-width: 340px) {
+  .nav__links { gap: 6px; }
+  .nav__links a { font-size: .5rem; letter-spacing: .06em; }
 }
 
 /* ------------------------------------------------------------------ opening screen waits for a tap */
