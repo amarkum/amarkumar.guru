@@ -414,7 +414,7 @@ button { font: inherit; color: inherit; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 42% 50%;
+  object-position: 50% 18%;
 }
 .hero__outline {
   position: absolute;
@@ -541,6 +541,17 @@ button { font: inherit; color: inherit; }
   font-weight: 300;
   line-height: 1;
   color: var(--ink);
+}
+.person__arch--photo {
+  background: #d9cfbe;
+  padding: 0;
+}
+.person__arch--photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 18%;
+  display: block;
 }
 .person__role {
   margin: 0 0 .3rem;
