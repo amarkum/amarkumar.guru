@@ -2472,3 +2472,9 @@ body { background: var(--night); }
 .wrap.events { width: 100%; max-width: none; margin-inline: 0; }
 .event { border-radius: 0; }
 .event > :not(.event__media) { padding-inline: var(--gutter); }
+.carousel__slide img { -webkit-mask-image: var(--fade-v-long); mask-image: var(--fade-v-long); }
+.pair--diag .pair__side img { -webkit-mask-image: var(--fade-v-long); mask-image: var(--fade-v-long); }
+.pair--diag .pair__line { -webkit-mask-image: var(--fade-v-long); mask-image: var(--fade-v-long); }
+.event__media, .event--flip .event__media,
+.event--haldi .event__media, .event--sangeet .event__media { -webkit-mask-image: var(--fade-v-long); mask-image: var(--fade-v-long); }
+@media (max-width: 1000px) { .event__media, .event--flip .event__media { -webkit-mask-image: var(--fade-v-long); mask-image: var(--fade-v-long); } }
