@@ -2621,3 +2621,28 @@ body { background: var(--night); }
   .hero__cta .btn { flex: 1 1 0; min-width: 0; padding: 0 .9rem; font-size: .64rem; letter-spacing: .12em; }
   .footer__actions .btn { padding: 0 1.1rem; font-size: .66rem; letter-spacing: .14em; }
 }
+
+/* ------------------------------------------------------------------ parents */
+.parents {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(20px, 3vw, 48px);
+  max-width: 1000px;
+  margin: clamp(40px, 5vw, 72px) auto 0;
+  padding-top: clamp(28px, 3.5vw, 48px);
+  border-top: 1px solid var(--line-light);
+  text-align: center;
+}
+.parents__names { margin: 0; font-family: var(--serif); font-size: clamp(1.25rem, 1.05rem + .6vw, 1.7rem); line-height: 1.3; color: var(--cream); }
+.parents__names span { font-style: italic; color: var(--gold-2); }
+.parents__rel { margin: .5rem 0; font-size: .72rem; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: rgba(243, 237, 227, .6); }
+.parents__child { margin: 0; font-family: var(--serif); font-size: clamp(2.4rem, 1.8rem + 2vw, 4rem); font-weight: 300; font-style: italic; line-height: 1; color: var(--gold-2); }
+.parents__with { margin: 0; font-family: var(--serif); font-size: 1.3rem; font-style: italic; color: rgba(243, 237, 227, .6); }
+.pair__parents { display: block; margin-top: .5rem; font-size: .78rem; line-height: 1.5; color: rgba(243, 237, 227, .72); text-shadow: 0 2px 10px rgba(0, 0, 0, .9); }
+.pair--diag .pair__caption { max-width: 44%; }
+@media (max-width: 760px) {
+  .parents { grid-template-columns: minmax(0, 1fr); }
+  .pair--diag .pair__caption { max-width: 60%; }
+  .pair__parents { font-size: .68rem; }
+}
