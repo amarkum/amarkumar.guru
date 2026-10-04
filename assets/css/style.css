@@ -332,6 +332,11 @@ button { font: inherit; color: inherit; }
   color: transparent;
   text-shadow: none;
 }
+@media (max-width: 760px) {
+  /* Phones: stack the names with "Weds" centred between them. */
+  .hero__names { flex-direction: column; gap: 0; line-height: 1; }
+  .hero__amp { margin: .12em 0 .08em; font-size: .36em; letter-spacing: .08em; }
+}
 .hero__lede {
   margin: clamp(14px, 2vw, 22px) 0 0;
   font-family: var(--serif);
